@@ -59,7 +59,7 @@ The site documents the transition while participating in it. This article is not
 
 Deep Field Works is using its own notes, archives and recurring concepts to generate new public material.
 
-That makes the site part of the system being studied
+That makes the site part of the system being studied.
 
 ## Open question
 
