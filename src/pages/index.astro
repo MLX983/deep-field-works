@@ -1,17 +1,72 @@
 ---
+import { getCollection } from 'astro:content';
 
+const typeLabels: Record<string, string> = {
+  articles: 'Article',
+  'field-notes': 'Field Note',
+  checkpoints: 'Checkpoint',
+};
+
+const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
+
+const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
+  import.meta.env.PROD ? !data.draft : true;
+
+const grouped = await Promise.all(
+  collectionNames.map((name) => getCollection(name, notDraftInProd)),
+);
+
+const entries = grouped
+  .flatMap((collection, index) =>
+    collection.map((entry) => ({ entry, collection: collectionNames[index] })),
+  )
+  .sort(
+    (a, b) =>
+      b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf(),
+  );
+
+const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Deep Field Works</title>
+  </head>
+  <body>
+    <main>
+      <h1>Deep Field Works</h1>
+      <p>A chronological field journal of observations, articles, and checkpoints.</p>
+
+      {entries.length === 0 && <p>No entries yet.</p>}
+
+      <ul>
+        {
+          entries.map(({ entry, collection }) => (
+            <li>
+              <p>
+                <small>
+                  {typeLabels[collection]}
+                  {' · '}
+                  <time datetime={entry.data.pubDate.toISOString()}>
+                    {dateFormat.format(entry.data.pubDate)}
+                  </time>
+                  {entry.data.theme && <> · {entry.data.theme}</>}
+                  {entry.data.status && <> · {entry.data.status}</>}
+                </small>
+              </p>
+              <h2>
+                <a href={`/${collection}/${entry.id}`}>{entry.data.title}</a>
+              </h2>
+              <p>{entry.data.description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+  </body>
 </html>

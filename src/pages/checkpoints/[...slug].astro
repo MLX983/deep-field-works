@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('checkpoints');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{entry.data.title} — Deep Field Works</title>
+  </head>
+  <body>
+    <main>
+      <p><a href="/">← Back to index</a></p>
+      <article>
+        <p>
+          <small>
+            Checkpoint
+            {' · '}
+            <time datetime={entry.data.pubDate.toISOString()}>
+              {dateFormat.format(entry.data.pubDate)}
+            </time>
+            {entry.data.theme && <> · {entry.data.theme}</>}
+            {entry.data.status && <> · {entry.data.status}</>}
+            {entry.data.checkpointFor && <> · checkpoint for: {entry.data.checkpointFor}</>}
+          </small>
+        </p>
+        <h1>{entry.data.title}</h1>
+        <p>{entry.data.description}</p>
+        <hr />
+        <Content />
+      </article>
+      <p><a href="/">← Back to index</a></p>
+    </main>
+  </body>
+</html>
