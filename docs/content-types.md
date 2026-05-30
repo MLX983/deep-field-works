@@ -1,5 +1,25 @@
 # Content Types
 
+These content types are intentionally distinct.
+
+The purpose is not taxonomy for its own sake. The purpose is to help authors and agents choose the correct publishing format.
+
+When deciding between content types:
+
+* Field Notes prioritize speed and observation.
+* Articles prioritize synthesis and explanation.
+* Checkpoints prioritize consolidation and orientation.
+* Research Notes prioritize exploration.
+* Experiments prioritize demonstration and learning.
+* Project Journals prioritize development history.
+
+Choose the smallest content type that adequately communicates the idea.
+
+Do not automatically promote Field Notes into Articles.
+
+Do not force unfinished ideas into polished formats.
+
+
 ## Field Notes
 
 Short observations.
