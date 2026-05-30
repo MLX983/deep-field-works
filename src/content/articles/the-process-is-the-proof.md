@@ -12,8 +12,6 @@ domainPath:
 canonical: true
 ---
 
-# The process is the proof
-
 Most personal knowledge systems stop at memory.
 
 They collect information, preserve context, and make retrieval easier. Notes become archives. Archives become knowledge bases. Knowledge bases become increasingly searchable.
