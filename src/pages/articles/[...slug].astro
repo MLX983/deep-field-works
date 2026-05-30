@@ -39,14 +39,40 @@ const withBase = (path: string) =>
 ---
 
 <BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
-  <article>
-    <p>
-      <small>{metaSegments.join(' · ')}</small>
-    </p>
-    <h1>{entry.data.title}</h1>
-    <p>{entry.data.description}</p>
-    <hr />
-    <Content />
+  <article class="article">
+    <header class="article__header">
+      <h1 class="article__title">{entry.data.title}</h1>
+      <p class="article__meta">{metaSegments.join(' · ')}</p>
+    </header>
+    <div class="article__body">
+      <Content />
+    </div>
   </article>
-  <p><a href={withBase('')}>← Back to index</a></p>
+  <p class="article__back"><a href={withBase('')}>← Back to index</a></p>
 </BaseLayout>
+
+<style>
+  .article__header {
+    margin-bottom: var(--space-600);
+  }
+
+  .article__title {
+    margin-bottom: var(--space-100);
+  }
+
+  .article__meta {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--font-size-footnote);
+    color: var(--color-text-muted);
+  }
+
+  .article__body :global(> p:first-child) {
+    margin-top: 0;
+  }
+
+  .article__back {
+    margin-top: var(--space-900);
+    font-size: var(--font-size-footnote);
+  }
+</style>

@@ -1,0 +1,56 @@
+/*
+ * Deep Field Works — design tokens
+ * Source of truth: Figma "The process is the proof" article frame.
+ * Values marked (derived) are not explicit Figma variables; they are
+ * reasonable supporting values chosen to complete the system.
+ */
+
+:root {
+  /* Surface / background */
+  --color-surface-primary: #faf9f7;
+
+  /* Text */
+  --color-text-body: #3c3c3c;
+  --color-text-header: #685149;
+  --color-text-muted: #8a8178; /* (derived) footnote / metadata */
+
+  /* Accent */
+  --color-text-link: #80341a;
+
+  /* Borders / dividers */
+  --color-border: #e7e1d9; /* (derived) subtle warm divider */
+
+  /* Font families */
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Font sizes */
+  --font-size-footnote: 11px;
+  --font-size-body: 14px;
+  --font-size-subheader: 20px;
+  --font-size-title: 32px;
+
+  /* Font weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  /* Line heights */
+  --line-height-body: 20px; /* 14px body text */
+  --line-height-heading: 1.15; /* (derived from Figma 100% + breathing room) */
+
+  /* Spacing scale (Figma Spacing/*) */
+  --space-0: 0;
+  --space-50: 4px;
+  --space-100: 8px;
+  --space-200: 16px;
+  --space-300: 24px;
+  --space-600: 48px;
+  --space-900: 72px;
+
+  /* Layout */
+  --content-width: 40rem;
+
+  /* Radius (none observed in the article frame) */
+  --radius: 0;
+}

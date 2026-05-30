@@ -1,4 +1,6 @@
 ---
+import '../styles/tokens.css';
+
 interface Props {
   title: string;
   description?: string;
@@ -19,6 +21,12 @@ const withBase = (path: string) =>
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     {description && <meta name="description" content={description} />}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Newsreader:wght@300;500&display=swap"
+      rel="stylesheet"
+    />
     <title>{title}</title>
   </head>
   <body>
@@ -34,15 +42,93 @@ const withBase = (path: string) =>
   </body>
 </html>
 
-<style>
-  body {
-    max-width: 42rem;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    font-family: system-ui, sans-serif;
-    line-height: 1.6;
+<style is:global>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
+
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: var(--space-600) var(--space-300) var(--space-900);
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-body);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    color: var(--color-text-header);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-medium);
+  }
+
+  h1 {
+    font-size: var(--font-size-title);
+    margin: 0 0 var(--space-200);
+  }
+
+  h2 {
+    font-size: var(--font-size-subheader);
+    margin: var(--space-600) 0 var(--space-100);
+  }
+
+  h3 {
+    font-size: var(--font-size-subheader);
+    font-weight: var(--font-weight-light);
+    margin: var(--space-300) 0 var(--space-100);
+  }
+
+  p {
+    margin: 0 0 var(--space-200);
+  }
+
+  a {
+    color: var(--color-text-link);
+  }
+
+  ul {
+    padding-left: var(--space-300);
+    margin: 0 0 var(--space-200);
+  }
+
+  li {
+    margin: var(--space-50) 0;
+  }
+
+  blockquote {
+    margin: var(--space-300) 0;
+    padding: 0;
+    border: none;
+    font-family: var(--font-serif);
+    font-weight: var(--font-weight-light);
+    font-size: var(--font-size-subheader);
+    line-height: var(--line-height-heading);
+    color: var(--color-text-link);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-300) 0;
+  }
+
+  nav {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-footnote);
+  }
+
   nav a {
-    margin-right: 0.25rem;
+    margin-right: var(--space-50);
   }
 </style>
