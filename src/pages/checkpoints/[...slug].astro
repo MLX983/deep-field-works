@@ -12,20 +12,24 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="icon" href={withBase('favicon.ico')} />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{entry.data.title} — Deep Field Works</title>
   </head>
   <body>
     <main>
-      <p><a href="/">← Back to index</a></p>
+      <p><a href={withBase('')}>← Back to index</a></p>
       <article>
         <p>
           <small>
@@ -44,7 +48,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
         <hr />
         <Content />
       </article>
-      <p><a href="/">← Back to index</a></p>
+      <p><a href={withBase('')}>← Back to index</a></p>
     </main>
   </body>
 </html>

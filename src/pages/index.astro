@@ -26,13 +26,17 @@ const entries = grouped
   );
 
 const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="icon" href={withBase('favicon.ico')} />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Deep Field Works</title>
@@ -60,7 +64,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
                 </small>
               </p>
               <h2>
-                <a href={`/${collection}/${entry.id}`}>{entry.data.title}</a>
+                <a href={withBase(`${collection}/${entry.id}`)}>{entry.data.title}</a>
               </h2>
               <p>{entry.data.description}</p>
             </li>
