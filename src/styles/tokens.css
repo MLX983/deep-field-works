@@ -34,6 +34,7 @@
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600;
 
   /* Line heights */
   --line-height-body: 20px; /* 14px body text */

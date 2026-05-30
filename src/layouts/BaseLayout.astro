@@ -24,7 +24,7 @@ const withBase = (path: string) =>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Newsreader:wght@300;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:wght@300;500&display=swap"
       rel="stylesheet"
     />
     <title>{title}</title>
@@ -80,7 +80,7 @@ const withBase = (path: string) =>
 
   h2 {
     font-size: var(--font-size-subheader);
-    margin: var(--space-600) 0 var(--space-100);
+    margin: var(--space-300) 0 var(--space-50);
   }
 
   h3 {
@@ -108,13 +108,17 @@ const withBase = (path: string) =>
 
   blockquote {
     margin: var(--space-300) 0;
-    padding: 0;
+    padding: 0 var(--space-300);
     border: none;
     font-family: var(--font-serif);
     font-weight: var(--font-weight-light);
     font-size: var(--font-size-subheader);
     line-height: var(--line-height-heading);
-    color: var(--color-text-link);
+    color: var(--color-text-header);
+  }
+
+  strong {
+    font-weight: var(--font-weight-semibold);
   }
 
   hr {
