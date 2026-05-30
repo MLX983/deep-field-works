@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+---
+
+<BaseLayout
+  title="AI Adoption — Deep Field Works"
+  description="A curated pathway tracking how people and institutions actually take up AI tools."
+>
+  <p><a href={withBase('domains')}>← Domains</a></p>
+
+  <h1>AI Adoption</h1>
+
+  <section>
+    <h2>Intro</h2>
+    <p>
+      This domain tracks how people and institutions actually take up AI tools,
+      as distinct from how vendors describe that uptake. The interest is in
+      observed behavior: what gets used, what gets abandoned, and what changes
+      in the work around the tool.
+    </p>
+  </section>
+
+  <section>
+    <h2>Current framing</h2>
+    <p>
+      Adoption appears to be uneven and local rather than uniform. Individuals
+      often adopt tools before the organizations around them do, which creates
+      a gap between informal practice and official process.
+    </p>
+    <p>
+      This is a working interpretation, not a settled conclusion. It will be
+      revised as more observations accumulate.
+    </p>
+  </section>
+
+  <section>
+    <h2>Key questions</h2>
+    <ul>
+      <li>Where does adoption stall, and what causes it to stall there?</li>
+      <li>Which tasks are quietly handed to machines without being announced?</li>
+      <li>How do teams revise their workflows once a tool becomes routine?</li>
+      <li>What is abandoned after initial enthusiasm, and why?</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Selected pieces</h2>
+    <p>
+      Placeholder. This section will collect specific entries from the archive
+      once enough material exists to form a meaningful pathway.
+    </p>
+  </section>
+</BaseLayout>

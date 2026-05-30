@@ -1,4 +1,5 @@
 ---
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -18,36 +19,23 @@ const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
-    <link rel="icon" href={withBase('favicon.ico')} />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{entry.data.title} — Deep Field Works</title>
-  </head>
-  <body>
-    <main>
-      <p><a href={withBase('')}>← Back to index</a></p>
-      <article>
-        <p>
-          <small>
-            Article
-            {' · '}
-            <time datetime={entry.data.pubDate.toISOString()}>
-              {dateFormat.format(entry.data.pubDate)}
-            </time>
-            {entry.data.theme && <> · {entry.data.theme}</>}
-            {entry.data.status && <> · {entry.data.status}</>}
-          </small>
-        </p>
-        <h1>{entry.data.title}</h1>
-        <p>{entry.data.description}</p>
-        <hr />
-        <Content />
-      </article>
-      <p><a href={withBase('')}>← Back to index</a></p>
-    </main>
-  </body>
-</html>
+<BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
+  <article>
+    <p>
+      <small>
+        Article
+        {' · '}
+        <time datetime={entry.data.pubDate.toISOString()}>
+          {dateFormat.format(entry.data.pubDate)}
+        </time>
+        {entry.data.theme && <> · {entry.data.theme}</>}
+        {entry.data.status && <> · {entry.data.status}</>}
+      </small>
+    </p>
+    <h1>{entry.data.title}</h1>
+    <p>{entry.data.description}</p>
+    <hr />
+    <Content />
+  </article>
+  <p><a href={withBase('')}>← Back to index</a></p>
+</BaseLayout>

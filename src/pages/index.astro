@@ -1,4 +1,5 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
 const typeLabels: Record<string, string> = {
@@ -32,45 +33,36 @@ const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
-    <link rel="icon" href={withBase('favicon.ico')} />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Deep Field Works</title>
-  </head>
-  <body>
-    <main>
-      <h1>Deep Field Works</h1>
-      <p>A chronological field journal of observations, articles, and checkpoints.</p>
+<BaseLayout
+  title="Deep Field Works"
+  description="A chronological field journal of observations, articles, and checkpoints."
+>
+  <h1>Deep Field Works</h1>
+  <p>A chronological field journal of observations, articles, and checkpoints.</p>
 
-      {entries.length === 0 && <p>No entries yet.</p>}
+  {entries.length === 0 && <p>No entries yet.</p>}
 
-      <ul>
-        {
-          entries.map(({ entry, collection }) => (
-            <li>
-              <p>
-                <small>
-                  {typeLabels[collection]}
-                  {' · '}
-                  <time datetime={entry.data.pubDate.toISOString()}>
-                    {dateFormat.format(entry.data.pubDate)}
-                  </time>
-                  {entry.data.theme && <> · {entry.data.theme}</>}
-                  {entry.data.status && <> · {entry.data.status}</>}
-                </small>
-              </p>
-              <h2>
-                <a href={withBase(`${collection}/${entry.id}`)}>{entry.data.title}</a>
-              </h2>
-              <p>{entry.data.description}</p>
-            </li>
-          ))
-        }
-      </ul>
-    </main>
-  </body>
-</html>
+  <ul>
+    {
+      entries.map(({ entry, collection }) => (
+        <li>
+          <p>
+            <small>
+              {typeLabels[collection]}
+              {' · '}
+              <time datetime={entry.data.pubDate.toISOString()}>
+                {dateFormat.format(entry.data.pubDate)}
+              </time>
+              {entry.data.theme && <> · {entry.data.theme}</>}
+              {entry.data.status && <> · {entry.data.status}</>}
+            </small>
+          </p>
+          <h2>
+            <a href={withBase(`${collection}/${entry.id}`)}>{entry.data.title}</a>
+          </h2>
+          <p>{entry.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
