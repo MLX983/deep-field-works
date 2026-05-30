@@ -26,10 +26,6 @@ const monthYear = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   year: 'numeric',
 }).format(entry.data.pubDate);
-
-const base = import.meta.env.BASE_URL;
-const withBase = (path: string) =>
-  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
 <BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
@@ -52,16 +48,15 @@ const withBase = (path: string) =>
       <Content />
     </div>
   </article>
-  <p class="article__back"><a href={withBase('')}>← Back to index</a></p>
 </BaseLayout>
 
 <style>
   .article__header {
-    margin-bottom: var(--space-600);
+    margin-bottom: var(--space-300);
   }
 
   .article__title {
-    margin-bottom: var(--space-100);
+    margin-bottom: var(--space-50);
   }
 
   .article__meta {
@@ -77,10 +72,5 @@ const withBase = (path: string) =>
 
   .article__body :global(> p:first-child) {
     margin-top: 0;
-  }
-
-  .article__back {
-    margin-top: var(--space-900);
-    font-size: var(--font-size-footnote);
   }
 </style>
