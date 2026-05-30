@@ -12,7 +12,26 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
+
+const typeLabels: Record<string, string> = {
+  article: 'Article',
+  'field-note': 'Field Note',
+  checkpoint: 'Checkpoint',
+  'research-note': 'Research Note',
+  experiment: 'Experiment',
+  'project-journal': 'Project Journal',
+};
+
+const monthYear = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  year: 'numeric',
+}).format(entry.data.pubDate);
+
+const metaSegments = [
+  typeLabels[entry.data.documentType],
+  entry.data.theme,
+  monthYear,
+].filter(Boolean);
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
@@ -22,15 +41,7 @@ const withBase = (path: string) =>
 <BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
   <article>
     <p>
-      <small>
-        Article
-        {' · '}
-        <time datetime={entry.data.pubDate.toISOString()}>
-          {dateFormat.format(entry.data.pubDate)}
-        </time>
-        {entry.data.theme && <> · {entry.data.theme}</>}
-        {entry.data.status && <> · {entry.data.status}</>}
-      </small>
+      <small>{metaSegments.join(' · ')}</small>
     </p>
     <h1>{entry.data.title}</h1>
     <p>{entry.data.description}</p>
