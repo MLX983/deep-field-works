@@ -3,9 +3,13 @@ title: "The process is the proof"
 description: "Deep Field Works is not only documenting cognitive institutions. It is becoming a small one."
 pubDate: 2026-05-30
 draft: false
+documentType: article
 theme: "Cognitive Infrastructure"
 status: working-theory
 sourceNote: "Developed from Deep Field Works launch notes and AI Adoption project discussions."
+domainPath:
+  - "Cognitive Infrastructure"
+canonical: true
 ---
 
 # The process is the proof

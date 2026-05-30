@@ -3,15 +3,27 @@ import { glob } from 'astro/loaders';
 
 const status = z.enum(['observation', 'working-theory', 'checkpoint', 'archived']);
 
+const documentType = z.enum([
+  'article',
+  'field-note',
+  'checkpoint',
+  'research-note',
+  'experiment',
+  'project-journal',
+]);
+
 const baseSchema = z.object({
   title: z.string(),
   description: z.string(),
   pubDate: z.coerce.date(),
   updatedDate: z.coerce.date().optional(),
   draft: z.boolean().optional().default(false),
+  documentType: documentType,
   theme: z.string().optional(),
   status: status.optional(),
   sourceNote: z.string().optional(),
+  domainPath: z.array(z.string()).optional(),
+  canonical: z.boolean().optional(),
 });
 
 const articles = defineCollection({

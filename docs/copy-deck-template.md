@@ -8,7 +8,7 @@ pubDate: YYYY-MM-DD
 updatedDate:
 draft: true
 
-contentType: article
+documentType: article
 theme: ""
 status: observation
 

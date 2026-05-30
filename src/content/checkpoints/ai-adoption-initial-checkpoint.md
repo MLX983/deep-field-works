@@ -2,10 +2,12 @@
 title: "AI Adoption: Initial Checkpoint"
 description: "A first consolidation of observations about how people and institutions are actually adopting AI tools."
 pubDate: 2026-05-30
+documentType: checkpoint
 theme: "AI Adoption"
 status: "checkpoint"
 checkpointFor: "AI Adoption"
 sourceNote: "Initial seed piece. Draft to be expanded."
+canonical: true
 ---
 
 Draft placeholder. This checkpoint will summarize the state of thinking in the
