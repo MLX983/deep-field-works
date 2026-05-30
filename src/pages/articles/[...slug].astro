@@ -27,12 +27,6 @@ const monthYear = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 }).format(entry.data.pubDate);
 
-const metaSegments = [
-  typeLabels[entry.data.documentType],
-  entry.data.theme,
-  monthYear,
-].filter(Boolean);
-
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
@@ -42,7 +36,17 @@ const withBase = (path: string) =>
   <article class="article">
     <header class="article__header">
       <h1 class="article__title">{entry.data.title}</h1>
-      <p class="article__meta">{metaSegments.join(' · ')}</p>
+      <p class="article__meta">
+        <span>{typeLabels[entry.data.documentType]}</span>
+        {entry.data.theme && (
+          <>
+            <span class="article__meta-sep"> · </span>
+            <span class="article__meta-theme">{entry.data.theme}</span>
+          </>
+        )}
+        <span class="article__meta-sep"> · </span>
+        <span>{monthYear}</span>
+      </p>
     </header>
     <div class="article__body">
       <Content />
@@ -65,6 +69,10 @@ const withBase = (path: string) =>
     font-family: var(--font-sans);
     font-size: var(--font-size-footnote);
     color: var(--color-text-muted);
+  }
+
+  .article__meta-theme {
+    color: var(--color-text-link);
   }
 
   .article__body :global(> p:first-child) {
