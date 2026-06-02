@@ -3,6 +3,6 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://mlx983.github.io',
-  base: '/deep-field-works',
+  // Served at the root of the custom domain, so no `base` prefix.
+  site: 'https://deepfieldworks.com',
 });
