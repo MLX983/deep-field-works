@@ -2,18 +2,93 @@
 
 ## Project Overview
 
-Deep Field Works is a long-term field journal, laboratory notebook, and publishing platform focused on the intersection of humans, technology, knowledge systems, and artificial intelligence.
+Deep Field Works is a long-term field journal, laboratory notebook, prototype lab, and publishing platform focused on the intersection of humans, technology, knowledge systems, institutions, interfaces, and artificial intelligence.
 
 The site serves as:
 
-* A public notebook
-* A research archive
-* A prototype cognitive institution
-* A development environment for future ideas
+* a public notebook
+* a research archive
+* a prototype lab
+* a concept library
+* a working record of evolving thought
+* a development environment for future ideas
 
 The objective is not audience growth, SEO optimization, personal branding, consulting lead generation, or content marketing.
 
 The objective is to document observations, develop ideas, preserve intellectual history, and explore emerging human-machine workflows.
+
+The archive is not merely documentation.
+
+The archive itself is part of the experiment.
+
+---
+
+## Source of Truth
+
+Before making content, publishing, taxonomy, voice, metadata, or site-structure decisions, read:
+
+```text
+docs/source-of-truth-link.md
+```
+
+That file points to the canonical Deep Field Works source-of-truth folder.
+
+Use the source-of-truth documents for:
+
+* project purpose
+* content strategy
+* domain structure
+* article templates
+* metadata schema
+* publishing workflow
+* editorial guidance
+* voice and style
+
+Do not invent new domains, content types, metadata fields, workflow stages, or publishing conventions unless explicitly asked.
+
+When source-of-truth guidance conflicts with assumptions in this repository, the source-of-truth documents take precedence unless the user says otherwise.
+
+---
+
+## Recommended Source-of-Truth Reading Order
+
+Use the smallest relevant set of documents.
+
+For general orientation:
+
+```text
+README.md
+content-strategy.md
+domain-structure.md
+```
+
+For drafting content:
+
+```text
+article-templates.md
+content-schema.md
+```
+
+For revising content:
+
+```text
+editorial-guidelines.md
+voice-and-style.md
+```
+
+For publishing or workflow decisions:
+
+```text
+publishing-workflow.md
+content-schema.md
+```
+
+For domain, taxonomy, or navigation decisions:
+
+```text
+domain-structure.md
+content-schema.md
+```
 
 ---
 
@@ -29,7 +104,7 @@ Chronology is a feature, not a problem.
 
 ### Favor Observation Over Opinion
 
-Articles should begin with observations and evidence whenever possible.
+Articles should begin with observations, signals, examples, or prototype behavior whenever possible.
 
 Avoid unsupported claims and sweeping conclusions.
 
@@ -39,7 +114,14 @@ Not every article requires a conclusion.
 
 Open questions are valuable.
 
-Tentative interpretations are acceptable when clearly identified as such.
+Tentative interpretations are acceptable when clearly identified as tentative.
+
+When claims matter, distinguish:
+
+* observation
+* inference
+* speculation
+* uncertainty
 
 ### Build Durable Knowledge
 
@@ -47,22 +129,34 @@ Prioritize work that remains useful months or years later.
 
 Avoid chasing short-lived trends unless they reveal a broader shift.
 
+### Use the Smallest Adequate Artifact
+
+Do not inflate every idea into an essay.
+
+A strong note is better than a weak article.
+
+A clear field report is better than a generic think piece.
+
+A focused prototype note is better than a vague project essay.
+
 ---
 
 ## What Deep Field Works Is Not
 
 Do not transform the site into:
 
-* A traditional blog
-* A newsletter
-* A personal brand platform
-* A consulting website
-* A startup landing page
-* A marketing funnel
-* An SEO content farm
-* An AI hype publication
+* a traditional blog
+* a newsletter
+* a personal brand platform
+* a consulting website
+* a startup landing page
+* a marketing funnel
+* an SEO content farm
+* an AI hype publication
+* a generic productivity site
+* a conventional UX portfolio
 
-The project should retain the feeling of a working notebook and research vessel.
+The project should retain the feeling of a working notebook, field journal, research vessel, and prototype cognitive institution.
 
 ---
 
@@ -70,65 +164,169 @@ The project should retain the feeling of a working notebook and research vessel.
 
 Preferred characteristics:
 
-* Clear
-* Direct
-* Thoughtful
-* Analytical
-* Concise
+* clear
+* direct
+* thoughtful
+* analytical
+* concrete
+* concise
+* structurally honest
+* provisional when needed
 
 Avoid:
 
-* Corporate language
-* Marketing language
-* Clickbait
-* Excessive jargon
-* Generic AI-generated prose
-* Empty motivational language
+* corporate language
+* marketing language
+* clickbait
+* excessive jargon
+* generic AI-generated prose
+* empty motivational language
+* broad introductions
+* AI hype language
+* polished paragraphs that do not sharpen the idea
 
 Use short paragraphs.
 
 Favor concrete examples over abstract claims.
 
+Make abstract shifts operational by showing what changes in:
+
+* work
+* interfaces
+* roles
+* decisions
+* governance
+* memory
+* coordination
+* supervision
+
 ---
 
 ## Content Types
 
-Current content categories include:
+Use the canonical content types defined in the source-of-truth folder.
 
-* Field Notes
-* Articles
-* Checkpoints
-* Research Notes
-* Experiments
-* Project Journals
+Current primary types include:
 
-Refer to:
+* seed
+* note
+* field-report
+* essay
+* experiment
+* prototype-note
+* concept
+* checkpoint
+* project-log
 
-docs/content-types.md
+Before creating content, classify the artifact type.
 
-for definitions and intended usage.
+Use the smallest type that preserves the value of the idea.
+
+---
+
+## Domains and Themes
+
+Use the canonical domain structure defined in the source-of-truth folder.
+
+Current primary domains:
+
+* Cognitive Infrastructure
+* Human-Machine Workflows
+* Institutions in Transition
+* Interfaces for Judgment
+* Media, Memory, and Meaning
+
+Do not create new domains without explicit user approval.
+
+Distinguish:
+
+```text
+Domain = what larger territory the piece belongs to
+Type   = what kind of artifact the piece is
+Theme  = what recurring topic cluster it connects to
+Status = where it is in the lifecycle
+```
+
+---
+
+## Metadata and Schema
+
+Use the canonical metadata schema from the source-of-truth folder.
+
+Do not create new frontmatter fields unless explicitly asked.
+
+Do not change field names casually.
+
+For publishable content, ensure frontmatter follows the current schema.
+
+Use valid values for:
+
+* `documentType`
+* `theme`
+* `status`
+* `domainPath`
+* `relatedConcepts`
+* `relatedPieces`
+* `canonical`
+
+When uncertain, leave a clear note rather than inventing taxonomy.
 
 ---
 
 ## Editorial Guidance
 
-Refer to:
+Before creating or modifying published content, consult the canonical editorial guidance in the source-of-truth folder.
 
-docs/editorial-guidelines.md
+Editorial guidance governs:
 
-before creating or modifying published content.
+* opening structure
+* reader question
+* central tension
+* argument shape
+* headings
+* evidence posture
+* uncertainty
+* endings
+* avoiding generic AI prose
 
-Editorial guidelines take precedence over stylistic assumptions.
+Editorial guidance takes precedence over stylistic assumptions.
+
+---
+
+## Voice and Style
+
+Before finalizing public-facing copy, consult the canonical voice and style guidance in the source-of-truth folder.
+
+Deep Field Works should sound like a thoughtful field journal for the AI age:
+
+* clear
+* provisional
+* concrete
+* structurally honest
+* quietly ambitious
+* more interested in useful understanding than performative certainty
+
+Avoid default AI cadence.
+
+Avoid corporate thought-leadership voice.
+
+Avoid marketing polish.
+
+The writing should feel selected, argued, and edited.
+
+Not generated.
 
 ---
 
 ## Publishing Guidance
 
-Refer to:
+Before publishing or restructuring content, consult the canonical publishing workflow in the source-of-truth folder.
 
-docs/publishing-workflow.md
+Agents may draft, organize, summarize, edit, classify, and propose.
 
-before publishing or restructuring content.
+Agents should not assume authority to publish automatically.
+
+Do not set content to published status, change canonical status, or alter publishing workflow unless explicitly asked.
 
 ---
 
@@ -136,16 +334,21 @@ before publishing or restructuring content.
 
 When modifying the site:
 
-* Prefer simple solutions.
-* Minimize dependencies.
-* Favor static generation.
-* Avoid unnecessary frameworks.
-* Preserve readability.
-* Preserve performance.
-
-The site should remain understandable by a single individual.
+* prefer simple solutions
+* minimize dependencies
+* favor static generation
+* preserve readability
+* preserve performance
+* keep routing understandable
+* avoid unnecessary frameworks
+* avoid speculative abstractions
+* preserve the ability for one person to understand and maintain the site
 
 Complexity requires justification.
+
+Do not restructure the site unless explicitly asked.
+
+When building new pages, extend the existing structure rather than replacing it.
 
 ---
 
@@ -154,29 +357,99 @@ Complexity requires justification.
 Before making substantial changes:
 
 1. Read this file.
-2. Review relevant files under /docs.
-3. Identify the smallest viable change.
-4. Explain proposed changes before implementing them.
-5. Avoid speculative redesigns.
+2. Read `docs/source-of-truth-link.md`.
+3. Consult the relevant source-of-truth documents.
+4. Identify the smallest viable change.
+5. Explain proposed changes before implementing them when the change is structural, public-facing, or irreversible.
+6. Preserve existing content and chronology.
+7. Avoid speculative redesigns.
+8. Run the relevant build or validation step when code changes are made.
+9. Report what changed.
 
 Do not introduce major structural changes unless explicitly requested.
+
+Do not silently alter canonical documentation.
+
+Do not overwrite source-of-truth documents unless specifically instructed.
+
+---
+
+## Content Creation Rules
+
+When asked to create new content:
+
+1. Classify the content type.
+2. Assign the likely domain and theme.
+3. Use the relevant template.
+4. Preserve observation, inference, and speculation.
+5. Add valid metadata.
+6. Draft the smallest adequate artifact.
+7. Avoid generic AI commentary.
+8. Stop for review unless the user explicitly asks to publish.
+
+When asked to revise content:
+
+1. Preserve the original idea unless asked to reframe it.
+2. Improve clarity without over-polishing.
+3. Keep uncertainty visible where it matters.
+4. Strengthen headings and structure.
+5. Avoid making old work appear more certain than it was.
 
 ---
 
 ## Human Review Rule
 
-Published content should be reviewed by the repository owner before release.
+Human review is required before publication when content:
 
-Agents may draft, organize, summarize, edit, and propose.
+* makes strong claims
+* interprets current events
+* names specific companies or people
+* uses personal context
+* changes source-of-truth guidance
+* defines a new domain
+* defines or changes a durable concept
+* affects public positioning
+* changes homepage, about page, or domain page copy
 
-Agents should not assume authority to publish automatically.
+Agents may draft, organize, summarize, edit, classify, and propose.
+
+The repository owner approves publication and major conceptual changes.
+
+---
+
+## Build and Validation
+
+After code or routing changes, run the appropriate local validation command if available.
+
+Likely commands may include:
+
+```bash
+npm run build
+```
+
+If the build fails:
+
+* report the failure clearly
+* identify the likely cause
+* propose a minimal fix
+* avoid broad rewrites unless necessary
+
+Do not treat a change as complete if the site no longer builds.
 
 ---
 
 ## Long-Term Goal
 
-The long-term goal is to accumulate a body of observations, experiments, articles, and prototypes that document the transition into an AI-mediated world.
+The long-term goal is to accumulate a body of observations, experiments, articles, concepts, checkpoints, and prototypes that document the transition into an AI-mediated world.
 
-The archive is not merely documentation.
+The site should become:
 
-The archive itself is part of the experiment.
+* a field journal
+* a research archive
+* a knowledge base
+* a prototype lab
+* a cognitive institution
+
+Deep Field Works is not only about the changing relationship between humans, machines, institutions, interfaces, and memory.
+
+It is also a working example of that relationship.
