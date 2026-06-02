@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BackLink from '../components/BackLink.astro';
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
 <BaseLayout
@@ -11,5 +15,7 @@ import BackLink from '../components/BackLink.astro';
 
   <h1>Not found</h1>
 
-  <p>That page does not exist. It may have moved, or the address may be incorrect.</p>
+  <p>This page does not exist, or the address may be out of date.</p>
+
+  <p>Return to the <a href={withBase('')}>Index</a> to continue from the main archive.</p>
 </BaseLayout>
