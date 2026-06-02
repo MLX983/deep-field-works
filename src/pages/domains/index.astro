@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import { domains } from '../../data/domains';
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+---
+
+<BaseLayout
+  title="Domains — Deep Field Works"
+  description="Domains are thematic territories for navigating the Deep Field Works archive."
+>
+  <BackLink />
+
+  <h1>Domains</h1>
+
+  <p>
+    Domains are thematic territories for navigating the Deep Field Works archive.
+    Chronology shows when ideas developed; domains show how ideas connect.
+  </p>
+
+  <ul class="link-list">
+    {
+      domains.map((domain) => (
+        <li>
+          <a href={withBase(`domains/${domain.slug}`)}>{domain.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
