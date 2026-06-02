@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { domains } from '../data/domains';
+import { formatDomainLabel } from '../utils/formatDomainLabel';
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
@@ -23,13 +24,15 @@ const recent = grouped
   .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf())
   .slice(0, 5);
 
-const startingPoints = [
-  { label: 'Chronology', path: 'chronology' },
-  { label: 'Domains', path: 'domains' },
-  { label: 'Field Notes', path: 'field-notes' },
-  { label: 'Articles', path: 'articles' },
-  { label: 'Checkpoints', path: 'checkpoints' },
-];
+// Temporarily suppressed: the "Starting points" section is hidden until there
+// are enough entries to make it useful. Restore the const + section below.
+// const startingPoints = [
+//   { label: 'Chronology', path: 'chronology' },
+//   { label: 'Domains', path: 'domains' },
+//   { label: 'Field Notes', path: 'field-notes' },
+//   { label: 'Articles', path: 'articles' },
+//   { label: 'Checkpoints', path: 'checkpoints' },
+// ];
 ---
 
 <BaseLayout
@@ -66,6 +69,7 @@ const startingPoints = [
     )
   }
 
+  {/* Temporarily suppressed until there are enough entries to be useful:
   <section class="topic-block">
     <h2 class="section-head">Starting points</h2>
     <ul class="link-list">
@@ -78,6 +82,7 @@ const startingPoints = [
       }
     </ul>
   </section>
+  */}
 
   <section class="topic-block">
     <h2 class="section-head">Domains</h2>
@@ -85,7 +90,9 @@ const startingPoints = [
       {
         domains.map((domain) => (
           <li>
-            <a href={withBase(`domains/${domain.slug}`)}>{domain.title}</a>
+            <a href={withBase(`domains/${domain.slug}`)}>
+              {formatDomainLabel(domain.title)}
+            </a>
           </li>
         ))
       }

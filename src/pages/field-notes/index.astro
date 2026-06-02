@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BackLink from '../../components/BackLink.astro';
+import BackToTop from '../../components/BackToTop.astro';
 import EntryList, { type ListItem } from '../../components/EntryList.astro';
 import { getCollection } from 'astro:content';
 
@@ -29,4 +30,6 @@ const items: ListItem[] = entries
   </p>
 
   <EntryList items={items} emptyMessage="No field notes yet." />
+
+  <BackToTop />
 </BaseLayout>

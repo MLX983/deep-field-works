@@ -1,0 +1,21 @@
+---
+// Footnote-sized link that returns the reader to the top of the page.
+// Targets the #top anchor on <main> (see BaseLayout).
+---
+
+<p class="back-to-top">
+  <a href="#top">Back to top</a>
+</p>
+
+<style>
+  .back-to-top {
+    margin: var(--space-300) 0 0;
+    font-family: var(--font-sans);
+    font-size: var(--font-size-footnote);
+  }
+
+  .back-to-top a {
+    color: var(--color-text-link);
+    text-decoration: underline;
+  }
+</style>

@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BackLink from '../../components/BackLink.astro';
+import BackToTop from '../../components/BackToTop.astro';
 import { resolveEntryDomain } from '../../data/domains';
+import { formatDomainLabel } from '../../utils/formatDomainLabel';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -53,7 +55,7 @@ const monthAnchor = withBase(
           <>
             {' · '}
             {domain ? (
-              <a href={withBase(`domains/${domain.slug}`)}>{domain.title}</a>
+              <a href={withBase(`domains/${domain.slug}`)}>{formatDomainLabel(domain.title)}</a>
             ) : (
               <span>{domainLabel}</span>
             )}
@@ -64,8 +66,8 @@ const monthAnchor = withBase(
       </small>
     </p>
     <h1>{entry.data.title}</h1>
-    <p>{entry.data.description}</p>
-    <hr />
     <Content />
   </article>
+
+  <BackToTop />
 </BaseLayout>

@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BackLink from '../../components/BackLink.astro';
 import { domains } from '../../data/domains';
+import { formatDomainLabel } from '../../utils/formatDomainLabel';
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
@@ -25,7 +26,9 @@ const withBase = (path: string) =>
     {
       domains.map((domain) => (
         <li>
-          <a href={withBase(`domains/${domain.slug}`)}>{domain.title}</a>
+          <a href={withBase(`domains/${domain.slug}`)}>
+            {formatDomainLabel(domain.title)}
+          </a>
         </li>
       ))
     }
