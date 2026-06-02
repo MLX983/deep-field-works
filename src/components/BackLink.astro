@@ -1,0 +1,43 @@
+---
+interface Props {
+  /** Label of the destination, e.g. "Index" or "Domains". */
+  label?: string;
+  /** Path relative to the site base, without leading slash. Empty = home. */
+  href?: string;
+}
+
+const { label = 'Index', href = '' } = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+---
+
+<p class="back-link">
+  <a href={withBase(href)}>
+    <span class="back-link__arrow" aria-hidden="true">←</span>
+    <span class="back-link__label">{label}</span>
+  </a>
+</p>
+
+<style>
+  .back-link {
+    margin: 0 0 var(--space-300);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-footnote);
+  }
+
+  .back-link a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .back-link__arrow {
+    color: var(--color-text-muted);
+  }
+
+  .back-link__label {
+    color: var(--color-text-link);
+    text-decoration: underline;
+  }
+</style>

@@ -121,4 +121,47 @@ const withBase = (path: string) =>
     border-top: 1px solid var(--color-border);
     margin: var(--space-300) 0;
   }
+
+  /* Masthead — the home wordmark (Figma: Newsreader Light 32). */
+  .masthead {
+    margin: 0 0 var(--space-300);
+    font-family: var(--font-serif);
+    font-weight: var(--font-weight-light);
+    font-size: var(--font-size-title);
+    line-height: var(--line-height-heading);
+    color: var(--color-text-header);
+  }
+
+  /* Section / topic-block header (Figma: Newsreader Medium 24). */
+  .section-head {
+    margin: 0 0 var(--space-100);
+    font-family: var(--font-serif);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-header);
+    line-height: var(--line-height-heading);
+    color: var(--color-text-header);
+  }
+
+  /* Link list — semibold rust links, no underline (Figma: "Main link"). */
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-50);
+  }
+
+  .link-list li {
+    margin: 0;
+  }
+
+  .link-list a {
+    font-weight: var(--font-weight-regular);
+    text-decoration: none;
+  }
+
+  .link-list a:hover {
+    text-decoration: underline;
+  }
 </style>

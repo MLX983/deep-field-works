@@ -28,6 +28,7 @@
   --font-size-footnote: 11px;
   --font-size-body: 14px;
   --font-size-subheader: 20px;
+  --font-size-header: 24px; /* Figma "Header" — section / topic-block headers */
   --font-size-title: 32px;
 
   /* Font weights */

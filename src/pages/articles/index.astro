@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import EntryList, { type ListItem } from '../../components/EntryList.astro';
+import { getCollection } from 'astro:content';
+
+const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
+  import.meta.env.PROD ? !data.draft : true;
+
+const entries = await getCollection('articles', notDraftInProd);
+
+const items: ListItem[] = entries
+  .map((entry) => ({ entry, collection: 'articles' as const }))
+  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title="Articles — Deep Field Works"
+  description="More developed essays and arguments that have earned a longer form."
+>
+  <BackLink />
+
+  <h1>Articles</h1>
+
+  <p>
+    Articles are the more developed pieces: essays and arguments that have
+    accumulated enough shape to stand on their own. They are selective by
+    design, since not every observation needs to become one.
+  </p>
+
+  <EntryList items={items} emptyMessage="No articles yet." />
+</BaseLayout>

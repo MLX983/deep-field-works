@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import EntryList, { type ListItem } from '../../components/EntryList.astro';
+import { getCollection } from 'astro:content';
+
+const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
+  import.meta.env.PROD ? !data.draft : true;
+
+const entries = await getCollection('field-notes', notDraftInProd);
+
+const items: ListItem[] = entries
+  .map((entry) => ({ entry, collection: 'field-notes' as const }))
+  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title="Field Notes — Deep Field Works"
+  description="Short observations, signals, and early interpretations captured before they harden into arguments."
+>
+  <BackLink />
+
+  <h1>Field Notes</h1>
+
+  <p>
+    Field notes collect short observations, signals, and early interpretations.
+    They preserve something worth keeping before it is developed enough for an
+    article, and they are allowed to remain tentative.
+  </p>
+
+  <EntryList items={items} emptyMessage="No field notes yet." />
+</BaseLayout>

@@ -1,0 +1,89 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+type Collection = 'articles' | 'field-notes' | 'checkpoints';
+
+export interface ListItem {
+  entry:
+    | CollectionEntry<'articles'>
+    | CollectionEntry<'field-notes'>
+    | CollectionEntry<'checkpoints'>;
+  collection: Collection;
+}
+
+interface Props {
+  items: ListItem[];
+  /** Shown when there are no entries yet. */
+  emptyMessage?: string;
+}
+
+const { items, emptyMessage = 'No entries yet.' } = Astro.props;
+
+const typeLabels: Record<Collection, string> = {
+  articles: 'Article',
+  'field-notes': 'Field Note',
+  checkpoints: 'Checkpoint',
+};
+
+const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+---
+
+{items.length === 0 && <p class="entry-list__empty">{emptyMessage}</p>}
+
+{
+  items.length > 0 && (
+    <ul class="entry-list">
+      {items.map(({ entry, collection }) => (
+        <li class="entry-list__item">
+          <p class="entry-list__meta">
+            <small>
+              {typeLabels[collection]}
+              {' · '}
+              <time datetime={entry.data.pubDate.toISOString()}>
+                {dateFormat.format(entry.data.pubDate)}
+              </time>
+              {entry.data.theme && <> · {entry.data.theme}</>}
+            </small>
+          </p>
+          <h2 class="entry-list__title">
+            <a href={withBase(`${collection}/${entry.id}`)}>{entry.data.title}</a>
+          </h2>
+          <p class="entry-list__description">{entry.data.description}</p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .entry-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .entry-list__item {
+    margin: 0 0 var(--space-600);
+  }
+
+  .entry-list__item:last-child {
+    margin-bottom: 0;
+  }
+
+  .entry-list__meta {
+    margin: 0 0 var(--space-50);
+    color: var(--color-text-muted);
+  }
+
+  .entry-list__title {
+    margin: 0 0 var(--space-50);
+  }
+
+  .entry-list__description {
+    margin: 0;
+  }
+</style>

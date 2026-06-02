@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import EntryList, { type ListItem } from '../../components/EntryList.astro';
+import { getCollection } from 'astro:content';
+
+const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
+  import.meta.env.PROD ? !data.draft : true;
+
+const entries = await getCollection('checkpoints', notDraftInProd);
+
+const items: ListItem[] = entries
+  .map((entry) => ({ entry, collection: 'checkpoints' as const }))
+  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title="Checkpoints — Deep Field Works"
+  description="Synthesis snapshots that compress accumulated thinking at a point in time."
+>
+  <BackLink />
+
+  <h1>Checkpoints</h1>
+
+  <p>
+    Checkpoints are synthesis snapshots. Each one compresses accumulated
+    thinking at a point in time: what has changed, the current working model,
+    and the questions still open. They help later readers follow the evolution
+    without reconstructing the whole archive.
+  </p>
+
+  <EntryList items={items} emptyMessage="No checkpoints yet." />
+</BaseLayout>

@@ -1,12 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { domains } from '../data/domains';
 
-const typeLabels: Record<string, string> = {
-  articles: 'Article',
-  'field-notes': 'Field Note',
-  checkpoints: 'Checkpoint',
-};
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
 const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
 
@@ -17,52 +16,89 @@ const grouped = await Promise.all(
   collectionNames.map((name) => getCollection(name, notDraftInProd)),
 );
 
-const entries = grouped
+const recent = grouped
   .flatMap((collection, index) =>
     collection.map((entry) => ({ entry, collection: collectionNames[index] })),
   )
-  .sort(
-    (a, b) =>
-      b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf(),
-  );
+  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf())
+  .slice(0, 5);
 
-const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' });
-
-const base = import.meta.env.BASE_URL;
-const withBase = (path: string) =>
-  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+const startingPoints = [
+  { label: 'Chronology', path: 'chronology' },
+  { label: 'Field Notes', path: 'field-notes' },
+  { label: 'Articles', path: 'articles' },
+  { label: 'Checkpoints', path: 'checkpoints' },
+];
 ---
 
 <BaseLayout
   title="Deep Field Works"
-  description="A chronological field journal of observations, articles, and checkpoints."
+  description="A long-term field journal and laboratory notebook on humans, technology, knowledge systems, and artificial intelligence."
 >
-  <h1>Deep Field Works</h1>
-  <p>A chronological field journal of observations, articles, and checkpoints.</p>
+  <h1 class="masthead">Deep Field Works</h1>
 
-  {entries.length === 0 && <p>No entries yet.</p>}
+  <p class="intro">
+    Deep Field Works is a long-term field journal and laboratory notebook,
+    recording how humans, technology, knowledge systems, and artificial
+    intelligence are changing one another. It is a working archive rather than a
+    finished publication: the goal is to preserve thinking while it develops,
+    and to keep the chronology intact.
+  </p>
 
-  <ul>
-    {
-      entries.map(({ entry, collection }) => (
-        <li>
-          <p>
-            <small>
-              {typeLabels[collection]}
-              {' · '}
-              <time datetime={entry.data.pubDate.toISOString()}>
-                {dateFormat.format(entry.data.pubDate)}
-              </time>
-              {entry.data.theme && <> · {entry.data.theme}</>}
-              {entry.data.status && <> · {entry.data.status}</>}
-            </small>
-          </p>
-          <h2>
-            <a href={withBase(`${collection}/${entry.id}`)}>{entry.data.title}</a>
-          </h2>
-          <p>{entry.data.description}</p>
-        </li>
-      ))
-    }
-  </ul>
+  {
+    recent.length > 0 && (
+      <section class="topic-block">
+        <h2 class="section-head">Recent additions</h2>
+        <ul class="link-list">
+          {recent.map(({ entry, collection }) => (
+            <li>
+              <a href={withBase(`${collection}/${entry.id}`)}>
+                {entry.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="topic-block">
+    <h2 class="section-head">Starting points</h2>
+    <ul class="link-list">
+      {
+        startingPoints.map((point) => (
+          <li>
+            <a href={withBase(point.path)}>{point.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="topic-block">
+    <h2 class="section-head">Domains</h2>
+    <ul class="link-list">
+      {
+        domains.map((domain) => (
+          <li>
+            <a href={withBase(`domains/${domain.slug}`)}>{domain.title}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
 </BaseLayout>
+
+<style>
+  .intro {
+    margin: 0 0 var(--space-300);
+  }
+
+  .topic-block {
+    margin: 0 0 var(--space-300);
+  }
+
+  .topic-block:last-child {
+    margin-bottom: 0;
+  }
+</style>

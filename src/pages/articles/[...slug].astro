@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import { resolveEntryDomain } from '../../data/domains';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -25,32 +27,43 @@ const typeLabels: Record<string, string> = {
 const monthYear = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   year: 'numeric',
+  timeZone: 'UTC',
 }).format(entry.data.pubDate);
+
+const domain = resolveEntryDomain(entry.data);
+const domainLabel = domain?.title ?? entry.data.domainPath?.[0] ?? entry.data.theme;
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+const monthAnchor = withBase(
+  `chronology#${entry.data.pubDate.getUTCFullYear()}-${String(
+    entry.data.pubDate.getUTCMonth() + 1,
+  ).padStart(2, '0')}`,
+);
 ---
 
 <BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
-  <nav class="page-nav">
-    <a class="page-nav__link" href={withBase('')}>
-      <span class="page-nav__arrow">←</span> <span class="page-nav__label">Index</span>
-    </a>
-  </nav>
+  <BackLink />
   <article class="article">
     <header class="article__header">
       <h1 class="article__title">{entry.data.title}</h1>
       <p class="article__meta">
         <span>{typeLabels[entry.data.documentType]}</span>
-        {entry.data.theme && (
+        {domainLabel && (
           <>
             <span class="article__meta-sep"> · </span>
-            <span class="article__meta-theme">{entry.data.theme}</span>
+            {domain ? (
+              <a class="article__meta-domain" href={withBase(`domains/${domain.slug}`)}>
+                {domain.title}
+              </a>
+            ) : (
+              <span>{domainLabel}</span>
+            )}
           </>
         )}
         <span class="article__meta-sep"> · </span>
-        <span>{monthYear}</span>
+        <a class="article__meta-date" href={monthAnchor}>{monthYear}</a>
       </p>
     </header>
     <div class="article__body">
@@ -75,27 +88,17 @@ const withBase = (path: string) =>
     color: var(--color-text-muted);
   }
 
-  .article__meta-theme {
+  .article__meta-domain {
+    color: var(--color-text-link);
+    text-decoration: underline;
+  }
+
+  .article__meta-date {
     color: var(--color-text-link);
     text-decoration: underline;
   }
 
   .article__body :global(> p:first-child) {
     margin-top: 0;
-  }
-
-  .page-nav {
-    margin-bottom: var(--space-200);
-    font-family: var(--font-sans);
-    font-size: var(--font-size-footnote);
-  }
-
-  .page-nav__link {
-    color: var(--color-text-link);
-    text-decoration: none;
-  }
-
-  .page-nav__label {
-    text-decoration: underline;
   }
 </style>

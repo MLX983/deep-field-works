@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import { resolveEntryDomain } from '../../data/domains';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -25,28 +27,45 @@ const typeLabels: Record<string, string> = {
 const monthYear = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   year: 'numeric',
+  timeZone: 'UTC',
 }).format(entry.data.pubDate);
 
-const metaSegments = [
-  typeLabels[entry.data.documentType],
-  entry.data.theme,
-  monthYear,
-].filter(Boolean);
+const domain = resolveEntryDomain(entry.data);
+const domainLabel = domain?.title ?? entry.data.domainPath?.[0] ?? entry.data.theme;
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+const monthAnchor = withBase(
+  `chronology#${entry.data.pubDate.getUTCFullYear()}-${String(
+    entry.data.pubDate.getUTCMonth() + 1,
+  ).padStart(2, '0')}`,
+);
 ---
 
 <BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
+  <BackLink />
   <article>
     <p>
-      <small>{metaSegments.join(' · ')}</small>
+      <small>
+        {typeLabels[entry.data.documentType]}
+        {domainLabel && (
+          <>
+            {' · '}
+            {domain ? (
+              <a href={withBase(`domains/${domain.slug}`)}>{domain.title}</a>
+            ) : (
+              <span>{domainLabel}</span>
+            )}
+          </>
+        )}
+        {' · '}
+        <a href={monthAnchor}>{monthYear}</a>
+      </small>
     </p>
     <h1>{entry.data.title}</h1>
     <p>{entry.data.description}</p>
     <hr />
     <Content />
   </article>
-  <p><a href={withBase('')}>← Back to index</a></p>
 </BaseLayout>
