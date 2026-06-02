@@ -142,7 +142,8 @@ const withBase = (path: string) =>
     color: var(--color-text-header);
   }
 
-  /* Link list — semibold rust links, no underline (Figma: "Main link"). */
+  /* Link list (Figma: "Main link"). Links stay underlined at rest so they
+     read as links on touch devices, where hover never fires. */
   .link-list {
     list-style: none;
     padding: 0;
@@ -158,10 +159,6 @@ const withBase = (path: string) =>
 
   .link-list a {
     font-weight: var(--font-weight-regular);
-    text-decoration: none;
-  }
-
-  .link-list a:hover {
     text-decoration: underline;
   }
 </style>
