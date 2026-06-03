@@ -3,9 +3,9 @@ title: "Agents increase shop time"
 description: "AI shopping is sold as a time-saver. It may instead concentrate attention and turn the product page into a data source."
 pubDate: 2026-05-31
 draft: false
-documentType: field-note
+documentType: note
 theme: "Media, Memory, and Meaning"
-status: observation
+status: published
 domainPath:
   - "Media, Memory, and Meaning"
 canonical: true

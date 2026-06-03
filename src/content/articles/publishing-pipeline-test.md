@@ -3,9 +3,9 @@ title: "Publishing Pipeline Test"
 description: "A draft-only test entry used to validate the Deep Field Works publishing pipeline."
 pubDate: 2026-06-03
 draft: true
-documentType: article
+documentType: project-log
 theme: "Media, Memory, and Meaning"
-status: observation
+status: draft
 domainPath:
   - "Media, Memory, and Meaning"
 canonical: false

@@ -3,9 +3,9 @@ title: "The Archive Becomes Part of the Work"
 description: "A founding Deep Field Works draft on how a structured archive can become part of future thinking, not merely a record of past work."
 pubDate: 2026-06-03
 draft: true
-documentType: article
+documentType: essay
 theme: "Cognitive Infrastructure"
-status: working-theory
+status: review
 domainPath:
   - "Cognitive Infrastructure"
   - "Media, Memory, and Meaning"

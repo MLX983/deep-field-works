@@ -3,9 +3,9 @@ title: "The third intelligence"
 description: "Most accounts of AI reduce it to human and machine. A third intelligence shapes the loop: the audience."
 pubDate: 2026-05-31
 draft: false
-documentType: article
+documentType: essay
 theme: "Media, Memory, and Meaning"
-status: working-theory
+status: published
 domainPath:
   - "Media, Memory, and Meaning"
 canonical: true

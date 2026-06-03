@@ -20,12 +20,15 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 
 const typeLabels: Record<string, string> = {
-  article: 'Article',
-  'field-note': 'Field Note',
-  checkpoint: 'Checkpoint',
-  'research-note': 'Research Note',
+  seed: 'Seed',
+  note: 'Note',
+  'field-report': 'Field Report',
+  essay: 'Essay',
   experiment: 'Experiment',
-  'project-journal': 'Project Journal',
+  'prototype-note': 'Prototype Note',
+  concept: 'Concept',
+  checkpoint: 'Checkpoint',
+  'project-log': 'Project Log',
 };
 
 const monthYear = new Intl.DateTimeFormat('en-US', {
