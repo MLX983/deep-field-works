@@ -482,6 +482,22 @@ canonical: true
 
 ---
 
+## Preview drafts locally
+
+While a piece has `draft: true`, it is excluded from production builds but remains available during local development.
+
+1. Run the dev server: `npm run dev`
+2. Open the piece at its collection route, for example:
+   * `http://localhost:4321/articles/{slug}`
+   * `http://localhost:4321/field-notes/{slug}`
+   * `http://localhost:4321/checkpoints/{slug}`
+
+Replace `{slug}` with the content filename (without `.md`), e.g. `publishing-pipeline-test`.
+
+Drafts may also appear on listing pages, chronology, domain pages, and the home page recent list in dev only. They will not appear on the live site until `draft: false` and the site is rebuilt and deployed.
+
+---
+
 ## 10. Link and index
 
 After publication:

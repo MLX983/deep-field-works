@@ -5,10 +5,9 @@ import BackToTop from '../../components/BackToTop.astro';
 import { resolveEntryDomain } from '../../data/domains';
 import { formatDomainLabel } from '../../utils/formatDomainLabel';
 import { getCollection, render } from 'astro:content';
+import { notDraftInProd } from '../../utils/notDraftInProd';
 
 export async function getStaticPaths() {
-  const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
-    import.meta.env.PROD ? !data.draft : true;
   const entries = await getCollection('checkpoints', notDraftInProd);
   return entries.map((entry) => ({
     params: { slug: entry.id },

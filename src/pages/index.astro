@@ -3,15 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { domains } from '../data/domains';
 import { formatDomainLabel } from '../utils/formatDomainLabel';
+import { notDraftInProd } from '../utils/notDraftInProd';
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
 const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
-
-const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
-  import.meta.env.PROD ? !data.draft : true;
 
 const grouped = await Promise.all(
   collectionNames.map((name) => getCollection(name, notDraftInProd)),

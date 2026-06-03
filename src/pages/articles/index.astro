@@ -4,9 +4,7 @@ import BackLink from '../../components/BackLink.astro';
 import BackToTop from '../../components/BackToTop.astro';
 import EntryList, { type ListItem } from '../../components/EntryList.astro';
 import { getCollection } from 'astro:content';
-
-const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
-  import.meta.env.PROD ? !data.draft : true;
+import { notDraftInProd } from '../../utils/notDraftInProd';
 
 const entries = await getCollection('articles', notDraftInProd);
 

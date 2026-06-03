@@ -2,11 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BackLink from '../components/BackLink.astro';
 import { getCollection } from 'astro:content';
+import { notDraftInProd } from '../utils/notDraftInProd';
 
 const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
-
-const notDraftInProd = ({ data }: { data: { draft?: boolean } }) =>
-  import.meta.env.PROD ? !data.draft : true;
 
 const grouped = await Promise.all(
   collectionNames.map((name) => getCollection(name, notDraftInProd)),
