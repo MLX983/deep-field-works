@@ -28,10 +28,10 @@ The archive itself is part of the experiment.
 Before making content, publishing, taxonomy, voice, metadata, or site-structure decisions, read:
 
 ```text
-docs/source-of-truth-link.md
+docs/source-of-truth/
 ```
 
-That file points to the canonical Deep Field Works source-of-truth folder.
+That folder contains the canonical Deep Field Works source-of-truth documents.
 
 Use the source-of-truth documents for:
 
@@ -57,37 +57,37 @@ Use the smallest relevant set of documents.
 For general orientation:
 
 ```text
-README.md
-content-strategy.md
-domain-structure.md
+docs/source-of-truth/README.md
+docs/source-of-truth/content-strategy.md
+docs/source-of-truth/domain-structure.md
 ```
 
 For drafting content:
 
 ```text
-article-templates.md
-content-schema.md
+docs/source-of-truth/article-templates.md
+docs/source-of-truth/content-schema.md
 ```
 
 For revising content:
 
 ```text
-editorial-guidelines.md
-voice-and-style.md
+docs/source-of-truth/editorial-guidelines.md
+docs/source-of-truth/voice-and-style.md
 ```
 
 For publishing or workflow decisions:
 
 ```text
-publishing-workflow.md
-content-schema.md
+docs/source-of-truth/publishing-workflow.md
+docs/source-of-truth/content-schema.md
 ```
 
 For domain, taxonomy, or navigation decisions:
 
 ```text
-domain-structure.md
-content-schema.md
+docs/source-of-truth/domain-structure.md
+docs/source-of-truth/content-schema.md
 ```
 
 ---
@@ -357,7 +357,7 @@ When building new pages, extend the existing structure rather than replacing it.
 Before making substantial changes:
 
 1. Read this file.
-2. Read `docs/source-of-truth-link.md`.
+2. Read `docs/source-of-truth/`.
 3. Consult the relevant source-of-truth documents.
 4. Identify the smallest viable change.
 5. Explain proposed changes before implementing them when the change is structural, public-facing, or irreversible.
