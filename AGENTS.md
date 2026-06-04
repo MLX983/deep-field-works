@@ -1,5 +1,23 @@
 # AGENTS.md
 
+## Codex Operating Summary
+
+Treat this repository as the working corpus for Deep Field Works.
+
+Before major content, metadata, taxonomy, publishing, or public-facing changes, read the relevant files in `docs/source-of-truth/`.
+
+Use the smallest adequate artifact type: `seed`, `note`, `field-report`, `essay`, `experiment`, `prototype-note`, `concept`, `checkpoint`, or `project-log`.
+
+Follow `content-schema.md`, `publishing-workflow.md`, `editorial-guidelines.md`, and `voice-and-style.md` as applicable.
+
+Preserve chronology. Do not modify source-of-truth documents, publish content, change draft status, or change canonical status without human approval.
+
+Avoid generic AI writing and over-polished ChatGPT cadence.
+
+Keep changes scoped, and run `npm run build` before reporting work complete.
+
+---
+
 ## Project Overview
 
 Deep Field Works is a long-term field journal, laboratory notebook, prototype lab, and publishing platform focused on the intersection of humans, technology, knowledge systems, institutions, interfaces, and artificial intelligence.
