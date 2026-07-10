@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "loop:intake": "node scripts/loop1-intake-understanding.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
