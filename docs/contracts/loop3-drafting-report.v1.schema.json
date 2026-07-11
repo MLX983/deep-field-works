@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop3-drafting-report.v1.schema.json",
+  "title": "loop3-drafting-report.v1",
+  "description": "Report produced by Loop 3 constrained drafting from an approved Loop 2 development packet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "sourcePacketReference",
+    "artifactType",
+    "validationStatus",
+    "sectionsGenerated",
+    "claimsUsed",
+    "speculationIncluded",
+    "unresolvedGapsPreserved",
+    "warnings",
+    "blockedContentOmitted"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "loop3-drafting-report.v1"
+    },
+    "sourcePacketReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issueNumber", "packetContract"],
+      "properties": {
+        "issueNumber": { "type": "integer", "minimum": 1 },
+        "packetContract": { "type": "string", "minLength": 1 },
+        "issueUrl": { "type": "string" }
+      }
+    },
+    "artifactType": {
+      "type": "string",
+      "enum": ["note", "field-report"]
+    },
+    "validationStatus": {
+      "type": "string",
+      "enum": ["passed", "failed", "blocked"]
+    },
+    "sectionsGenerated": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "claimsUsed": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "speculationIncluded": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "unresolvedGapsPreserved": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blockedContentOmitted": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "validationErrors": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "editorialWorkflowNotesOmitted": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "gateBlockingMessage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "draftPath": { "type": "string" },
+    "failedDraftPath": { "type": "string" }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9207,
+  "humanApprovalStatus": "approved",
+  "recommendedArtifactType": "field-report",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "workflow judgment boundaries",
+  "rationale": "Sanitized field-report fixture for Loop 3 evaluation."
+}

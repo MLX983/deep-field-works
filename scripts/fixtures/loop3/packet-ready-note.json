@@ -1,0 +1,36 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": {
+    "number": 9201,
+    "title": "Bounded workflow boundary note",
+    "url": "https://example.invalid/dfw-intake/issues/9201"
+  },
+  "approvedArtifactType": "note",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "workflow judgment boundaries",
+  "workingTitle": "Bounded workflow boundary note",
+  "readerQuestion": "What signal tells a team delegated work has crossed into decision authority?",
+  "centralTension": "The boundary between delegated routine and required judgment can shift faster than the team's review habits.",
+  "verifiedObservations": [
+    "Teams sometimes delegate routine coordination to automated assistants before they have a shared rule for when a human must re-enter the loop."
+  ],
+  "inferences": [
+    "The boundary between delegated routine and required judgment can shift faster than the team's review habits."
+  ],
+  "speculation": [],
+  "sourceRequirements": [],
+  "evidenceGaps": [],
+  "relatedMaterial": [],
+  "recommendedStructure": ["Observation", "Working model", "Open question"],
+  "unresolvedQuestions": [
+    "What lightweight signal would tell a team that a delegated workflow has crossed from assistance into decision authority?"
+  ],
+  "draftReadiness": "ready",
+  "nextAction": "Outline a concise note.",
+  "sourceSufficiency": {
+    "status": "sufficient",
+    "reasons": [],
+    "missingElements": []
+  },
+  "blockingCondition": null
+}

@@ -1,0 +1,32 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": { "number": 9206, "title": "Ready with uncertainty", "url": "https://example.invalid/dfw-intake/issues/9206" },
+  "approvedArtifactType": "note",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "workflow judgment boundaries",
+  "workingTitle": "Ready with uncertainty",
+  "readerQuestion": "What signal marks a boundary shift?",
+  "centralTension": "Delegated routine and required judgment can desynchronize.",
+  "verifiedObservations": [
+    "Teams delegate routine coordination before shared re-entry rules exist."
+  ],
+  "inferences": [
+    "Review habits may lag behind shifting delegation boundaries."
+  ],
+  "speculation": [
+    "A lightweight signal may eventually be needed at the workflow layer."
+  ],
+  "sourceRequirements": [],
+  "evidenceGaps": [
+    "Non-blocking uncertainty: keep observation, inference, and speculation separated."
+  ],
+  "relatedMaterial": [],
+  "recommendedStructure": ["Observation", "Interpretation", "Open question"],
+  "unresolvedQuestions": [
+    "What lightweight signal would tell a team delegated work has crossed into decision authority?"
+  ],
+  "draftReadiness": "ready",
+  "nextAction": "Draft bounded note and preserve uncertainty.",
+  "sourceSufficiency": { "status": "sufficient", "reasons": [], "missingElements": [] },
+  "blockingCondition": null
+}

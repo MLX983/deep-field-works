@@ -1,0 +1,47 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": {
+    "number": 9207,
+    "title": "Delegation boundary field signal",
+    "url": "https://example.invalid/dfw-intake/issues/9207"
+  },
+  "approvedArtifactType": "field-report",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "workflow judgment boundaries",
+  "workingTitle": "Delegation boundary field signal",
+  "readerQuestion": "What signal tells a team delegated work has crossed into decision authority?",
+  "centralTension": "Delegated routine and required judgment can desynchronize when review habits lag behind shifting automation boundaries.",
+  "verifiedObservations": [
+    "Teams sometimes delegate routine coordination to automated assistants before they have a shared rule for when a human must re-enter the loop.",
+    "Escalation paths are often defined for failures, but not for ambiguous cases where the assistant has already acted."
+  ],
+  "inferences": [
+    "Review habits may lag behind shifting delegation boundaries.",
+    "Ambiguous assistant actions may bypass the informal checks teams rely on for judgment-heavy work."
+  ],
+  "speculation": [
+    "A lightweight signal may eventually be needed at the workflow layer when delegated actions begin to resemble decisions."
+  ],
+  "sourceRequirements": [],
+  "evidenceGaps": [
+    "Non-blocking uncertainty: keep observation, inference, and speculation separated."
+  ],
+  "relatedMaterial": [],
+  "recommendedStructure": [
+    "The signal",
+    "Why it may matter",
+    "The deeper tension",
+    "What to watch next"
+  ],
+  "unresolvedQuestions": [
+    "What lightweight signal would tell a team that a delegated workflow has crossed from assistance into decision authority?"
+  ],
+  "draftReadiness": "ready",
+  "nextAction": "Draft bounded field report and preserve uncertainty.",
+  "sourceSufficiency": {
+    "status": "sufficient",
+    "reasons": [],
+    "missingElements": []
+  },
+  "blockingCondition": null
+}

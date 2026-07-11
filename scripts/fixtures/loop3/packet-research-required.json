@@ -1,0 +1,26 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": { "number": 9202, "title": "Research fixture", "url": "https://example.invalid/dfw-intake/issues/9202" },
+  "approvedArtifactType": "seed, with potential to become a field report",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "agent discovery",
+  "workingTitle": "Research fixture",
+  "readerQuestion": "What must be verified?",
+  "centralTension": "Discovery is not authorization.",
+  "verifiedObservations": ["A vendor announced a standard."],
+  "inferences": [],
+  "speculation": [],
+  "sourceRequirements": ["Primary announcement"],
+  "evidenceGaps": ["Authorization scope"],
+  "relatedMaterial": [],
+  "recommendedStructure": [],
+  "unresolvedQuestions": [],
+  "draftReadiness": "research-required",
+  "nextAction": "Verify sources.",
+  "sourceSufficiency": { "status": "partial", "reasons": ["unverified external"], "missingElements": ["verified primary sources"] },
+  "blockingCondition": "Loop 2 stopped before drafting because source verification is required.",
+  "researchPlan": {
+    "claimsRequiringVerification": ["Announcement details"],
+    "evidenceNeededForReady": ["Verified primary source"]
+  }
+}

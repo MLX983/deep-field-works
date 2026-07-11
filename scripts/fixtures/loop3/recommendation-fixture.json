@@ -1,0 +1,11 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9202,
+  "disposition": "research before development",
+  "suggestedArtifact": "seed",
+  "primaryDomain": "Human-Machine Workflows",
+  "themeOrCluster": "fixture",
+  "rationale": "Fixture gate block.",
+  "nextAction": "Verify.",
+  "humanApprovalStatus": "approved"
+}

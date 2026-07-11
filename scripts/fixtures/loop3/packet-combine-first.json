@@ -1,0 +1,28 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": { "number": 9204, "title": "Combine fixture", "url": "https://example.invalid/dfw-intake/issues/9204" },
+  "approvedArtifactType": "supporting note or section within loop-engineering cluster",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "loop engineering",
+  "workingTitle": "Combine fixture",
+  "readerQuestion": "How should this support #21?",
+  "centralTension": "Evaluation burden may scale combinatorially.",
+  "verifiedObservations": ["More agents create more outputs to evaluate."],
+  "inferences": ["Evaluation may become the limiting factor."],
+  "speculation": [],
+  "sourceRequirements": [],
+  "evidenceGaps": [],
+  "relatedMaterial": [{ "reference": "#21", "role": "combine-target", "note": "loop-engineering cluster" }],
+  "recommendedStructure": [],
+  "unresolvedQuestions": [],
+  "draftReadiness": "combine-first",
+  "nextAction": "Merge into #21.",
+  "sourceSufficiency": { "status": "partial", "reasons": ["combine required"], "missingElements": ["merge into destination"] },
+  "blockingCondition": "Loop 2 stopped before drafting because this material must combine with existing work first.",
+  "combinationPlan": {
+    "targetReference": "#21",
+    "targetTitle": "Loop engineering cluster",
+    "materialToCarryForward": ["Evaluation burden framing"],
+    "doNotStandalone": true
+  }
+}

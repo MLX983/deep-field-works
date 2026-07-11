@@ -1,0 +1,22 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": { "number": 9205, "title": "Essay fixture", "url": "https://example.invalid/dfw-intake/issues/9205" },
+  "approvedArtifactType": "essay",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "unsupported",
+  "workingTitle": "Essay fixture",
+  "readerQuestion": "Should not draft.",
+  "centralTension": "This should be blocked.",
+  "verifiedObservations": ["Observation present."],
+  "inferences": ["Inference present."],
+  "speculation": [],
+  "sourceRequirements": [],
+  "evidenceGaps": [],
+  "relatedMaterial": [],
+  "recommendedStructure": [],
+  "unresolvedQuestions": [],
+  "draftReadiness": "ready",
+  "nextAction": "Do not draft as essay in MVP.",
+  "sourceSufficiency": { "status": "sufficient", "reasons": [], "missingElements": [] },
+  "blockingCondition": null
+}

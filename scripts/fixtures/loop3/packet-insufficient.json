@@ -1,0 +1,22 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": { "number": 9203, "title": "Thin fixture", "url": "https://example.invalid/dfw-intake/issues/9203" },
+  "approvedArtifactType": "note",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "thin",
+  "workingTitle": "Thin fixture",
+  "readerQuestion": "",
+  "centralTension": "",
+  "verifiedObservations": [],
+  "inferences": [],
+  "speculation": [],
+  "sourceRequirements": [],
+  "evidenceGaps": [],
+  "relatedMaterial": [],
+  "recommendedStructure": [],
+  "unresolvedQuestions": [],
+  "draftReadiness": "insufficient-material",
+  "nextAction": "Gather substance.",
+  "sourceSufficiency": { "status": "insufficient", "reasons": ["thin body"], "missingElements": ["clear claim"] },
+  "blockingCondition": "Loop 2 stopped before drafting because the source material is not yet sufficient for development."
+}
