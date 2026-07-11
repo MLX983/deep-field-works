@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop1-reviewed-recommendation.v1.schema.json",
+  "title": "loop1-reviewed-recommendation.v1",
+  "description": "Human-reviewed editorial recommendation derived from Loop 1 intake understanding. Excludes retrieval scores, evaluator diagnostics, source text, and model traces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueNumber",
+    "disposition",
+    "suggestedArtifact",
+    "primaryDomain",
+    "rationale",
+    "nextAction",
+    "humanApprovalStatus"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "loop1-reviewed-recommendation.v1"
+    },
+    "issueNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "GitHub issue number in the intake repository."
+    },
+    "disposition": {
+      "type": "string",
+      "enum": [
+        "develop independently",
+        "research before development",
+        "combine with existing material",
+        "combine with overlapping material",
+        "preserve as seed",
+        "defer",
+        "needs human judgment",
+        "not for publication"
+      ],
+      "description": "Editorial stance after human review."
+    },
+    "suggestedArtifact": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Smallest adequate artifact or role (e.g. note, seed, supporting seed, section within a cluster)."
+    },
+    "primaryDomain": {
+      "type": "string",
+      "enum": [
+        "Cognitive Infrastructure",
+        "Human-Machine Workflows",
+        "Institutions in Transition",
+        "Interfaces for Judgment",
+        "Media, Memory, and Meaning"
+      ]
+    },
+    "themeOrCluster": {
+      "type": "string",
+      "description": "Concise theme or cluster label. Omit when not yet assigned."
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200,
+      "description": "One or two concise sentences explaining the recommendation."
+    },
+    "relatedMaterial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reference"],
+        "properties": {
+          "reference": {
+            "type": "string",
+            "description": "Issue number (e.g. #21), corpus path, or short label."
+          },
+          "note": {
+            "type": "string",
+            "description": "Why the reference matters."
+          }
+        }
+      },
+      "description": "Pointers to related backlog or published material. Omit when empty."
+    },
+    "nextAction": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 800,
+      "description": "One concrete next step for a human editor."
+    },
+    "uncertaintyOrReviewFlag": {
+      "type": "string",
+      "maxLength": 800,
+      "description": "Residual uncertainty, verification requirement, or editorial caution. Omit when none."
+    },
+    "humanApprovalStatus": {
+      "type": "string",
+      "enum": ["pending", "approved", "rejected", "superseded"]
+    },
+    "reviewedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a human approved or superseded this record."
+    },
+    "reviewedBy": {
+      "type": "string",
+      "description": "Reviewer identifier. Omit for automated drafts awaiting review."
+    },
+    "sourceLoop1Run": {
+      "type": "string",
+      "description": "Optional path or label for the Loop 1 run that informed review. Not a model trace."
+    }
+  }
+}
