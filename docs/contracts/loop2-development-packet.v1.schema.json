@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop2-development-packet.v1.schema.json",
+  "title": "loop2-development-packet.v1",
+  "description": "Structured development packet produced by Loop 2 from an approved Loop 1 recommendation and source issue.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueReference",
+    "approvedArtifactType",
+    "primaryDomain",
+    "theme",
+    "workingTitle",
+    "readerQuestion",
+    "centralTension",
+    "verifiedObservations",
+    "inferences",
+    "speculation",
+    "sourceRequirements",
+    "evidenceGaps",
+    "relatedMaterial",
+    "recommendedStructure",
+    "unresolvedQuestions",
+    "draftReadiness",
+    "nextAction"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "loop2-development-packet.v1"
+    },
+    "issueReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "title", "url"],
+      "properties": {
+        "number": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 }
+      }
+    },
+    "approvedArtifactType": { "type": "string", "minLength": 1 },
+    "primaryDomain": {
+      "type": "string",
+      "enum": [
+        "Cognitive Infrastructure",
+        "Human-Machine Workflows",
+        "Institutions in Transition",
+        "Interfaces for Judgment",
+        "Media, Memory, and Meaning"
+      ]
+    },
+    "theme": { "type": "string" },
+    "workingTitle": { "type": "string" },
+    "readerQuestion": { "type": "string" },
+    "centralTension": { "type": "string" },
+    "verifiedObservations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "inferences": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "speculation": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceRequirements": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidenceGaps": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "relatedMaterial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reference", "role"],
+        "properties": {
+          "reference": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "recommendedStructure": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "unresolvedQuestions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "draftReadiness": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "research-required",
+        "combine-first",
+        "insufficient-material",
+        "not-for-publication"
+      ]
+    },
+    "nextAction": { "type": "string", "minLength": 1 },
+    "combinationPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetReference",
+        "materialToCarryForward",
+        "doNotStandalone"
+      ],
+      "properties": {
+        "targetReference": { "type": "string", "minLength": 1 },
+        "targetTitle": { "type": "string" },
+        "materialToCarryForward": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "doNotStandalone": { "type": "boolean" }
+      }
+    },
+    "researchPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claimsRequiringVerification",
+        "evidenceNeededForReady"
+      ],
+      "properties": {
+        "claimsRequiringVerification": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidenceNeededForReady": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "blockingCondition": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable explanation when draftReadiness is not ready."
+    }
+  }
+}

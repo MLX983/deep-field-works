@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "loop:intake": "node scripts/loop1-intake-understanding.mjs",
+    "loop:packet": "node scripts/loop2-development-packet.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
