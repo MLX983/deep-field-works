@@ -79,12 +79,45 @@ Pinned combine targets from `relatedMaterial` (`#21`, `#20`) are loaded from the
 
 ## Draft readiness rules
 
-| Reviewed disposition | `draftReadiness` |
-|----------------------|------------------|
-| develop independently | `ready` |
+Loop 2 does **not** map disposition directly to `draftReadiness`. Disposition is a hint; source sufficiency is assessed independently.
+
+### Decision order
+
+1. `not-for-publication` — operational or administrative material
+2. `combine-first` — combine disposition, named `#N` destination, or duplicate cluster override
+3. `research-required` — research disposition, unverified external claims, or verification flags
+4. `insufficient-material` — thin source, partial sufficiency, or non-develop dispositions
+5. `ready` — develop independently **and** `sourceSufficiency.status = sufficient` **and** no blockers
+
+### `ready` requires
+
+- Approved Loop 1 recommendation
+- `sourceSufficiency.status = sufficient`
+- No unresolved combine requirement
+- No source verification blocker
+- No drafting path that would require invented support
+
+### `sourceSufficiency`
+
+Every packet includes:
+
+```json
+{
+  "sourceSufficiency": {
+    "status": "sufficient | partial | insufficient",
+    "reasons": [],
+    "missingElements": []
+  }
+}
+```
+
+Assessed factors include: clear claim/question, artifact-type substance threshold, unverified external dependencies, central tension from source, combine requirement, and speculation risk.
+
+| Reviewed disposition | Typical `draftReadiness` |
+|----------------------|---------------------------|
+| develop independently | `ready` only when source sufficiency is sufficient |
 | research before development | `research-required` |
-| combine with existing material | `combine-first` |
-| combine with overlapping material | `combine-first` |
+| combine with existing / overlapping material | `combine-first` |
 | preserve as seed / defer / needs human judgment | `insufficient-material` |
 | not for publication | `not-for-publication` |
 
@@ -104,6 +137,17 @@ Packet must include:
 - `evidenceGaps`
 - `researchPlan.claimsRequiringVerification`
 - `researchPlan.evidenceNeededForReady`
+
+## Adversarial fixtures
+
+Tracked under `scripts/fixtures/loop2-adversarial/`:
+
+| Fixture | Expected `draftReadiness` |
+|---------|---------------------------|
+| thin body + develop independently | `insufficient-material` |
+| unverified external + develop independently | `research-required` |
+| bounded ready note | `ready` |
+| duplicate cluster + `#21` target | `combine-first` |
 
 ## Exit codes
 

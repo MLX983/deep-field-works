@@ -40,15 +40,31 @@ const STOP_WORDS = new Set([
   'or', 'that', 'the', 'this', 'to', 'what', 'when', 'where', 'why', 'with',
 ]);
 
-const DISPOSITION_TO_READINESS = {
-  'develop independently': 'ready',
-  'research before development': 'research-required',
-  'combine with existing material': 'combine-first',
-  'combine with overlapping material': 'combine-first',
-  'preserve as seed': 'insufficient-material',
-  defer: 'insufficient-material',
-  'needs human judgment': 'insufficient-material',
+const DISPOSITION_HINTS = {
+  'develop independently': 'ready-candidate',
+  'research before development': 'research-candidate',
+  'combine with existing material': 'combine-candidate',
+  'combine with overlapping material': 'combine-candidate',
+  'preserve as seed': 'insufficient-candidate',
+  defer: 'insufficient-candidate',
+  'needs human judgment': 'insufficient-candidate',
   'not for publication': 'not-for-publication',
+};
+
+const UNVERIFIED_EXTERNAL_PATTERNS = [
+  /\b(?:google|meta|microsoft|openai|anthropic|tesla|apple)\b/i,
+  /\b(?:announced|announcement|reported|according to|the article|press release)\b/i,
+  /\b(?:standard|protocol|specification|whitepaper)\b/i,
+  /\b(?:ard|agentic resource discovery)\b/i,
+  /\bverify\b/i,
+];
+
+const ARTIFACT_THRESHOLDS = {
+  note: { min: 3, ready: 5 },
+  seed: { min: 1, ready: 2 },
+  'field-report': { min: 5, ready: 7 },
+  essay: { min: 7, ready: 9 },
+  default: { min: 2, ready: 4 },
 };
 
 function parseArgs(argv) {
@@ -256,16 +272,228 @@ function buildCarryForwardMaterial(recommendation, issueMeta, claims) {
   return [...new Set(items)].slice(0, 5);
 }
 
+function artifactThreshold(suggestedArtifact) {
+  const lower = suggestedArtifact.toLowerCase();
+  if (lower.includes('note')) return ARTIFACT_THRESHOLDS.note;
+  if (lower.includes('field report') || lower.includes('field-report')) {
+    return ARTIFACT_THRESHOLDS['field-report'];
+  }
+  if (lower.includes('essay')) return ARTIFACT_THRESHOLDS.essay;
+  if (lower.includes('seed')) return ARTIFACT_THRESHOLDS.seed;
+  return ARTIFACT_THRESHOLDS.default;
+}
+
+function computeSubstanceScore(claims, substantiveParagraphs, rawBody) {
+  let score = 0;
+  if (claims.verifiedObservations.length > 0) score += 2;
+  if (claims.inferences.length > 0) score += 2;
+  if (claims.unresolvedQuestions.length > 0) score += 1;
+  if (claims.speculation.length > 0) score += 1;
+  score += Math.min(substantiveParagraphs.length, 3);
+  if (rawBody.replace(/\s+/g, ' ').trim().length >= 250) score += 1;
+  if (rawBody.replace(/\s+/g, ' ').trim().length >= 600) score += 1;
+  return score;
+}
+
+function detectUnverifiedExternalDeps(rawBody, claims) {
+  const haystack = [
+    rawBody,
+    ...claims.verifiedObservations,
+    ...claims.inferences,
+    ...claims.speculation,
+  ].join('\n');
+  const hits = [];
+  for (const pattern of UNVERIFIED_EXTERNAL_PATTERNS) {
+    if (pattern.test(haystack)) hits.push(pattern.source);
+  }
+  if (
+    /\b(?:announced|announcement|reported|according to|the article)\b/i.test(haystack) &&
+    !/\bObservation:\b/i.test(rawBody)
+  ) {
+    hits.push('external-reference-without-local-verification');
+  }
+  return [...new Set(hits)];
+}
+
+function jaccardSimilarity(a, b) {
+  if (a.size === 0 || b.size === 0) return 0;
+  let overlap = 0;
+  for (const token of a) if (b.has(token)) overlap += 1;
+  return overlap / (a.size + b.size - overlap);
+}
+
+function detectDuplicateCluster(issueMeta, targetIssue) {
+  if (!targetIssue?.meta?.rawBody) return false;
+  const sourceTokens = new Set(tokenize(issueMeta.rawBody));
+  const targetTokens = new Set(tokenize(targetIssue.meta.rawBody));
+  const similarity = jaccardSimilarity(sourceTokens, targetTokens);
+  const sharedThemes = [
+    'evaluation',
+    'loop',
+    'agent',
+    'memory',
+    'governance',
+    'agile',
+  ].filter((term) => issueMeta.rawBody.toLowerCase().includes(term) && targetIssue.meta.rawBody.toLowerCase().includes(term));
+  return similarity >= 0.08 || sharedThemes.length >= 2;
+}
+
+function centralTensionFromSource(claims) {
+  if (claims.inferences[0]) return { value: claims.inferences[0], invented: false };
+  if (claims.verifiedObservations[0]) return { value: claims.verifiedObservations[0], invented: false };
+  return { value: '', invented: true };
+}
+
+function assessSourceSufficiency({
+  issueMeta,
+  recommendation,
+  claims,
+  targetIssue,
+  hasCombineTarget,
+}) {
+  const reasons = [];
+  const missingElements = [];
+  const substantiveParagraphs = extractSubstantiveParagraphs(issueMeta.rawBody);
+  const rawBody = issueMeta.rawBody.replace(/\s+/g, ' ').trim();
+  const threshold = artifactThreshold(recommendation.suggestedArtifact);
+  const substanceScore = computeSubstanceScore(claims, substantiveParagraphs, issueMeta.rawBody);
+  const unverifiedExternal = detectUnverifiedExternalDeps(issueMeta.rawBody, claims);
+  const tension = centralTensionFromSource(claims);
+
+  const hasClearClaim =
+    claims.verifiedObservations.length > 0 ||
+    claims.inferences.length > 0 ||
+    claims.unresolvedQuestions.length > 0 ||
+    substantiveParagraphs.length > 0;
+
+  if (!hasClearClaim) {
+    missingElements.push('clear observation, question, or claim');
+  }
+
+  if (substanceScore < threshold.min) {
+    reasons.push(
+      `Supporting material is below the minimum threshold for ${recommendation.suggestedArtifact}`,
+    );
+    missingElements.push(`enough substance for approved artifact type (${recommendation.suggestedArtifact})`);
+  }
+
+  if (tension.invented || !tension.value) {
+    missingElements.push('identifiable central tension from source material');
+  }
+
+  if (unverifiedExternal.length > 0) {
+    reasons.push('Key claims depend on unverified external evidence');
+    missingElements.push('verified primary sources');
+  }
+
+  if (hasCombineTarget) {
+    reasons.push('Related material should be combined with an existing cluster first');
+    missingElements.push('merge into named destination before standalone development');
+  }
+
+  const speculationDraftingRisk =
+    claims.speculation.length > 0 &&
+    claims.verifiedObservations.length === 0 &&
+    (unverifiedExternal.length > 0 || substanceScore < threshold.ready);
+
+  if (speculationDraftingRisk) {
+    reasons.push('Drafting would likely require speculation without verified support');
+    missingElements.push('verified observations before drafting');
+  }
+
+  let status = 'sufficient';
+  if (!hasClearClaim || substanceScore < threshold.min || (!tension.value && !recommendation.rationale)) {
+    status = 'insufficient';
+  } else if (
+    unverifiedExternal.length > 0 ||
+    substanceScore < threshold.ready ||
+    speculationDraftingRisk ||
+    hasCombineTarget
+  ) {
+    status = 'partial';
+  }
+
+  return {
+    status,
+    reasons: [...new Set(reasons)],
+    missingElements: [...new Set(missingElements)],
+    substanceScore,
+    unverifiedExternal,
+    hasClearClaim,
+    tensionInvented: tension.invented,
+    speculationDraftingRisk,
+  };
+}
+
+function determineDraftReadiness(recommendation, sufficiency, targetRef, duplicateCluster) {
+  const disposition = recommendation.disposition;
+
+  if (disposition === 'not for publication') return 'not-for-publication';
+
+  if (
+    disposition === 'combine with existing material' ||
+    disposition === 'combine with overlapping material'
+  ) {
+    return 'combine-first';
+  }
+
+  if (targetRef && duplicateCluster && disposition === 'develop independently') {
+    return 'combine-first';
+  }
+
+  if (disposition === 'research before development') return 'research-required';
+
+  if (sufficiency.unverifiedExternal.length > 0) return 'research-required';
+
+  if (
+    recommendation.uncertaintyOrReviewFlag &&
+    /\b(verif|confirm|source|announcement|whether|primary)\b/i.test(
+      recommendation.uncertaintyOrReviewFlag,
+    )
+  ) {
+    return 'research-required';
+  }
+
+  if (
+    disposition === 'preserve as seed' ||
+    disposition === 'defer' ||
+    disposition === 'needs human judgment'
+  ) {
+    return 'insufficient-material';
+  }
+
+  if (sufficiency.status === 'insufficient') return 'insufficient-material';
+
+  if (
+    disposition === 'develop independently' &&
+    sufficiency.status === 'sufficient' &&
+    !targetRef &&
+    !sufficiency.speculationDraftingRisk
+  ) {
+    return 'ready';
+  }
+
+  if (disposition === 'develop independently' && sufficiency.status === 'partial') {
+    if (sufficiency.unverifiedExternal.length > 0) return 'research-required';
+    return 'insufficient-material';
+  }
+
+  return 'insufficient-material';
+}
+
 function deriveWorkingTitle(issueMeta, recommendation) {
   const title = issueMeta.title.replace(/^\[DFW Intake\]\s*/i, '').trim();
   if (title) return title;
   return recommendation.themeOrCluster || 'Untitled development packet';
 }
 
-function deriveCentralTension(claims, recommendation) {
-  if (claims.inferences[0]) return claims.inferences[0];
-  if (claims.verifiedObservations[0]) return claims.verifiedObservations[0];
-  return recommendation.rationale;
+function deriveCentralTension(claims, recommendation, sufficiency) {
+  const fromSource = centralTensionFromSource(claims);
+  if (fromSource.value) return fromSource.value;
+  if (sufficiency?.status === 'sufficient' && recommendation.rationale) {
+    return recommendation.rationale;
+  }
+  return recommendation.rationale || '';
 }
 
 function deriveReaderQuestion(issueMeta, recommendation, draftReadiness) {
@@ -493,7 +721,8 @@ function buildBlockingCondition(packet) {
   }
 
   if (draftReadiness === 'insufficient-material') {
-    return 'Loop 2 stopped before drafting because the source material is not yet sufficient for development.';
+    const gaps = packet.sourceSufficiency?.missingElements?.join('; ') || 'see sourceSufficiency';
+    return `Loop 2 stopped before drafting because the source material is not yet sufficient for development. Missing: ${gaps}`;
   }
 
   if (draftReadiness === 'not-for-publication') {
@@ -510,11 +739,11 @@ function buildPacket({
   relatedMaterial,
   targetIssue,
   sotSummaries,
+  sourceSufficiency,
+  draftReadiness,
 }) {
-  const draftReadiness =
-    DISPOSITION_TO_READINESS[recommendation.disposition] ?? 'insufficient-material';
   const workingTitle = deriveWorkingTitle(issueMeta, recommendation);
-  const centralTension = deriveCentralTension(claims, recommendation);
+  const centralTension = deriveCentralTension(claims, recommendation, sourceSufficiency);
   const readerQuestion = deriveReaderQuestion(issueMeta, recommendation, draftReadiness);
 
   const packet = {
@@ -545,6 +774,11 @@ function buildPacket({
     ].filter(Boolean),
     draftReadiness,
     nextAction: recommendation.nextAction,
+    sourceSufficiency: {
+      status: sourceSufficiency.status,
+      reasons: sourceSufficiency.reasons,
+      missingElements: sourceSufficiency.missingElements,
+    },
   };
 
   if (draftReadiness === 'combine-first') {
@@ -576,8 +810,8 @@ function buildPacket({
 
   if (draftReadiness === 'ready') {
     packet.evidenceGaps = [
-      'Measures for adaptation pace and proof distinguishing technique vs workflow vs judgment half-lives',
       recommendation.uncertaintyOrReviewFlag,
+      'Optional strengtheners that do not block a bounded note draft',
     ].filter(Boolean);
   }
 
@@ -613,6 +847,7 @@ function validatePacket(packet) {
     'unresolvedQuestions',
     'draftReadiness',
     'nextAction',
+    'sourceSufficiency',
   ];
   for (const key of required) {
     if (packet[key] === undefined) throw new Error(`Packet missing required field: ${key}`);
@@ -655,6 +890,12 @@ function validatePacket(packet) {
   if (packet.draftReadiness !== 'ready' && !packet.blockingCondition) {
     throw new Error('Non-ready packet requires blockingCondition');
   }
+  if (!packet.sourceSufficiency?.status) {
+    throw new Error('Packet requires sourceSufficiency');
+  }
+  if (packet.draftReadiness === 'ready' && packet.sourceSufficiency.status !== 'sufficient') {
+    throw new Error('ready packet requires sourceSufficiency.status = sufficient');
+  }
 }
 
 function buildSummaryMarkdown(packet) {
@@ -691,6 +932,16 @@ function buildSummaryMarkdown(packet) {
       '## Research plan',
       `- **Claims requiring verification:** ${packet.researchPlan.claimsRequiringVerification.join('; ')}`,
       `- **Evidence needed for ready:** ${packet.researchPlan.evidenceNeededForReady.join('; ')}`,
+      '',
+    );
+  }
+
+  if (packet.sourceSufficiency) {
+    lines.push(
+      '## Source sufficiency',
+      `- **Status:** ${packet.sourceSufficiency.status}`,
+      `- **Reasons:** ${packet.sourceSufficiency.reasons.join('; ') || '(none)'}`,
+      `- **Missing elements:** ${packet.sourceSufficiency.missingElements.join('; ') || '(none)'}`,
       '',
     );
   }
@@ -736,8 +987,6 @@ async function main() {
   }
 
   const claims = parseLabeledClaims(issueMeta.rawBody);
-  const draftReadiness =
-    DISPOSITION_TO_READINESS[recommendation.disposition] ?? 'insufficient-material';
 
   const pinned = [];
   const targetRef = parseIssueReference(recommendation);
@@ -746,6 +995,21 @@ async function main() {
     pinned.push(targetRef.number);
     targetIssue = await findIssueInCache(intakeCachePath, targetRef.number);
   }
+
+  const duplicateCluster = detectDuplicateCluster(issueMeta, targetIssue);
+  const sourceSufficiency = assessSourceSufficiency({
+    issueMeta,
+    recommendation,
+    claims,
+    targetIssue,
+    hasCombineTarget: Boolean(targetRef),
+  });
+  const draftReadiness = determineDraftReadiness(
+    recommendation,
+    sourceSufficiency,
+    targetRef,
+    duplicateCluster,
+  );
 
   const queryParts = [
     { text: issueMeta.rawBody, weight: 5 },
@@ -787,6 +1051,8 @@ async function main() {
     relatedMaterial,
     targetIssue,
     sotSummaries,
+    sourceSufficiency,
+    draftReadiness,
   });
 
   validatePacket(packet);
@@ -801,6 +1067,7 @@ async function main() {
     ok: true,
     issueNumber: packet.issueReference.number,
     draftReadiness: packet.draftReadiness,
+    sourceSufficiency: packet.sourceSufficiency.status,
     packetPath,
     summaryPath,
     blocked: packet.draftReadiness !== 'ready',

@@ -23,7 +23,8 @@
     "recommendedStructure",
     "unresolvedQuestions",
     "draftReadiness",
-    "nextAction"
+    "nextAction",
+    "sourceSufficiency"
   ],
   "properties": {
     "contractVersion": {
@@ -106,6 +107,25 @@
       ]
     },
     "nextAction": { "type": "string", "minLength": 1 },
+    "sourceSufficiency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasons", "missingElements"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["sufficient", "partial", "insufficient"]
+        },
+        "reasons": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "missingElements": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "combinationPlan": {
       "type": "object",
       "additionalProperties": false,

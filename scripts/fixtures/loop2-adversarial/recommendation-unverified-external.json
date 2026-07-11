@@ -1,0 +1,12 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9102,
+  "disposition": "develop independently",
+  "suggestedArtifact": "note",
+  "primaryDomain": "Human-Machine Workflows",
+  "themeOrCluster": "agent discovery and governance",
+  "rationale": "Adversarial fixture: clear claim with unverified external dependency.",
+  "nextAction": "Verify the announcement before drafting.",
+  "uncertaintyOrReviewFlag": "Confirm what the standard authorizes before developing the note.",
+  "humanApprovalStatus": "approved"
+}
