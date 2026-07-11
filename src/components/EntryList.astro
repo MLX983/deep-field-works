@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { entryChronologyDate } from '../utils/entryChronologyDate';
 
 type Collection = 'articles' | 'field-notes' | 'checkpoints';
 
@@ -37,14 +38,16 @@ const withBase = (path: string) =>
 {
   items.length > 0 && (
     <ul class="entry-list">
-      {items.map(({ entry, collection }) => (
+      {items.map(({ entry, collection }) => {
+        const displayDate = entryChronologyDate(entry.data);
+        return (
         <li class="entry-list__item">
           <p class="entry-list__meta">
             <small>
               {typeLabels[collection]}
               {' · '}
-              <time datetime={entry.data.pubDate.toISOString()}>
-                {dateFormat.format(entry.data.pubDate)}
+              <time datetime={displayDate.toISOString()}>
+                {dateFormat.format(displayDate)}
               </time>
               {entry.data.theme && <> · {entry.data.theme}</>}
             </small>
@@ -54,7 +57,8 @@ const withBase = (path: string) =>
           </h2>
           <p class="entry-list__description">{entry.data.description}</p>
         </li>
-      ))}
+        );
+      })}
     </ul>
   )
 }

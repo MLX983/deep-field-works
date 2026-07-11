@@ -5,12 +5,16 @@ import BackToTop from '../../components/BackToTop.astro';
 import EntryList, { type ListItem } from '../../components/EntryList.astro';
 import { getCollection } from 'astro:content';
 import { notDraftInProd } from '../../utils/notDraftInProd';
+import { entryChronologyDate } from '../../utils/entryChronologyDate';
 
 const entries = await getCollection('checkpoints', notDraftInProd);
 
 const items: ListItem[] = entries
   .map((entry) => ({ entry, collection: 'checkpoints' as const }))
-  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+  .sort(
+    (a, b) =>
+      entryChronologyDate(b.entry.data).valueOf() - entryChronologyDate(a.entry.data).valueOf(),
+  );
 ---
 
 <BaseLayout

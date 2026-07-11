@@ -6,6 +6,7 @@ import { resolveEntryDomain } from '../../data/domains';
 import { formatDomainLabel } from '../../utils/formatDomainLabel';
 import { getCollection, render } from 'astro:content';
 import { notDraftInProd } from '../../utils/notDraftInProd';
+import { entryChronologyDate } from '../../utils/entryChronologyDate';
 
 export async function getStaticPaths() {
   const entries = await getCollection('checkpoints', notDraftInProd);
@@ -27,11 +28,13 @@ const typeLabels: Record<string, string> = {
   'project-journal': 'Project Journal',
 };
 
+const displayDate = entryChronologyDate(entry.data);
+
 const monthYear = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   year: 'numeric',
   timeZone: 'UTC',
-}).format(entry.data.pubDate);
+}).format(displayDate);
 
 const domain = resolveEntryDomain(entry.data);
 const domainLabel = domain?.title ?? entry.data.domainPath?.[0] ?? entry.data.theme;
@@ -40,9 +43,10 @@ const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 const monthAnchor = withBase(
-  `chronology#${entry.data.pubDate.getUTCFullYear()}-${String(
-    entry.data.pubDate.getUTCMonth() + 1,
-  ).padStart(2, '0')}`,
+  `chronology#${displayDate.getUTCFullYear()}-${String(displayDate.getUTCMonth() + 1).padStart(
+    2,
+    '0',
+  )}`,
 );
 ---
 

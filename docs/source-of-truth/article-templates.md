@@ -31,6 +31,7 @@ Use this frontmatter for publishable content unless a specific template requires
 title: ""
 description: ""
 pubDate: YYYY-MM-DD
+draftDate:
 updatedDate:
 draft: true
 
@@ -74,6 +75,12 @@ What is this piece about, and why does it matter?
 ### pubDate
 
 The original publication date.
+
+Required for published content. Internal drafts may omit it until publication.
+
+### draftDate
+
+Optional internal creation date for a draft that has not been published. Generated drafts use `draftDate`, omit `pubDate`, and remain `canonical: false` until human approval.
 
 Chronology matters. Preserve the date when the piece first becomes public.
 

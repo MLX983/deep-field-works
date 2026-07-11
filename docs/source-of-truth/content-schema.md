@@ -39,6 +39,7 @@ All publishable content should include the following frontmatter.
 title: ""
 description: ""
 pubDate: YYYY-MM-DD
+draftDate:
 updatedDate:
 draft: true
 
@@ -135,6 +136,14 @@ Publication dates matter because Deep Field Works preserves the evolution of thi
 
 Do not silently change `pubDate` when revising a piece.
 
+`pubDate` is required for published content. Internal drafts may omit it until publication.
+
+## draftDate
+
+An optional internal date for a draft that has not been published.
+
+Use format `YYYY-MM-DD`. Generated drafts may use `draftDate` while omitting `pubDate`. This date supports draft previews and internal chronology; it does not become the publication date automatically.
+
 ---
 
 ## updatedDate
@@ -179,6 +188,8 @@ draft: false
 Use `true` until the piece is ready to publish.
 
 Use `false` only when the piece is public or ready for publication.
+
+Generated drafts are candidate artifacts awaiting editorial review and must use `canonical: false`.
 
 ---
 

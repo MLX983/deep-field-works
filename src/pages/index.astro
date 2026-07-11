@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import { domains } from '../data/domains';
 import { formatDomainLabel } from '../utils/formatDomainLabel';
 import { notDraftInProd } from '../utils/notDraftInProd';
+import { entryChronologyDate } from '../utils/entryChronologyDate';
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
@@ -19,7 +20,10 @@ const recent = grouped
   .flatMap((collection, index) =>
     collection.map((entry) => ({ entry, collection: collectionNames[index] })),
   )
-  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf())
+  .sort(
+    (a, b) =>
+      entryChronologyDate(b.entry.data).valueOf() - entryChronologyDate(a.entry.data).valueOf(),
+  )
   .slice(0, 5);
 
 // Temporarily suppressed: the "Starting points" section is hidden until there

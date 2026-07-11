@@ -4,6 +4,7 @@ import BackLink from '../../components/BackLink.astro';
 import { domains } from '../../data/domains';
 import { getCollection } from 'astro:content';
 import { notDraftInProd } from '../../utils/notDraftInProd';
+import { entryChronologyDate } from '../../utils/entryChronologyDate';
 
 export async function getStaticPaths() {
   return domains.map((domain) => ({
@@ -29,7 +30,10 @@ const items = grouped
       entry.data.domainPath?.includes(domain.title) ||
       entry.data.theme === domain.title,
   )
-  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+  .sort(
+    (a, b) =>
+      entryChronologyDate(b.entry.data).valueOf() - entryChronologyDate(a.entry.data).valueOf(),
+  );
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import BackLink from '../components/BackLink.astro';
 import { getCollection } from 'astro:content';
 import { notDraftInProd } from '../utils/notDraftInProd';
+import { entryChronologyDate } from '../utils/entryChronologyDate';
 
 const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
 
@@ -14,7 +15,10 @@ const entries = grouped
   .flatMap((collection, index) =>
     collection.map((entry) => ({ entry, collection: collectionNames[index] })),
   )
-  .sort((a, b) => b.entry.data.pubDate.valueOf() - a.entry.data.pubDate.valueOf());
+  .sort(
+    (a, b) =>
+      entryChronologyDate(b.entry.data).valueOf() - entryChronologyDate(a.entry.data).valueOf(),
+  );
 
 const monthFormat = new Intl.DateTimeFormat('en-US', {
   month: 'long',
@@ -25,7 +29,7 @@ const monthFormat = new Intl.DateTimeFormat('en-US', {
 type Item = (typeof entries)[number];
 const years = new Map<number, Map<number, Item[]>>();
 for (const item of entries) {
-  const d = item.entry.data.pubDate;
+  const d = entryChronologyDate(item.entry.data);
   const year = d.getUTCFullYear();
   const month = d.getUTCMonth();
   const months = years.get(year) ?? new Map<number, Item[]>();
@@ -64,7 +68,7 @@ const withBase = (path: string) =>
           {sortedMonths.map((month) => (
             <div class="chrono-month">
               <h3 class="chrono-month__label" id={monthAnchor(year, month)}>
-                {monthFormat.format(months.get(month)![0].entry.data.pubDate)}
+                {monthFormat.format(entryChronologyDate(months.get(month)![0].entry.data))}
               </h3>
               <ul class="link-list">
                 {months.get(month)!.map(({ entry, collection }) => (
