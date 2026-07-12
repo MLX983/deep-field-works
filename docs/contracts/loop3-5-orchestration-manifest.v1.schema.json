@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop3-5-orchestration-manifest.v1.schema.json",
+  "title": "loop3-5-orchestration-manifest.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueReference",
+    "startedAt",
+    "completedAt",
+    "finalWorkflowStatus",
+    "stageExecutionSummary",
+    "artifacts",
+    "stoppedAtStage",
+    "stopReason",
+    "humanInputRequests",
+    "warnings"
+  ],
+  "properties": {
+    "contractVersion": { "const": "loop3-5-orchestration-manifest.v1" },
+    "issueReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "title"],
+      "properties": {
+        "number": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string" }
+      }
+    },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "finalWorkflowStatus": {
+      "enum": [
+        "LOOP3_BLOCKED",
+        "READY_FOR_HUMAN_EDITORIAL_REVIEW",
+        "REVISED_PENDING_REEVALUATION",
+        "PARTIALLY_REVISED_WAITING_FOR_HUMAN",
+        "WAITING_FOR_HUMAN",
+        "HOLD",
+        "BLOCKED"
+      ]
+    },
+    "stageExecutionSummary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage", "startedAt", "completedAt", "exitCode", "outcome", "stdoutPath", "stderrPath"],
+        "properties": {
+          "stage": { "enum": ["loop3", "loop4", "loop5"] },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "completedAt": { "type": "string", "format": "date-time" },
+          "exitCode": { "type": "integer" },
+          "outcome": { "type": "string", "minLength": 1 },
+          "stdoutPath": { "type": "string", "minLength": 1 },
+          "stderrPath": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage", "kind", "path", "sha256"],
+        "properties": {
+          "stage": { "enum": ["loop3", "loop4", "loop5"] },
+          "kind": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "stoppedAtStage": { "enum": ["loop3", "loop4", "loop5"] },
+    "stopReason": { "type": "string", "minLength": 1 },
+    "humanInputRequests": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "warnings": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  }
+}
