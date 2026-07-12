@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop4-editorial-evaluation.v1.schema.json",
+  "title": "loop4-editorial-evaluation.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueAndDraftReference",
+    "verdict",
+    "confidence",
+    "blockingProblems",
+    "revisionInstructions",
+    "strengths",
+    "risks",
+    "evidenceUsed",
+    "humanReviewNotes"
+  ],
+  "properties": {
+    "contractVersion": { "const": "loop4-editorial-evaluation.v1" },
+    "issueAndDraftReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issueNumber", "draftPath", "packetContract", "draftReportContract"],
+      "properties": {
+        "issueNumber": { "type": "integer", "minimum": 1 },
+        "issueUrl": { "type": "string" },
+        "draftPath": { "type": "string", "minLength": 1 },
+        "packetContract": { "const": "loop2-development-packet.v1" },
+        "draftReportContract": { "const": "loop3-drafting-report.v1" }
+      }
+    },
+    "verdict": { "enum": ["PASS_TO_HUMAN", "REVISE", "HOLD"] },
+    "confidence": { "enum": ["high", "medium", "low"] },
+    "blockingProblems": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "revisionInstructions": { "type": "array", "maxItems": 5, "items": { "type": "string", "minLength": 1 } },
+    "strengths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "risks": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "evidenceUsed": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "humanReviewNotes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  }
+}

@@ -11,6 +11,8 @@
     "loop:intake": "node scripts/loop1-intake-understanding.mjs",
     "loop:packet": "node scripts/loop2-development-packet.mjs",
     "loop:draft": "node scripts/loop3-constrained-draft.mjs",
+    "loop:evaluate": "node scripts/loop4-editorial-evaluation.mjs",
+    "loop:evaluate:fixtures": "node scripts/run-loop4-fixtures.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
