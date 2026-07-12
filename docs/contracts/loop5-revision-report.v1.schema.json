@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop5-revision-report.v1.schema.json",
+  "title": "loop5-revision-report.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueAndDraftReference",
+    "sourceEvaluationReference",
+    "overallStatus",
+    "instructionClassifications",
+    "instructionsApplied",
+    "instructionsNotApplied",
+    "humanInputRequests",
+    "changesMade",
+    "claimsAdded",
+    "claimsRemoved",
+    "warnings"
+  ],
+  "properties": {
+    "contractVersion": { "const": "loop5-revision-report.v1" },
+    "issueAndDraftReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issueNumber", "sourceDraftPath", "artifactType"],
+      "properties": {
+        "issueNumber": { "type": "integer", "minimum": 1 },
+        "issueUrl": { "type": "string" },
+        "sourceDraftPath": { "type": "string", "minLength": 1 },
+        "artifactType": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceEvaluationReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "contractVersion", "verdict"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "contractVersion": { "const": "loop4-editorial-evaluation.v1" },
+        "verdict": { "enum": ["PASS_TO_HUMAN", "REVISE", "HOLD"] }
+      }
+    },
+    "overallStatus": { "enum": ["REVISED", "PARTIALLY_REVISED_WAITING_FOR_HUMAN", "WAITING_FOR_HUMAN", "BLOCKED"] },
+    "instructionClassifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["instruction", "classification", "reason"],
+        "properties": {
+          "instruction": { "type": "string", "minLength": 1 },
+          "classification": { "enum": ["AUTO_APPLY", "HUMAN_INPUT_REQUIRED", "UNSAFE_OR_OUT_OF_SCOPE"] },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "instructionsApplied": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "instructionsNotApplied": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "humanInputRequests": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "changesMade": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "claimsAdded": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "claimsRemoved": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "warnings": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "revisedDraftPath": { "type": "string", "minLength": 1 }
+  }
+}
