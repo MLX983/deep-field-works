@@ -3,6 +3,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { sha256Bytes, sha256Combined } from './lib/content-fingerprint.mjs';
 
 const root = process.cwd();
 const cases = JSON.parse(await fs.readFile(path.join(root, 'scripts/fixtures/loop5/cases.json'), 'utf8'));
@@ -26,20 +27,36 @@ for (const fixture of cases) {
     sourceSufficiency: { status: 'sufficient', reasons: [], missingElements: [] }, blockingCondition: null,
   };
   const draft = `---\ntitle: ${JSON.stringify(fixture.title)}\ndescription: ${JSON.stringify(fixture.description)}\ndraftDate: 2026-07-11\nupdatedDate:\ndraft: true\ndocumentType: note\ntheme: loop5-fixture\nstatus: draft\nsourceNote: "Sanitized Loop 5 fixture"\ndomainPath:\n  - "Human-Machine Workflows"\nrelatedConcepts: []\nrelatedPieces: []\ncanonical: false\n---\n\n${fixture.body.trim()}\n`;
+  const packetBytes = Buffer.from(`${JSON.stringify(packet, null, 2)}\n`, 'utf8');
+  const draftBytes = Buffer.from(draft, 'utf8');
   const report = {
     contractVersion: 'loop3-drafting-report.v1', sourcePacketReference: { issueNumber: fixture.issueNumber, packetContract: packet.contractVersion },
     artifactType: 'note', validationStatus: 'passed', sectionsGenerated: [], claimsUsed: fixture.approvedMaterial,
     speculationIncluded: [], unresolvedGapsPreserved: [fixture.readerQuestion], warnings: [], blockedContentOmitted: [], validationErrors: [], draftPath,
+    sourcePacketSha256: sha256Bytes(packetBytes),
+    sourceIssueSha256: sha256Bytes(Buffer.from(`sanitized issue ${fixture.issueNumber}\n`)),
+    sourceRecommendationSha256: sha256Bytes(Buffer.from(`sanitized recommendation ${fixture.issueNumber}\n`)),
+    generatedDraftSha256: sha256Bytes(draftBytes),
   };
+  const reportBytes = Buffer.from(`${JSON.stringify(report, null, 2)}\n`, 'utf8');
   const evaluation = {
     contractVersion: 'loop4-editorial-evaluation.v1',
     issueAndDraftReference: { issueNumber: fixture.issueNumber, draftPath, packetContract: packet.contractVersion, draftReportContract: report.contractVersion },
     verdict: fixture.verdict, confidence: 'high', blockingProblems: [], revisionInstructions: fixture.instructions,
     strengths: [], risks: [], evidenceUsed: [], humanReviewNotes: [],
+    sourcePacketSha256: sha256Bytes(packetBytes),
+    sourceDraftSha256: sha256Bytes(draftBytes),
+    sourceDraftReportSha256: sha256Bytes(reportBytes),
+    sourceEvaluationInputsSha256: sha256Combined([
+      { label: 'loop2-packet', bytes: packetBytes }, { label: 'loop3-draft', bytes: draftBytes },
+      { label: 'loop3-draft-report', bytes: reportBytes },
+    ]),
   };
+  const evaluationBytes = Buffer.from(`${JSON.stringify(evaluation, null, 2)}\n`, 'utf8');
   await Promise.all([
-    fs.writeFile(draftPath, draft), fs.writeFile(packetPath, `${JSON.stringify(packet, null, 2)}\n`),
-    fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`), fs.writeFile(evaluationPath, `${JSON.stringify(evaluation, null, 2)}\n`),
+    fs.writeFile(draftPath, draftBytes), fs.writeFile(packetPath, packetBytes),
+    fs.writeFile(reportPath, reportBytes), fs.writeFile(evaluationPath, evaluationBytes),
+    fs.writeFile(`${evaluationPath}.sha256`, `${sha256Bytes(evaluationBytes)}\n`),
   ]);
   const run = spawnSync(process.execPath, [path.join(root, 'scripts/loop5-bounded-revision.mjs'),
     '--packet', packetPath, '--draft', draftPath, '--draft-report', reportPath,

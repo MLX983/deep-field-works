@@ -9,6 +9,9 @@
     "contractVersion",
     "sourcePacketReference",
     "artifactType",
+    "sourcePacketSha256",
+    "sourceIssueSha256",
+    "sourceRecommendationSha256",
     "validationStatus",
     "sectionsGenerated",
     "claimsUsed",
@@ -16,6 +19,12 @@
     "unresolvedGapsPreserved",
     "warnings",
     "blockedContentOmitted"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "validationStatus": { "enum": ["passed", "failed"] } }, "required": ["validationStatus"] },
+      "then": { "required": ["generatedDraftSha256"] }
+    }
   ],
   "properties": {
     "contractVersion": {
@@ -35,6 +44,10 @@
       "type": "string",
       "enum": ["note", "field-report"]
     },
+    "sourcePacketSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIssueSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceRecommendationSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "generatedDraftSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "validationStatus": {
       "type": "string",
       "enum": ["passed", "failed", "blocked"]

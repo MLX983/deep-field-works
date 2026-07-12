@@ -3,6 +3,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { sha256Bytes } from './lib/content-fingerprint.mjs';
 
 const root = process.cwd();
 const fixturePath = path.join(root, 'scripts/fixtures/loop4/cases.json');
@@ -39,6 +40,9 @@ for (const fixture of cases) {
     blockingCondition: null,
     nextAction: 'Evaluate the constrained fixture draft.',
   };
+  const draft = `---\ntitle: ${yamlString(fixture.title)}\ndescription: ${yamlString(fixture.description)}\ndraftDate: 2026-07-11\nupdatedDate:\ndraft: true\ndocumentType: ${fixture.draftArtifactType}\ntheme: editorial-evaluation-fixture\nstatus: draft\nsourceNote: ${yamlString('Sanitized Loop 4 fixture')}\ndomainPath:\n  - "Human-Machine Workflows"\nrelatedConcepts: []\nrelatedPieces: []\ncanonical: false\n---\n\n${fixture.body.trim()}\n`;
+  const packetBytes = Buffer.from(`${JSON.stringify(packet, null, 2)}\n`, 'utf8');
+  const draftBytes = Buffer.from(draft, 'utf8');
   const report = {
     contractVersion: 'loop3-drafting-report.v1',
     sourcePacketReference: { issueNumber: fixture.issueNumber, packetContract: 'loop2-development-packet.v1', issueUrl: packet.issueReference.url },
@@ -51,16 +55,19 @@ for (const fixture of cases) {
     warnings: [],
     blockedContentOmitted: [],
     validationErrors: [],
+    sourcePacketSha256: sha256Bytes(packetBytes),
+    sourceIssueSha256: sha256Bytes(Buffer.from(`sanitized issue ${fixture.issueNumber}\n`)),
+    sourceRecommendationSha256: sha256Bytes(Buffer.from(`sanitized recommendation ${fixture.issueNumber}\n`)),
+    generatedDraftSha256: sha256Bytes(draftBytes),
   };
-  const draft = `---\ntitle: ${yamlString(fixture.title)}\ndescription: ${yamlString(fixture.description)}\ndraftDate: 2026-07-11\nupdatedDate:\ndraft: true\ndocumentType: ${fixture.draftArtifactType}\ntheme: editorial-evaluation-fixture\nstatus: draft\nsourceNote: ${yamlString('Sanitized Loop 4 fixture')}\ndomainPath:\n  - "Human-Machine Workflows"\nrelatedConcepts: []\nrelatedPieces: []\ncanonical: false\n---\n\n${fixture.body.trim()}\n`;
   const packetPath = path.join(dir, 'packet.json');
   const reportPath = path.join(dir, 'draft-report.json');
   const draftPath = path.join(dir, 'draft.md');
   const evaluationDir = path.join(dir, 'evaluation');
   await Promise.all([
-    fs.writeFile(packetPath, `${JSON.stringify(packet, null, 2)}\n`),
+    fs.writeFile(packetPath, packetBytes),
     fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`),
-    fs.writeFile(draftPath, draft),
+    fs.writeFile(draftPath, draftBytes),
   ]);
   const run = spawnSync(process.execPath, [
     path.join(root, 'scripts/loop4-editorial-evaluation.mjs'),

@@ -15,6 +15,7 @@
     "loop:evaluate:fixtures": "node scripts/run-loop4-fixtures.mjs",
     "loop:revise": "node scripts/loop5-bounded-revision.mjs",
     "loop:revise:fixtures": "node scripts/run-loop5-fixtures.mjs",
+    "loop:integrity:fixtures": "node scripts/run-integrity-fixtures.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

@@ -23,3 +23,21 @@ npm run loop:evaluate -- \
 ```
 
 The output is `loop4-<issue>-evaluation.json` and conforms to `docs/contracts/loop4-editorial-evaluation.v1.schema.json`.
+
+## Content integrity
+
+Loop 4 hashes the exact packet, draft, and Loop 3 report bytes. It refuses before evaluation when the packet or draft no longer matches the fingerprints in the Loop 3 report. Legacy pre-hash reports are rejected explicitly; there is no compatibility flag.
+
+The evaluation records the three source hashes plus a length-delimited combined-input hash. Loop 4 also writes `<evaluation>.sha256`, a lowercase SHA-256 fingerprint of the exact evaluation JSON bytes, for Loop 5 to verify.
+
+## Threat model
+
+These are **content-integrity fingerprints**, not cryptographic immutability or tamper-proof provenance.
+
+The hashes detect accidental edits, stale inputs, substituted files, and ordinary same-path mutation.
+
+The Loop 4 sidecar detects changes to the evaluation JSON when the sidecar has not also been regenerated.
+
+The mechanism does not defend against an actor deliberately modifying an artifact and recomputing all associated hashes or sidecars.
+
+Stronger tamper resistance would require anchoring hashes in trusted external state such as a Git commit, signed manifest, or append-only ledger.

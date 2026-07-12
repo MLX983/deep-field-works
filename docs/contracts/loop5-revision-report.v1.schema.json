@@ -8,6 +8,10 @@
     "contractVersion",
     "issueAndDraftReference",
     "sourceEvaluationReference",
+    "sourcePacketSha256",
+    "sourceDraftSha256",
+    "sourceDraftReportSha256",
+    "sourceEvaluationSha256",
     "overallStatus",
     "instructionClassifications",
     "instructionsApplied",
@@ -17,6 +21,12 @@
     "claimsAdded",
     "claimsRemoved",
     "warnings"
+  ],
+  "allOf": [
+    {
+      "if": { "required": ["revisedDraftPath"] },
+      "then": { "required": ["revisedDraftSha256"] }
+    }
   ],
   "properties": {
     "contractVersion": { "const": "loop5-revision-report.v1" },
@@ -41,6 +51,10 @@
         "verdict": { "enum": ["PASS_TO_HUMAN", "REVISE", "HOLD"] }
       }
     },
+    "sourcePacketSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDraftSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDraftReportSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceEvaluationSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "overallStatus": { "enum": ["REVISED", "PARTIALLY_REVISED_WAITING_FOR_HUMAN", "WAITING_FOR_HUMAN", "BLOCKED"] },
     "instructionClassifications": {
       "type": "array",
@@ -62,6 +76,7 @@
     "claimsAdded": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "claimsRemoved": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "warnings": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-    "revisedDraftPath": { "type": "string", "minLength": 1 }
+    "revisedDraftPath": { "type": "string", "minLength": 1 },
+    "revisedDraftSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
   }
 }

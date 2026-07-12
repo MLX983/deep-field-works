@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { sha256Bytes } from './lib/content-fingerprint.mjs';
 
 const REPO_ROOT = process.cwd();
 const PACKET_SCHEMA_REQUIRED = [
@@ -586,6 +587,8 @@ function buildReport({
   gateMessage = '',
   draftPath = '',
   failedDraftPath = '',
+  fingerprints,
+  generatedDraftSha256 = '',
 }) {
   return {
     contractVersion: 'loop3-drafting-report.v1',
@@ -595,6 +598,10 @@ function buildReport({
       issueUrl: packet.issueReference.url,
     },
     artifactType: artifactType || normalizeArtifactType(packet.approvedArtifactType) || 'note',
+    sourcePacketSha256: fingerprints.sourcePacketSha256,
+    sourceIssueSha256: fingerprints.sourceIssueSha256,
+    sourceRecommendationSha256: fingerprints.sourceRecommendationSha256,
+    generatedDraftSha256: generatedDraftSha256 || undefined,
     validationStatus: status,
     sectionsGenerated: draftResult?.sections ?? [],
     claimsUsed: draftResult?.claimsUsed ?? [],
@@ -620,7 +627,7 @@ async function main() {
     console.log(usage());
     return;
   }
-  if (!args.packet || !args.issue || !args.outDir) {
+  if (!args.packet || !args.issue || !args.recommendation || !args.outDir) {
     throw new Error(`Missing required arguments.\n${usage()}`);
   }
 
@@ -630,13 +637,21 @@ async function main() {
   const recommendationPath = args.recommendation ? resolveInputPath(args.recommendation) : '';
   const relatedDir = args.relatedDir ? resolveInputPath(args.relatedDir) : '';
 
-  const packet = await readJson(packetPath);
+  const [packetBytes, issueBytes, recommendationBytes] = await Promise.all([
+    fs.readFile(packetPath), fs.readFile(issuePath), fs.readFile(recommendationPath),
+  ]);
+  const packet = JSON.parse(packetBytes.toString('utf8'));
   validatePacketSchema(packet);
-  const issueBody = await fs.readFile(issuePath, 'utf8');
+  const issueBody = issueBytes.toString('utf8');
   const issueMeta = {
     url: packet.issueReference?.url,
   };
-  const recommendation = recommendationPath ? await readJson(recommendationPath) : null;
+  const recommendation = JSON.parse(recommendationBytes.toString('utf8'));
+  const fingerprints = {
+    sourcePacketSha256: sha256Bytes(packetBytes),
+    sourceIssueSha256: sha256Bytes(issueBytes),
+    sourceRecommendationSha256: sha256Bytes(recommendationBytes),
+  };
 
   const gate = evaluateHardGate(packet, recommendation);
   const issueNumber = packet.issueReference.number;
@@ -651,6 +666,7 @@ async function main() {
       artifactType: gate.artifactType,
       status: 'blocked',
       gateMessage: message,
+      fingerprints,
     });
     const reportPath = path.join(outDir, `loop3-${issueNumber}-gate-blocked.json`);
     await writeJson(reportPath, report);
@@ -671,7 +687,8 @@ async function main() {
     await fs.mkdir(failedDir, { recursive: true });
     const failedDraftPath = path.join(failedDir, draftFileName);
     const reportPath = path.join(failedDir, reportFileName);
-    await fs.writeFile(failedDraftPath, draftResult.markdown, 'utf8');
+    const draftBytes = Buffer.from(draftResult.markdown, 'utf8');
+    await fs.writeFile(failedDraftPath, draftBytes);
     const report = buildReport({
       packet,
       artifactType: gate.artifactType,
@@ -679,6 +696,8 @@ async function main() {
       validation,
       status: 'failed',
       failedDraftPath,
+      fingerprints,
+      generatedDraftSha256: sha256Bytes(draftBytes),
     });
     await writeJson(reportPath, report);
     console.log(
@@ -701,7 +720,8 @@ async function main() {
 
   const draftPath = path.join(outDir, draftFileName);
   const reportPath = path.join(outDir, reportFileName);
-  await fs.writeFile(draftPath, draftResult.markdown, 'utf8');
+  const draftBytes = Buffer.from(draftResult.markdown, 'utf8');
+  await fs.writeFile(draftPath, draftBytes);
   const report = buildReport({
     packet,
     artifactType: gate.artifactType,
@@ -709,6 +729,8 @@ async function main() {
     validation,
     status: 'passed',
     draftPath,
+    fingerprints,
+    generatedDraftSha256: sha256Bytes(draftBytes),
   });
   await writeJson(reportPath, report);
 

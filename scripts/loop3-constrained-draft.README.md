@@ -52,6 +52,20 @@ Essays and other artifact types are **rejected explicitly**.
 | `failed/loop3-<n>-draft.md` | Validation failed |
 | `failed/loop3-<n>-draft-report.json` | Validation failed |
 
+Successful and failed drafting reports fingerprint the exact packet, issue, recommendation, and generated draft bytes with lowercase SHA-256 values. Gate-blocked reports fingerprint their three inputs but have no generated-draft hash. Downstream loops reject legacy reports that lack these fingerprints.
+
+## Threat model
+
+These are **content-integrity fingerprints**, not cryptographic immutability or tamper-proof provenance.
+
+The hashes detect accidental edits, stale inputs, substituted files, and ordinary same-path mutation.
+
+The Loop 4 sidecar detects changes to the evaluation JSON when the sidecar has not also been regenerated.
+
+The mechanism does not defend against an actor deliberately modifying an artifact and recomputing all associated hashes or sidecars.
+
+Stronger tamper resistance would require anchoring hashes in trusted external state such as a Git commit, signed manifest, or append-only ledger.
+
 ## Frontmatter convention
 
 Drafts include required DFW frontmatter:

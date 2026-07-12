@@ -6,6 +6,10 @@
   "additionalProperties": false,
   "required": [
     "contractVersion",
+    "sourcePacketSha256",
+    "sourceDraftSha256",
+    "sourceDraftReportSha256",
+    "sourceEvaluationInputsSha256",
     "issueAndDraftReference",
     "verdict",
     "confidence",
@@ -18,6 +22,10 @@
   ],
   "properties": {
     "contractVersion": { "const": "loop4-editorial-evaluation.v1" },
+    "sourcePacketSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDraftSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDraftReportSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceEvaluationInputsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "issueAndDraftReference": {
       "type": "object",
       "additionalProperties": false,

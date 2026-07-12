@@ -28,4 +28,22 @@ npm run loop:revise -- \
   --out-dir /tmp/dfw-loop5/run
 ```
 
-The runner preserves frontmatter identity, domain, type, provenance, draft state, and `canonical: false`. A Loop 4 path reference is the available draft-version identity check; Loop 4 does not yet provide a content hash, so modification at the same path cannot be detected cryptographically.
+The runner preserves frontmatter identity, domain, type, provenance, draft state, and `canonical: false`.
+
+## Content integrity
+
+Loop 5 verifies the exact packet, draft, Loop 3 report, and Loop 4 evaluation bytes before classification or revision. It recomputes Loop 4's combined-input hash and verifies the evaluation against the adjacent `<evaluation>.sha256` sidecar written by Loop 4. Legacy pre-hash reports and evaluations are rejected explicitly; there is no compatibility flag.
+
+Revision reports record all four source hashes and the exact revised-draft hash whenever a revised draft exists.
+
+## Threat model
+
+These are **content-integrity fingerprints**, not cryptographic immutability or tamper-proof provenance.
+
+The hashes detect accidental edits, stale inputs, substituted files, and ordinary same-path mutation.
+
+The Loop 4 sidecar detects changes to the evaluation JSON when the sidecar has not also been regenerated.
+
+The mechanism does not defend against an actor deliberately modifying an artifact and recomputing all associated hashes or sidecars.
+
+Stronger tamper resistance would require anchoring hashes in trusted external state such as a Git commit, signed manifest, or append-only ledger.

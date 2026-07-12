@@ -3,6 +3,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { isSha256, sha256Bytes, sha256Combined } from './lib/content-fingerprint.mjs';
 
 const ROOT = process.cwd();
 const CONTRACT = 'loop4-editorial-evaluation.v1';
@@ -201,7 +202,7 @@ function repetitionRisk(body) {
   return normalizedSentences.some((sentence, index) => normalizedSentences.indexOf(sentence) !== index);
 }
 
-function evaluate(packet, report, draftPath, markdown) {
+function evaluate(packet, report, draftPath, markdown, fingerprints) {
   const parsed = parseFrontmatter(markdown);
   const meta = parsed.data;
   const body = parsed.body;
@@ -292,6 +293,10 @@ function evaluate(packet, report, draftPath, markdown) {
   const confidence = blockingProblems.length || (strengths.length >= 4 && orderedRevisions.length <= 2) ? 'high' : 'medium';
   return {
     contractVersion: CONTRACT,
+    sourcePacketSha256: fingerprints.sourcePacketSha256,
+    sourceDraftSha256: fingerprints.sourceDraftSha256,
+    sourceDraftReportSha256: fingerprints.sourceDraftReportSha256,
+    sourceEvaluationInputsSha256: fingerprints.sourceEvaluationInputsSha256,
     issueAndDraftReference: {
       issueNumber: packet.issueReference.number,
       issueUrl: packet.issueReference.url,
@@ -322,6 +327,7 @@ function evaluate(packet, report, draftPath, markdown) {
 function validateEvaluationContract(result) {
   const required = [
     'contractVersion', 'issueAndDraftReference', 'verdict', 'confidence',
+    'sourcePacketSha256', 'sourceDraftSha256', 'sourceDraftReportSha256', 'sourceEvaluationInputsSha256',
     'blockingProblems', 'revisionInstructions', 'strengths', 'risks',
     'evidenceUsed', 'humanReviewNotes',
   ];
@@ -329,6 +335,9 @@ function validateEvaluationContract(result) {
     if (!(key in result)) throw new Error(`Evaluation contract missing field: ${key}`);
   }
   if (result.contractVersion !== CONTRACT) throw new Error('Evaluation contractVersion is invalid');
+  for (const key of ['sourcePacketSha256', 'sourceDraftSha256', 'sourceDraftReportSha256', 'sourceEvaluationInputsSha256']) {
+    if (!isSha256(result[key])) throw new Error(`Evaluation fingerprint is invalid: ${key}`);
+  }
   if (!VERDICTS.has(result.verdict)) throw new Error('Evaluation verdict is invalid');
   if (!['high', 'medium', 'low'].includes(result.confidence)) throw new Error('Evaluation confidence is invalid');
   for (const key of ['blockingProblems', 'revisionInstructions', 'strengths', 'risks', 'evidenceUsed', 'humanReviewNotes']) {
@@ -349,17 +358,49 @@ async function main() {
   const draftPath = resolve(input.draft);
   const reportPath = resolve(input.report);
   const outDir = resolve(input.outDir);
-  const [packet, markdown, report] = await Promise.all([
-    fs.readFile(packetPath, 'utf8').then(JSON.parse),
-    fs.readFile(draftPath, 'utf8'),
-    fs.readFile(reportPath, 'utf8').then(JSON.parse),
+  const [packetBytes, draftBytes, reportBytes] = await Promise.all([
+    fs.readFile(packetPath), fs.readFile(draftPath), fs.readFile(reportPath),
   ]);
-  const result = evaluate(packet, report, draftPath, markdown);
-  validateEvaluationContract(result);
+  const packet = JSON.parse(packetBytes.toString('utf8'));
+  const markdown = draftBytes.toString('utf8');
+  const report = JSON.parse(reportBytes.toString('utf8'));
+  const fingerprints = {
+    sourcePacketSha256: sha256Bytes(packetBytes),
+    sourceDraftSha256: sha256Bytes(draftBytes),
+    sourceDraftReportSha256: sha256Bytes(reportBytes),
+    sourceEvaluationInputsSha256: sha256Combined([
+      { label: 'loop2-packet', bytes: packetBytes },
+      { label: 'loop3-draft', bytes: draftBytes },
+      { label: 'loop3-draft-report', bytes: reportBytes },
+    ]),
+  };
+  const integrityFailures = [];
+  for (const [field, artifact, actual] of [
+    ['sourcePacketSha256', 'Loop 2 packet', fingerprints.sourcePacketSha256],
+    ['generatedDraftSha256', 'Loop 3 draft', fingerprints.sourceDraftSha256],
+  ]) {
+    const expected = report[field];
+    if (!isSha256(expected)) integrityFailures.push({ artifact, message: `Loop 3 report lacks required fingerprint ${field}; legacy reports are rejected.`, expectedSha256: expected == null ? '' : String(expected), actualSha256: actual });
+    else if (expected !== actual) integrityFailures.push({ artifact, message: `${artifact} bytes changed after Loop 3 validation.`, expectedSha256: expected, actualSha256: actual });
+  }
   await fs.mkdir(outDir, { recursive: true });
+  if (integrityFailures.length) {
+    const integrityPath = path.join(outDir, `loop4-${packet.issueReference.number}-integrity-failure.json`);
+    const integrity = { contractVersion: 'loop-integrity-failure.v1', stage: 'loop4', status: 'BLOCKED', issueNumber: packet.issueReference.number, failures: integrityFailures };
+    await fs.writeFile(integrityPath, `${JSON.stringify(integrity, null, 2)}\n`);
+    console.log(JSON.stringify({ ok: false, status: 'BLOCKED', integrityPath }, null, 2));
+    process.exitCode = 2;
+    return;
+  }
+  const result = evaluate(packet, report, draftPath, markdown, fingerprints);
+  validateEvaluationContract(result);
   const outputPath = path.join(outDir, `loop4-${packet.issueReference.number}-evaluation.json`);
-  await fs.writeFile(outputPath, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
-  console.log(JSON.stringify({ ok: true, verdict: result.verdict, outputPath }, null, 2));
+  const outputBytes = Buffer.from(`${JSON.stringify(result, null, 2)}\n`, 'utf8');
+  await fs.writeFile(outputPath, outputBytes);
+  const evaluationSha256 = sha256Bytes(outputBytes);
+  const fingerprintPath = `${outputPath}.sha256`;
+  await fs.writeFile(fingerprintPath, `${evaluationSha256}\n`, 'utf8');
+  console.log(JSON.stringify({ ok: true, verdict: result.verdict, outputPath, fingerprintPath, evaluationSha256 }, null, 2));
 }
 
 main().catch((error) => { console.error(error.message); process.exitCode = 1; });
