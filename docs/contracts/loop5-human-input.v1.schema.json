@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/loop5-human-input.v1.schema.json",
+  "title": "loop5-human-input.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "issueNumber", "inputType", "suppliedBy", "requestedFor", "content", "usageScope"],
+  "properties": {
+    "contractVersion": { "const": "loop5-human-input.v1" },
+    "issueNumber": { "type": "integer", "minimum": 1 },
+    "inputType": { "const": "editorial-example" },
+    "suppliedBy": { "const": "human-editor" },
+    "requestedFor": { "type": "string", "minLength": 1 },
+    "content": { "type": "string", "minLength": 1 },
+    "usageScope": { "type": "string", "minLength": 1 }
+  }
+}

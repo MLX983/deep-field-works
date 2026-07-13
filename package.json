@@ -18,6 +18,7 @@
     "loop:integrity:fixtures": "node scripts/run-integrity-fixtures.mjs",
     "loop:orchestrate": "node scripts/orchestrate-loops-3-5.mjs",
     "loop:orchestrate:fixtures": "node scripts/run-orchestration-fixtures.mjs",
+    "loop:human-input:fixtures": "node scripts/run-loop5-human-input-fixtures.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

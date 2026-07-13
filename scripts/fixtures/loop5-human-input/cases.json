@@ -1,0 +1,8 @@
+[
+  { "name": "valid-matching", "variant": "valid", "expectedStatus": "REVISED", "expectedExit": 0 },
+  { "name": "wrong-issue", "variant": "wrong-issue", "expectedStatus": "BLOCKED", "expectedExit": 2 },
+  { "name": "unsupported-type", "variant": "unsupported-type", "expectedStatus": "BLOCKED", "expectedExit": 2 },
+  { "name": "scope-mismatch", "variant": "scope-mismatch", "expectedStatus": "BLOCKED", "expectedExit": 2 },
+  { "name": "malformed-json", "variant": "malformed", "expectedStatus": "BLOCKED", "expectedExit": 2 },
+  { "name": "input-not-needed", "variant": "not-needed", "expectedStatus": "BLOCKED", "expectedExit": 2 }
+]

@@ -38,12 +38,13 @@ const GENERIC_PATTERNS = [
 ];
 
 function args(argv) {
-  const out = { packet: '', draft: '', report: '', outDir: '', help: false };
+  const out = { packet: '', draft: '', report: '', revisionReport: '', outDir: '', help: false };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === '--packet') out.packet = argv[++i] ?? '';
     else if (value === '--draft') out.draft = argv[++i] ?? '';
     else if (value === '--draft-report') out.report = argv[++i] ?? '';
+    else if (value === '--revision-report') out.revisionReport = argv[++i] ?? '';
     else if (value === '--out-dir') out.outDir = argv[++i] ?? '';
     else if (value === '--help' || value === '-h') out.help = true;
     else throw new Error(`Unknown argument: ${value}`);
@@ -56,6 +57,7 @@ function usage() {
   --packet <loop2-packet.json> \\
   --draft <loop3-draft.md> \\
   --draft-report <loop3-draft-report.json> \\
+  [--revision-report <loop5-revision-report.json>] \\
   --out-dir </tmp/output>`;
 }
 
@@ -134,6 +136,18 @@ function wordCount(body) {
   return (body.match(/\b[\p{L}\p{N}][\p{L}\p{N}'’-]*\b/gu) ?? []).length;
 }
 
+function sectionWordCounts(body) {
+  const counts = new Map();
+  const matches = [...body.matchAll(/^#{1,3}\s+(.+)$/gm)];
+  for (let index = 0; index < matches.length; index += 1) {
+    const heading = normalize(matches[index][1]);
+    const start = matches[index].index + matches[index][0].length;
+    const end = matches[index + 1]?.index ?? body.length;
+    counts.set(heading, wordCount(body.slice(start, end)));
+  }
+  return counts;
+}
+
 function unique(items) {
   return [...new Set(items.filter(Boolean))];
 }
@@ -141,12 +155,14 @@ function unique(items) {
 function validateInputs(packet, report) {
   const problems = [];
   if (packet.contractVersion !== 'loop2-development-packet.v1') problems.push('Packet contract is not loop2-development-packet.v1.');
-  if (report.contractVersion !== 'loop3-drafting-report.v1') problems.push('Draft report contract is not loop3-drafting-report.v1.');
-  if (packet.issueReference?.number !== report.sourcePacketReference?.issueNumber) problems.push('Packet and drafting report issue numbers do not match.');
+  if (!['loop3-drafting-report.v1', 'loop5-revision-report.v1'].includes(report.contractVersion)) problems.push('Draft report contract is not a supported Loop 3 or Loop 5 report.');
+  const reportIssue = report.contractVersion === 'loop5-revision-report.v1' ? report.issueAndDraftReference?.issueNumber : report.sourcePacketReference?.issueNumber;
+  if (packet.issueReference?.number !== reportIssue) problems.push('Packet and drafting report issue numbers do not match.');
   if (packet.draftReadiness !== 'ready' || packet.sourceSufficiency?.status !== 'sufficient' || packet.blockingCondition || (packet.sourceRequirements ?? []).length) {
     problems.push('Upstream packet is not consistently ready and source-sufficient for editorial evaluation.');
   }
-  if (report.validationStatus !== 'passed') problems.push('Loop 3 drafting report did not pass deterministic drafting validation.');
+  if (report.contractVersion === 'loop3-drafting-report.v1' && report.validationStatus !== 'passed') problems.push('Loop 3 drafting report did not pass deterministic drafting validation.');
+  if (report.contractVersion === 'loop5-revision-report.v1' && report.overallStatus !== 'REVISED') problems.push('Loop 5 revision report is not REVISED.');
   return problems;
 }
 
@@ -163,7 +179,8 @@ function metadataProblems(meta, packet, report) {
   if (!Array.isArray(meta.domainPath) || !meta.domainPath.length) errors.push('domainPath must contain the approved primary domain.');
   if (meta.domainPath?.[0] !== packet.primaryDomain) errors.push('domainPath does not match the packet primary domain.');
   if (!Array.isArray(meta.relatedPieces)) errors.push('relatedPieces must be an array.');
-  if (meta.documentType !== report.artifactType) errors.push('Draft metadata artifact type does not match the Loop 3 report.');
+  const reportArtifactType = report.contractVersion === 'loop5-revision-report.v1' ? report.issueAndDraftReference?.artifactType : report.artifactType;
+  if (meta.documentType !== reportArtifactType) errors.push('Draft metadata artifact type does not match the upstream draft report.');
   if (meta.documentType !== packet.approvedArtifactType) errors.push('Draft metadata artifact type does not match the approved packet artifact type.');
   return errors;
 }
@@ -248,13 +265,20 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
 
   if (words < min) {
     risks.push(`Body length is ${words} words, below the ${min}–${max} target for ${type}.`);
-    revisions.push(`Expand only the existing ${type} functions enough to move toward the ${min}–${max} word target; do not broaden it into an essay or add unsupported evidence.`);
+    const counts = sectionWordCounts(body);
+    const functionalMinimums = type === 'note'
+      ? [['why it may matter', 15], ['current interpretation', 10], ['open question', 4]]
+      : [['the signal', 35], ['why it may matter', 20], ['the deeper tension', 20], ['what to watch next', 8]];
+    for (const [section, minimumWords] of functionalMinimums) {
+      if (counts.has(section) && counts.get(section) < minimumWords) {
+        revisions.push(`Develop the “${section}” section enough to perform its editorial function using only packet-grounded material; do not pad to meet a numeric target.`);
+      }
+    }
   } else if (words > max) {
     risks.push(`Body length is ${words} words, above the ${min}–${max} target for ${type}.`);
-    revisions.push(`Cut repeated or nonfunctional passages to return the body to the ${min}–${max} word target.`);
   } else strengths.push(`Body length (${words} words) fits the ${type} target.`);
 
-  if (!questionVisible && tensionVisible) {
+  if (!questionVisible && tensionVisible && !hasConcreteExample(body)) {
     revisions.push('Recheck whether the opening creates enough tension after the example is added; revise only if the central question remains unclear.');
   } else if (!questionVisible) {
     revisions.push('State the packet’s reader question or its direct equivalent near the opening.');
@@ -312,7 +336,7 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
     risks: unique(risks),
     evidenceUsed: [
       `Loop 2 packet: ${packet.contractVersion}`,
-      `Loop 3 report: ${report.contractVersion} (${report.validationStatus})`,
+      `${report.contractVersion === 'loop5-revision-report.v1' ? 'Loop 5 revision report' : 'Loop 3 draft report'}: ${report.contractVersion} (${report.overallStatus ?? report.validationStatus})`,
       ...SOURCE_OF_TRUTH,
       `${type || 'unknown'} artifact requirements and target length`,
     ],
@@ -357,31 +381,41 @@ async function main() {
   const packetPath = resolve(input.packet);
   const draftPath = resolve(input.draft);
   const reportPath = resolve(input.report);
+  const revisionReportPath = input.revisionReport ? resolve(input.revisionReport) : '';
   const outDir = resolve(input.outDir);
-  const [packetBytes, draftBytes, reportBytes] = await Promise.all([
+  const [packetBytes, draftBytes, loop3ReportBytes, revisionReportBytes] = await Promise.all([
     fs.readFile(packetPath), fs.readFile(draftPath), fs.readFile(reportPath),
+    revisionReportPath ? fs.readFile(revisionReportPath) : Promise.resolve(null),
   ]);
   const packet = JSON.parse(packetBytes.toString('utf8'));
   const markdown = draftBytes.toString('utf8');
-  const report = JSON.parse(reportBytes.toString('utf8'));
+  const loop3Report = JSON.parse(loop3ReportBytes.toString('utf8'));
+  const reportBytes = revisionReportBytes ?? loop3ReportBytes;
+  const report = revisionReportBytes ? JSON.parse(revisionReportBytes.toString('utf8')) : loop3Report;
+  const reportLabel = revisionReportBytes ? 'loop5-revision-report' : 'loop3-draft-report';
+  const draftLabel = revisionReportBytes ? 'loop5-revised-draft' : 'loop3-draft';
   const fingerprints = {
     sourcePacketSha256: sha256Bytes(packetBytes),
     sourceDraftSha256: sha256Bytes(draftBytes),
     sourceDraftReportSha256: sha256Bytes(reportBytes),
     sourceEvaluationInputsSha256: sha256Combined([
       { label: 'loop2-packet', bytes: packetBytes },
-      { label: 'loop3-draft', bytes: draftBytes },
-      { label: 'loop3-draft-report', bytes: reportBytes },
+      { label: draftLabel, bytes: draftBytes },
+      { label: reportLabel, bytes: reportBytes },
     ]),
   };
   const integrityFailures = [];
-  for (const [field, artifact, actual] of [
-    ['sourcePacketSha256', 'Loop 2 packet', fingerprints.sourcePacketSha256],
-    ['generatedDraftSha256', 'Loop 3 draft', fingerprints.sourceDraftSha256],
-  ]) {
-    const expected = report[field];
-    if (!isSha256(expected)) integrityFailures.push({ artifact, message: `Loop 3 report lacks required fingerprint ${field}; legacy reports are rejected.`, expectedSha256: expected == null ? '' : String(expected), actualSha256: actual });
-    else if (expected !== actual) integrityFailures.push({ artifact, message: `${artifact} bytes changed after Loop 3 validation.`, expectedSha256: expected, actualSha256: actual });
+  const integrityChecks = revisionReportBytes ? [
+    [report.sourcePacketSha256, 'Loop 2 packet', fingerprints.sourcePacketSha256, 'Loop 5 report packet fingerprint'],
+    [report.revisedDraftSha256, 'Loop 5 revised draft', fingerprints.sourceDraftSha256, 'Loop 5 revised-draft fingerprint'],
+    [report.sourceDraftReportSha256, 'Loop 3 draft report', sha256Bytes(loop3ReportBytes), 'Loop 5 source draft-report fingerprint'],
+  ] : [
+    [report.sourcePacketSha256, 'Loop 2 packet', fingerprints.sourcePacketSha256, 'Loop 3 packet fingerprint'],
+    [report.generatedDraftSha256, 'Loop 3 draft', fingerprints.sourceDraftSha256, 'Loop 3 generated-draft fingerprint'],
+  ];
+  for (const [expected, artifact, actual, source] of integrityChecks) {
+    if (!isSha256(expected)) integrityFailures.push({ artifact, message: `${source} is missing; legacy reports are rejected.`, expectedSha256: expected == null ? '' : String(expected), actualSha256: actual });
+    else if (expected !== actual) integrityFailures.push({ artifact, message: `${artifact} bytes do not match the ${source}.`, expectedSha256: expected, actualSha256: actual });
   }
   await fs.mkdir(outDir, { recursive: true });
   if (integrityFailures.length) {
@@ -392,7 +426,13 @@ async function main() {
     process.exitCode = 2;
     return;
   }
-  const result = evaluate(packet, report, draftPath, markdown, fingerprints);
+  const evaluationPacket = revisionReportBytes
+    ? { ...packet, verifiedObservations: [...(packet.verifiedObservations ?? []), ...(report.claimsAdded ?? [])] }
+    : packet;
+  const result = evaluate(evaluationPacket, report, draftPath, markdown, fingerprints);
+  if (revisionReportBytes && (report.humanInputProvenance ?? []).length) {
+    result.evidenceUsed.push('Loop 5 human-input provenance and explicitly recorded claimsAdded');
+  }
   validateEvaluationContract(result);
   const outputPath = path.join(outDir, `loop4-${packet.issueReference.number}-evaluation.json`);
   const outputBytes = Buffer.from(`${JSON.stringify(result, null, 2)}\n`, 'utf8');

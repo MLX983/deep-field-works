@@ -19,13 +19,14 @@ const GENERIC_PATTERNS = [
 ];
 
 function parseArgs(argv) {
-  const out = { packet: '', draft: '', report: '', evaluation: '', outDir: '', help: false };
+  const out = { packet: '', draft: '', report: '', evaluation: '', humanInput: '', outDir: '', help: false };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === '--packet') out.packet = argv[++i] ?? '';
     else if (value === '--draft') out.draft = argv[++i] ?? '';
     else if (value === '--draft-report') out.report = argv[++i] ?? '';
     else if (value === '--evaluation') out.evaluation = argv[++i] ?? '';
+    else if (value === '--human-input') out.humanInput = argv[++i] ?? '';
     else if (value === '--out-dir') out.outDir = argv[++i] ?? '';
     else if (value === '--help' || value === '-h') out.help = true;
     else throw new Error(`Unknown argument: ${value}`);
@@ -39,6 +40,7 @@ function usage() {
   --draft <loop3-draft.md> \\
   --draft-report <loop3-draft-report.json> \\
   --evaluation <loop4-evaluation.json> \\
+  [--human-input <loop5-human-input.json>] \\
   --out-dir </tmp/output>`;
 }
 
@@ -187,7 +189,7 @@ function applyInstruction(body, classification, packet) {
   return { body, changed: false, change: '', removed: [], added: [] };
 }
 
-function validateRevision(source, revised, packet, classifications, applied) {
+function validateRevision(source, revised, packet, classifications, applied, humanGrounding = '') {
   const errors = [];
   const sourceMeta = parseMetadata(source.frontmatter);
   const revisedMeta = parseMetadata(revised.frontmatter);
@@ -197,7 +199,7 @@ function validateRevision(source, revised, packet, classifications, applied) {
   if (revisedMeta.documentType !== packet.approvedArtifactType) errors.push('Artifact type changed or no longer matches the packet.');
   if (revisedMeta.domainPath?.[0] !== packet.primaryDomain) errors.push('Approved domain changed.');
   if (revisedMeta.canonical !== false || revisedMeta.draft !== true || revisedMeta.status !== 'draft' || revisedMeta.pubDate) errors.push('Draft is no longer noncanonical and unpublished.');
-  const corpus = packetCorpus(packet);
+  const corpus = `${packetCorpus(packet)} ${humanGrounding}`;
   const sourceSentenceSet = new Set(sentences(source.body).map(normalize));
   for (const sentence of sentences(revised.body)) {
     if (sourceSentenceSet.has(normalize(sentence))) continue;
@@ -206,7 +208,7 @@ function validateRevision(source, revised, packet, classifications, applied) {
       if (!corpus.includes(marker)) errors.push(`New sentence introduces an unsupported entity, date, statistic, or quotation: ${marker}`);
     }
   }
-  const blocked = classifications.filter((item) => item.classification !== 'AUTO_APPLY').map((item) => item.instruction);
+  const blocked = classifications.filter((item) => item.classification !== 'AUTO_APPLY' && !item.satisfiedByHumanInput).map((item) => item.instruction);
   if (applied.some((instruction) => blocked.includes(instruction))) errors.push('A blocked or human-input instruction was applied.');
   return unique(errors);
 }
@@ -221,6 +223,37 @@ function humanRequest(classification) {
   return `Clarify or supply the missing human input required by: ${classification.instruction}`;
 }
 
+function validateHumanInput(input, inputPath, packet, classifications) {
+  const errors = [];
+  const required = ['contractVersion', 'issueNumber', 'inputType', 'suppliedBy', 'requestedFor', 'content', 'usageScope'];
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return ['Human-input file is malformed JSON or is not an object.'];
+  const keys = Object.keys(input);
+  for (const key of required) if (!(key in input)) errors.push(`Human-input field is missing: ${key}`);
+  for (const key of keys) if (!required.includes(key)) errors.push(`Human-input field is not allowed: ${key}`);
+  if (input.contractVersion !== 'loop5-human-input.v1') errors.push('Human-input contractVersion must be loop5-human-input.v1.');
+  if (input.inputType !== 'editorial-example') errors.push('Human-input inputType must be editorial-example.');
+  if (input.suppliedBy !== 'human-editor') errors.push('Human-input suppliedBy must be human-editor.');
+  if (input.issueNumber !== packet.issueReference.number) errors.push('Human-input issue number does not match the revision issue.');
+  for (const key of ['requestedFor', 'content', 'usageScope']) if (typeof input[key] !== 'string' || !input[key].trim()) errors.push(`Human-input ${key} must be a non-empty string.`);
+  const humanInstructions = classifications.filter((item) => item.classification === 'HUMAN_INPUT_REQUIRED');
+  if (!humanInstructions.length) errors.push('Human input was supplied, but no HUMAN_INPUT_REQUIRED instruction exists.');
+  if (!humanInstructions.some((item) => item.instruction === input.requestedFor)) errors.push('Human-input requestedFor does not exactly match an existing HUMAN_INPUT_REQUIRED instruction.');
+  const scope = normalize(input.usageScope);
+  if (!scope.includes(`issue ${packet.issueReference.number}`) || !(scope.includes('concrete example') || scope.includes('concrete example revision instruction'))) {
+    errors.push('Human-input usageScope does not permit the exact concrete-example revision for this issue.');
+  }
+  return errors;
+}
+
+function insertHumanExample(body, content) {
+  const heading = '## Why it may matter';
+  const start = body.indexOf(heading);
+  if (start < 0) return { body, changed: false };
+  const next = body.indexOf('\n## ', start + heading.length);
+  const insertAt = next < 0 ? body.length : next;
+  return { body: `${body.slice(0, insertAt).trimEnd()}\n\n${content.trim()}\n${body.slice(insertAt)}`.trim(), changed: true };
+}
+
 function baseReport(packet, evaluation, evaluationPath, draftPath, meta, classifications, fingerprints) {
   return {
     contractVersion: CONTRACT,
@@ -230,6 +263,7 @@ function baseReport(packet, evaluation, evaluationPath, draftPath, meta, classif
     sourceDraftSha256: fingerprints.sourceDraftSha256,
     sourceDraftReportSha256: fingerprints.sourceDraftReportSha256,
     sourceEvaluationSha256: fingerprints.sourceEvaluationSha256,
+    humanInputProvenance: [],
     overallStatus: 'BLOCKED', instructionClassifications: classifications,
     instructionsApplied: [], instructionsNotApplied: classifications.map((item) => item.instruction),
     humanInputRequests: [], changesMade: [], claimsAdded: [], claimsRemoved: [], warnings: [],
@@ -240,6 +274,7 @@ function validateReport(result) {
   if (result.contractVersion !== CONTRACT || !STATUSES.has(result.overallStatus)) throw new Error('Invalid Loop 5 report contract or status');
   for (const key of ['sourcePacketSha256', 'sourceDraftSha256', 'sourceDraftReportSha256', 'sourceEvaluationSha256']) if (!isSha256(result[key])) throw new Error(`Invalid Loop 5 fingerprint: ${key}`);
   if (!Array.isArray(result.instructionClassifications) || result.instructionClassifications.some((item) => !CLASSIFICATIONS.has(item.classification))) throw new Error('Invalid instruction classification');
+  if (!Array.isArray(result.humanInputProvenance) || result.humanInputProvenance.some((item) => !isSha256(item.sha256))) throw new Error('Invalid human-input provenance');
   for (const key of ['instructionsApplied', 'instructionsNotApplied', 'humanInputRequests', 'changesMade', 'claimsAdded', 'claimsRemoved', 'warnings']) if (!Array.isArray(result[key])) throw new Error(`Invalid report field: ${key}`);
   if (result.overallStatus === 'REVISED' && !result.revisedDraftPath) throw new Error('REVISED report lacks revisedDraftPath');
   if (result.revisedDraftPath && !isSha256(result.revisedDraftSha256)) throw new Error('Revised draft lacks a valid fingerprint');
@@ -285,6 +320,19 @@ async function main() {
   const source = splitDraft(markdown), meta = parseMetadata(source.frontmatter);
   const classifications = (evaluation.revisionInstructions ?? []).map(classifyInstruction);
   const result = baseReport(packet, evaluation, evaluationPath, draftPath, meta, classifications, fingerprints);
+  const humanInputPath = input.humanInput ? resolve(input.humanInput) : '';
+  let humanInputBytes = null;
+  let humanInput = null;
+  let humanInputErrors = [];
+  if (humanInputPath) {
+    try {
+      humanInputBytes = await fs.readFile(humanInputPath);
+      try { humanInput = JSON.parse(humanInputBytes.toString('utf8')); } catch { humanInputErrors.push('Human-input file is malformed JSON.'); }
+    } catch (error) {
+      humanInputErrors.push(`Human-input file could not be read: ${error.message}`);
+    }
+    humanInputErrors.push(...validateHumanInput(humanInput, humanInputPath, packet, classifications));
+  }
   await fs.mkdir(outDir, { recursive: true });
   if (integrityFailures.length) {
     const integrityPath = path.join(outDir, `loop5-${packet.issueReference.number}-integrity-failure.json`);
@@ -294,20 +342,52 @@ async function main() {
   }
   const gate = [...(source.error ? [source.error] : []), ...gateProblems(packet, report, evaluation, draftPath, meta)];
   const unsafe = classifications.filter((item) => item.classification === 'UNSAFE_OR_OUT_OF_SCOPE');
-  if (gate.length || unsafe.length) {
-    result.warnings.push(...gate, ...unsafe.map((item) => `Unsafe or out-of-scope instruction: ${item.instruction}`));
+  if (gate.length || unsafe.length || humanInputErrors.length) {
+    result.warnings.push(...gate, ...unsafe.map((item) => `Unsafe or out-of-scope instruction: ${item.instruction}`), ...humanInputErrors);
     validateReport(result);
     const outputPath = path.join(outDir, `loop5-${packet.issueReference.number}-revision-report.json`);
     await fs.writeFile(outputPath, `${JSON.stringify(result, null, 2)}\n`);
     console.log(JSON.stringify({ ok: false, status: result.overallStatus, outputPath }, null, 2)); process.exitCode = 2; return;
   }
-  const human = classifications.filter((item) => item.classification === 'HUMAN_INPUT_REQUIRED');
+  const humanMatch = humanInput ? classifications.find((item) => item.classification === 'HUMAN_INPUT_REQUIRED' && item.instruction === humanInput.requestedFor) : null;
+  const human = classifications.filter((item) => item.classification === 'HUMAN_INPUT_REQUIRED' && item !== humanMatch);
   const auto = classifications.filter((item) => item.classification === 'AUTO_APPLY');
   result.humanInputRequests = unique(human.map(humanRequest));
   let revisedBody = source.body;
+  if (humanMatch) {
+    const inserted = insertHumanExample(revisedBody, humanInput.content);
+    if (!inserted.changed) {
+      result.overallStatus = 'BLOCKED';
+      result.warnings.push('Human editorial example could not be placed because the required note section is missing.');
+    } else {
+      revisedBody = inserted.body;
+      humanMatch.satisfiedByHumanInput = true;
+      result.instructionsApplied.push(humanMatch.instruction);
+      result.changesMade.push('Inserted the supplied human-editor example verbatim under “Why it may matter.”');
+      result.claimsAdded.push(humanInput.content);
+      result.humanInputProvenance.push({
+        filePath: humanInputPath,
+        sha256: sha256Bytes(humanInputBytes),
+        inputType: humanInput.inputType,
+        suppliedBy: humanInput.suppliedBy,
+        instructionSatisfied: humanMatch.instruction,
+        useMode: 'verbatim',
+      });
+    }
+  }
   const dependentOnHuman = human.length > 0 && auto.some((item) => /\b(?:expand|recheck|opening)\b/.test(normalize(item.instruction)));
   const safeAuto = dependentOnHuman ? auto.filter((item) => /\b(?:repeat|generic)\b/.test(normalize(item.instruction))) : auto;
   for (const item of safeAuto) {
+    if (humanMatch && /\bexpand\b.*\bexisting\b/.test(normalize(item.instruction))) {
+      result.instructionsApplied.push(item.instruction);
+      result.changesMade.push('The supplied example completed the approved bounded expansion without broadening the note.');
+      continue;
+    }
+    if (humanMatch && /\brecheck\b.*\bopening\b/.test(normalize(item.instruction))) {
+      result.instructionsApplied.push(item.instruction);
+      result.changesMade.push('Reassessed the opening after insertion; the existing opening still establishes the central tension, so no opening text changed.');
+      continue;
+    }
     const applied = applyInstruction(revisedBody, item, packet);
     if (applied.changed) {
       revisedBody = applied.body; result.instructionsApplied.push(item.instruction); result.changesMade.push(applied.change);
@@ -320,7 +400,7 @@ async function main() {
   else if (result.instructionsApplied.length && result.instructionsNotApplied.length === 0) result.overallStatus = 'REVISED';
   else result.overallStatus = 'BLOCKED';
   const revised = { frontmatter: source.frontmatter, body: revisedBody };
-  const validationErrors = validateRevision(source, revised, packet, classifications, result.instructionsApplied);
+  const validationErrors = validateRevision(source, revised, packet, classifications, result.instructionsApplied, humanInput?.content ?? '');
   if (validationErrors.length) { result.overallStatus = 'BLOCKED'; result.warnings.push(...validationErrors); }
   const failedDir = path.join(outDir, 'failed');
   if (result.overallStatus === 'BLOCKED' && revisedBody !== source.body) {

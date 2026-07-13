@@ -49,6 +49,7 @@ function fixtureObserver(scenario) {
       if (scenario === 'loop5-waiting') await rewriteEvaluation(outRoot, { verdict: 'REVISE', blockingProblems: [], revisionInstructions: ['Add one concrete workplace or training example showing a tool-specific skill decaying while a more durable judgment skill remains useful.', 'Expand only the existing note functions enough to move toward the 200–600 word target; do not broaden it into an essay or add unsupported evidence.', 'Recheck whether the opening creates enough tension after the example is added; revise only if the central question remains unclear.'] });
       if (scenario === 'loop5-blocked') await rewriteEvaluation(outRoot, { verdict: 'REVISE', blockingProblems: [], revisionInstructions: ['Recheck whether the opening creates enough tension; revise only if the central question remains unclear.'] });
       if (scenario === 'loop5-integrity-failure') await fs.appendFile(path.join(outRoot, 'loop4', 'loop4-9201-evaluation.json'), ' \n');
+      if (scenario === 'valid-human-input') await rewriteEvaluation(outRoot, { verdict: 'REVISE', blockingProblems: [], revisionInstructions: ['Add one concrete workplace example showing a tool-specific skill decaying while a durable judgment skill remains useful.', 'Expand only the existing note functions enough to move toward the 200–600 word target; do not broaden it into an essay or add unsupported evidence.', 'Recheck whether the opening creates enough tension after the example is added; revise only if the central question remains unclear.'] });
     }
   };
 }
@@ -60,9 +61,15 @@ for (const fixture of cases) {
   const packetPath = path.join(root, `scripts/fixtures/loop3/${blocked ? 'packet-research-required.json' : 'packet-ready-note.json'}`);
   const issuePath = path.join(root, `scripts/fixtures/loop3/${blocked ? 'issue-fixture.md' : 'issue-ready-note.md'}`);
   const recommendationPath = path.join(root, `scripts/fixtures/loop3/${blocked ? 'recommendation-fixture.json' : 'recommendation-ready-note.json'}`);
+  let humanInputPath = '';
+  if (fixture.scenario === 'valid-human-input') {
+    humanInputPath = path.join(outRoot, 'human-input.json');
+    await fs.mkdir(outRoot, { recursive: true });
+    await fs.writeFile(humanInputPath, `${JSON.stringify({ contractVersion: 'loop5-human-input.v1', issueNumber: 9201, inputType: 'editorial-example', suppliedBy: 'human-editor', requestedFor: 'Add one concrete workplace example showing a tool-specific skill decaying while a durable judgment skill remains useful.', content: 'A designer may become fast in one prototyping tool, then lose that advantage when the team changes tools. The durable skill is deciding what needs to be prototyped, what fidelity is sufficient, and how to interpret the result.', usageScope: 'Use only to satisfy the concrete-example revision instruction for issue 9201. Do not broaden the note.' }, null, 2)}\n`);
+  }
   let result;
   try {
-    result = await orchestrate({ packetPath, issuePath, recommendationPath, outRoot, afterStage: fixtureObserver(fixture.scenario) });
+    result = await orchestrate({ packetPath, issuePath, recommendationPath, humanInputPath, outRoot, afterStage: fixtureObserver(fixture.scenario) });
   } catch (error) {
     console.error(`FAIL ${fixture.name}: ${error.message}`); failures += 1; continue;
   }

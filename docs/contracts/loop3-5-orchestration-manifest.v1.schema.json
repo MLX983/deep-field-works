@@ -36,6 +36,7 @@
         "LOOP3_BLOCKED",
         "READY_FOR_HUMAN_EDITORIAL_REVIEW",
         "REVISED_PENDING_REEVALUATION",
+        "REVISED_STILL_NEEDS_WORK",
         "PARTIALLY_REVISED_WAITING_FOR_HUMAN",
         "WAITING_FOR_HUMAN",
         "HOLD",
@@ -49,7 +50,7 @@
         "additionalProperties": false,
         "required": ["stage", "startedAt", "completedAt", "exitCode", "outcome", "stdoutPath", "stderrPath"],
         "properties": {
-          "stage": { "enum": ["loop3", "loop4", "loop5"] },
+          "stage": { "enum": ["loop3", "loop4", "loop5", "loop4-reevaluation"] },
           "startedAt": { "type": "string", "format": "date-time" },
           "completedAt": { "type": "string", "format": "date-time" },
           "exitCode": { "type": "integer" },
@@ -66,14 +67,14 @@
         "additionalProperties": false,
         "required": ["stage", "kind", "path", "sha256"],
         "properties": {
-          "stage": { "enum": ["loop3", "loop4", "loop5"] },
+          "stage": { "enum": ["loop3", "loop4", "loop5", "loop4-reevaluation"] },
           "kind": { "type": "string", "minLength": 1 },
           "path": { "type": "string", "minLength": 1 },
           "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
         }
       }
     },
-    "stoppedAtStage": { "enum": ["loop3", "loop4", "loop5"] },
+    "stoppedAtStage": { "enum": ["loop3", "loop4", "loop5", "loop4-reevaluation"] },
     "stopReason": { "type": "string", "minLength": 1 },
     "humanInputRequests": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "warnings": { "type": "array", "items": { "type": "string", "minLength": 1 } }

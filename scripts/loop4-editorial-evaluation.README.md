@@ -10,7 +10,7 @@ It does not rewrite drafts, publish, access or mutate GitHub, or implement Loop 
 - `REVISE`: viable and adequately grounded, but up to five bounded changes are required.
 - `HOLD`: upstream readiness, evidence, factual grounding, coherence, or artifact fit prevents revision alone.
 
-Deterministic checks are authoritative for input consistency, metadata, structure, target length, and unsupported sentences, named entities, dates, statistics, and quotations. Reproducible editorial heuristics assess concrete examples, generic AI language, repetition, reader question, tension, description, ending, and preserved uncertainty.
+Deterministic checks are authoritative for input consistency, metadata, structure, length measurement, and unsupported sentences, named entities, dates, statistics, and quotations. Artifact-length targets are advisory: an out-of-range draft records a risk, while `REVISE` requires a corresponding substantive defect such as an underdeveloped section, missing editorial function, weak grounding, unclear tension, weak ending, repetition, or unnecessary expansion. Loop 4 does not request padding merely to cross a numeric threshold. Reproducible editorial heuristics assess concrete examples, generic AI language, repetition, reader question, tension, description, ending, and preserved uncertainty.
 
 ## Usage
 
@@ -19,6 +19,7 @@ npm run loop:evaluate -- \
   --packet /tmp/loop2-18-packet.json \
   --draft /tmp/loop3-18-draft.md \
   --draft-report /tmp/loop3-18-draft-report.json \
+  --revision-report /tmp/loop5-18-revision-report.json \
   --out-dir /tmp/dfw-loop4/0018
 ```
 
@@ -29,6 +30,8 @@ The output is `loop4-<issue>-evaluation.json` and conforms to `docs/contracts/lo
 Loop 4 hashes the exact packet, draft, and Loop 3 report bytes. It refuses before evaluation when the packet or draft no longer matches the fingerprints in the Loop 3 report. Legacy pre-hash reports are rejected explicitly; there is no compatibility flag.
 
 The evaluation records the three source hashes plus a length-delimited combined-input hash. Loop 4 also writes `<evaluation>.sha256`, a lowercase SHA-256 fingerprint of the exact evaluation JSON bytes, for Loop 5 to verify.
+
+When `--revision-report` is supplied, Loop 4 evaluates the exact revised draft fingerprinted by a `REVISED` Loop 5 report while also verifying that report's reference to the original Loop 3 report. This supports one bounded post-revision evaluation without weakening the chain.
 
 ## Threat model
 

@@ -35,7 +35,7 @@
         "issueUrl": { "type": "string" },
         "draftPath": { "type": "string", "minLength": 1 },
         "packetContract": { "const": "loop2-development-packet.v1" },
-        "draftReportContract": { "const": "loop3-drafting-report.v1" }
+        "draftReportContract": { "enum": ["loop3-drafting-report.v1", "loop5-revision-report.v1"] }
       }
     },
     "verdict": { "enum": ["PASS_TO_HUMAN", "REVISE", "HOLD"] },

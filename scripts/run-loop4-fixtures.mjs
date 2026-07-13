@@ -82,7 +82,13 @@ for (const fixture of cases) {
     continue;
   }
   const result = JSON.parse(await fs.readFile(path.join(evaluationDir, `loop4-${fixture.issueNumber}-evaluation.json`), 'utf8'));
-  const passed = result.verdict === fixture.expectedVerdict;
+  const expectedRisk = fixture.expectedRiskIncludes
+    ? result.risks.some((risk) => risk.includes(fixture.expectedRiskIncludes))
+    : true;
+  const forbiddenRevision = fixture.forbiddenRevisionIncludes
+    ? result.revisionInstructions.every((instruction) => !instruction.includes(fixture.forbiddenRevisionIncludes))
+    : true;
+  const passed = result.verdict === fixture.expectedVerdict && expectedRisk && forbiddenRevision;
   console.log(`${passed ? 'PASS' : 'FAIL'} ${fixture.name}: expected ${fixture.expectedVerdict}, received ${result.verdict}`);
   if (!passed) {
     failures += 1;

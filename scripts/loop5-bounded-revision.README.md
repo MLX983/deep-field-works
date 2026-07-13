@@ -25,6 +25,7 @@ npm run loop:revise -- \
   --draft /tmp/loop3-draft.md \
   --draft-report /tmp/loop3-draft-report.json \
   --evaluation /tmp/loop4-evaluation.json \
+  --human-input /tmp/loop5-human-input.json \
   --out-dir /tmp/dfw-loop5/run
 ```
 
@@ -35,6 +36,12 @@ The runner preserves frontmatter identity, domain, type, provenance, draft state
 Loop 5 verifies the exact packet, draft, Loop 3 report, and Loop 4 evaluation bytes before classification or revision. It recomputes Loop 4's combined-input hash and verifies the evaluation against the adjacent `<evaluation>.sha256` sidecar written by Loop 4. Legacy pre-hash reports and evaluations are rejected explicitly; there is no compatibility flag.
 
 Revision reports record all four source hashes and the exact revised-draft hash whenever a revised draft exists.
+
+## Human editorial input
+
+`--human-input` accepts `loop5-human-input.v1` only when its issue, requested instruction, and usage scope exactly match an existing `HUMAN_INPUT_REQUIRED` instruction. The initial supported input is a human-editor supplied editorial example. It is not intake material and cannot authorize research, reframing, reclassification, publication, or unrelated revisions.
+
+When used, the revision report records the exact input path and SHA-256, input type, supplier, satisfied instruction, and whether the content was used verbatim, lightly edited, or only as factual grounding. The human-input hash is therefore preserved in the revision chain.
 
 ## Threat model
 

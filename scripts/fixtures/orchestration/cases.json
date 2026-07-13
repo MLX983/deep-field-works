@@ -2,10 +2,11 @@
   { "name": "loop3-blocked", "scenario": "loop3-blocked", "expectedStatus": "LOOP3_BLOCKED", "stoppedAtStage": "loop3", "loop5Expected": false },
   { "name": "loop4-pass", "scenario": "loop4-pass", "expectedStatus": "READY_FOR_HUMAN_EDITORIAL_REVIEW", "stoppedAtStage": "loop4", "loop5Expected": false },
   { "name": "loop4-hold", "scenario": "loop4-hold", "expectedStatus": "HOLD", "stoppedAtStage": "loop4", "loop5Expected": false },
-  { "name": "loop5-revised", "scenario": "loop5-revised", "expectedStatus": "REVISED_PENDING_REEVALUATION", "stoppedAtStage": "loop5", "loop5Expected": true },
+  { "name": "loop5-revised", "scenario": "loop5-revised", "expectedStatus": "REVISED_STILL_NEEDS_WORK", "stoppedAtStage": "loop4-reevaluation", "loop5Expected": true },
   { "name": "loop5-partial", "scenario": "loop5-partial", "expectedStatus": "PARTIALLY_REVISED_WAITING_FOR_HUMAN", "stoppedAtStage": "loop5", "loop5Expected": true },
   { "name": "loop5-waiting", "scenario": "loop5-waiting", "expectedStatus": "WAITING_FOR_HUMAN", "stoppedAtStage": "loop5", "loop5Expected": true },
   { "name": "loop5-blocked", "scenario": "loop5-blocked", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop5", "loop5Expected": true },
   { "name": "loop4-integrity-failure", "scenario": "loop4-integrity-failure", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop4", "loop5Expected": false },
-  { "name": "loop5-integrity-failure", "scenario": "loop5-integrity-failure", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop5", "loop5Expected": true }
+  { "name": "loop5-integrity-failure", "scenario": "loop5-integrity-failure", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop5", "loop5Expected": true },
+  { "name": "valid-human-input", "scenario": "valid-human-input", "expectedStatus": "REVISED_STILL_NEEDS_WORK", "stoppedAtStage": "loop4-reevaluation", "loop5Expected": true }
 ]

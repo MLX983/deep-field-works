@@ -11,16 +11,17 @@ const ROOT = process.cwd();
 const CONTRACT = 'loop3-5-orchestration-manifest.v1';
 const STATUSES = new Set([
   'LOOP3_BLOCKED', 'READY_FOR_HUMAN_EDITORIAL_REVIEW', 'REVISED_PENDING_REEVALUATION',
-  'PARTIALLY_REVISED_WAITING_FOR_HUMAN', 'WAITING_FOR_HUMAN', 'HOLD', 'BLOCKED',
+  'REVISED_STILL_NEEDS_WORK', 'PARTIALLY_REVISED_WAITING_FOR_HUMAN', 'WAITING_FOR_HUMAN', 'HOLD', 'BLOCKED',
 ]);
 
 function parseArgs(argv) {
-  const out = { packet: '', issue: '', recommendation: '', outRoot: '', help: false };
+  const out = { packet: '', issue: '', recommendation: '', humanInput: '', outRoot: '', help: false };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === '--packet') out.packet = argv[++i] ?? '';
     else if (value === '--issue') out.issue = argv[++i] ?? '';
     else if (value === '--recommendation') out.recommendation = argv[++i] ?? '';
+    else if (value === '--human-input') out.humanInput = argv[++i] ?? '';
     else if (value === '--out-root') out.outRoot = argv[++i] ?? '';
     else if (value === '--help' || value === '-h') out.help = true;
     else throw new Error(`Unknown argument: ${value}`);
@@ -33,6 +34,7 @@ function usage() {
   --packet <loop2-packet.json> \\
   --issue <source-issue.md> \\
   --recommendation <approved-loop1-recommendation.json> \\
+  [--human-input <loop5-human-input.json>] \\
   --out-root </tmp/run-root>`;
 }
 
@@ -92,7 +94,7 @@ function artifactKind(filePath) {
 
 async function collectArtifacts(outRoot) {
   const artifacts = [];
-  for (const stage of ['loop3', 'loop4', 'loop5']) {
+  for (const stage of ['loop3', 'loop4', 'loop5', 'loop4-reevaluation']) {
     for (const file of await filesRecursively(path.join(outRoot, stage))) {
       artifacts.push({ stage, kind: artifactKind(file), path: file, sha256: await sha256File(file) });
     }
@@ -116,13 +118,14 @@ function stageWarnings(value) {
 function validateManifest(manifest) {
   if (manifest.contractVersion !== CONTRACT || !STATUSES.has(manifest.finalWorkflowStatus)) throw new Error('Invalid orchestration manifest status or contract');
   if (!manifest.issueReference?.number || !manifest.startedAt || !manifest.completedAt) throw new Error('Incomplete orchestration manifest identity or timestamps');
-  if (!['loop3', 'loop4', 'loop5'].includes(manifest.stoppedAtStage) || !manifest.stopReason) throw new Error('Incomplete orchestration stop state');
+  if (!['loop3', 'loop4', 'loop5', 'loop4-reevaluation'].includes(manifest.stoppedAtStage) || !manifest.stopReason) throw new Error('Incomplete orchestration stop state');
   if (!Array.isArray(manifest.stageExecutionSummary) || !Array.isArray(manifest.artifacts)) throw new Error('Invalid orchestration manifest arrays');
 }
 
-export async function orchestrate({ packetPath, issuePath, recommendationPath, outRoot, afterStage } = {}) {
+export async function orchestrate({ packetPath, issuePath, recommendationPath, humanInputPath = '', outRoot, afterStage } = {}) {
   const startedAt = new Date().toISOString();
   const resolvedPacket = resolveInput(packetPath), resolvedIssue = resolveInput(issuePath), resolvedRecommendation = resolveInput(recommendationPath);
+  const resolvedHumanInput = humanInputPath ? resolveInput(humanInputPath) : '';
   const resolvedOut = validateOutputRoot(outRoot);
   const packet = JSON.parse(await fs.readFile(resolvedPacket, 'utf8'));
   const issueReference = { number: packet.issueReference.number, title: packet.issueReference.title, url: packet.issueReference.url };
@@ -182,7 +185,10 @@ export async function orchestrate({ packetPath, issuePath, recommendationPath, o
   }
 
   const loop5Dir = path.join(resolvedOut, 'loop5');
-  const loop5 = await execute('loop5', 'loop5-bounded-revision.mjs', ['--packet', resolvedPacket, '--draft', loop3Draft, '--draft-report', loop3ReportPath, '--evaluation', evaluationPath, '--out-dir', loop5Dir], loop5Dir);
+  const loop5Args = ['--packet', resolvedPacket, '--draft', loop3Draft, '--draft-report', loop3ReportPath, '--evaluation', evaluationPath];
+  if (resolvedHumanInput) loop5Args.push('--human-input', resolvedHumanInput);
+  loop5Args.push('--out-dir', loop5Dir);
+  const loop5 = await execute('loop5', 'loop5-bounded-revision.mjs', loop5Args, loop5Dir);
   stageExecutionSummary.push(loop5);
   await afterStage?.({ stage: 'loop5', outRoot: resolvedOut, packetPath: resolvedPacket, draftPath: loop3Draft, draftReportPath: loop3ReportPath, evaluationPath });
   const revisionReportPath = await findJson(loop5Dir, /loop5-\d+-revision-report\.json$/);
@@ -196,7 +202,31 @@ export async function orchestrate({ packetPath, issuePath, recommendationPath, o
   warnings.push(...stageWarnings(revisionReport)); humanInputRequests = revisionReport.humanInputRequests ?? [];
   stoppedAtStage = 'loop5';
   if (revisionReport.overallStatus === 'REVISED') {
-    finalWorkflowStatus = 'REVISED_PENDING_REEVALUATION'; stopReason = 'Loop 5 revised the draft; automatic Loop 4 reevaluation is outside this MVP.';
+    const revisedDraftPath = revisionReport.revisedDraftPath;
+    if (!revisedDraftPath) {
+      finalWorkflowStatus = 'BLOCKED'; stopReason = `Loop 5 reported REVISED without a revised draft path; see ${revisionReportPath}.`; return finish();
+    }
+    const reevaluationDir = path.join(resolvedOut, 'loop4-reevaluation');
+    const reevaluation = await execute('loop4-reevaluation', 'loop4-editorial-evaluation.mjs', [
+      '--packet', resolvedPacket, '--draft', revisedDraftPath, '--draft-report', loop3ReportPath,
+      '--revision-report', revisionReportPath, '--out-dir', reevaluationDir,
+    ], reevaluationDir);
+    stageExecutionSummary.push(reevaluation);
+    await afterStage?.({ stage: 'loop4-reevaluation', outRoot: resolvedOut, packetPath: resolvedPacket, draftPath: revisedDraftPath, draftReportPath: loop3ReportPath, revisionReportPath });
+    const reevaluationPath = await findJson(reevaluationDir, /loop4-\d+-evaluation\.json$/);
+    const reevaluationResult = await readJsonIfPresent(reevaluationPath);
+    stoppedAtStage = 'loop4-reevaluation';
+    if (reevaluation.exitCode !== 0 || !reevaluationResult) {
+      const failurePath = await findJson(reevaluationDir, /integrity-failure\.json$/);
+      finalWorkflowStatus = 'BLOCKED'; stopReason = `Loop 4 reevaluation stopped with exit code ${reevaluation.exitCode}${failurePath || reevaluationPath ? `; see ${failurePath || reevaluationPath}` : ''}.`;
+    } else if (reevaluationResult.verdict === 'PASS_TO_HUMAN') {
+      finalWorkflowStatus = 'READY_FOR_HUMAN_EDITORIAL_REVIEW'; stopReason = 'The single post-revision Loop 4 evaluation passed the draft to human editorial review.';
+    } else if (reevaluationResult.verdict === 'REVISE') {
+      finalWorkflowStatus = 'REVISED_STILL_NEEDS_WORK'; stopReason = 'The single post-revision Loop 4 evaluation found additional bounded revision work; no further cycle was run.';
+    } else {
+      finalWorkflowStatus = 'BLOCKED'; stopReason = `The single post-revision Loop 4 evaluation returned ${reevaluationResult.verdict}; no further cycle was run.`;
+    }
+    warnings.push(...stageWarnings(reevaluationResult));
   } else if (revisionReport.overallStatus === 'PARTIALLY_REVISED_WAITING_FOR_HUMAN') {
     finalWorkflowStatus = 'PARTIALLY_REVISED_WAITING_FOR_HUMAN'; stopReason = 'Loop 5 applied independent safe instructions and is waiting for human input.';
   } else if (revisionReport.overallStatus === 'WAITING_FOR_HUMAN') {
@@ -211,7 +241,7 @@ async function main() {
   const input = parseArgs(process.argv.slice(2));
   if (input.help) { console.log(usage()); return; }
   if (!input.packet || !input.issue || !input.recommendation || !input.outRoot) throw new Error(`Missing required argument.\n${usage()}`);
-  const result = await orchestrate({ packetPath: input.packet, issuePath: input.issue, recommendationPath: input.recommendation, outRoot: input.outRoot });
+  const result = await orchestrate({ packetPath: input.packet, issuePath: input.issue, recommendationPath: input.recommendation, humanInputPath: input.humanInput, outRoot: input.outRoot });
   console.log(JSON.stringify({ ok: !['BLOCKED', 'LOOP3_BLOCKED', 'HOLD'].includes(result.manifest.finalWorkflowStatus), finalWorkflowStatus: result.manifest.finalWorkflowStatus, manifestPath: result.manifestPath }, null, 2));
   if (result.manifest.finalWorkflowStatus === 'BLOCKED') process.exitCode = 2;
 }

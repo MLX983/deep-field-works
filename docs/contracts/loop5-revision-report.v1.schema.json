@@ -12,6 +12,7 @@
     "sourceDraftSha256",
     "sourceDraftReportSha256",
     "sourceEvaluationSha256",
+    "humanInputProvenance",
     "overallStatus",
     "instructionClassifications",
     "instructionsApplied",
@@ -55,6 +56,22 @@
     "sourceDraftSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "sourceDraftReportSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "sourceEvaluationSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "humanInputProvenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["filePath", "sha256", "inputType", "suppliedBy", "instructionSatisfied", "useMode"],
+        "properties": {
+          "filePath": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "inputType": { "const": "editorial-example" },
+          "suppliedBy": { "const": "human-editor" },
+          "instructionSatisfied": { "type": "string", "minLength": 1 },
+          "useMode": { "enum": ["verbatim", "lightly-edited", "factual-grounding-only"] }
+        }
+      }
+    },
     "overallStatus": { "enum": ["REVISED", "PARTIALLY_REVISED_WAITING_FOR_HUMAN", "WAITING_FOR_HUMAN", "BLOCKED"] },
     "instructionClassifications": {
       "type": "array",
@@ -65,7 +82,8 @@
         "properties": {
           "instruction": { "type": "string", "minLength": 1 },
           "classification": { "enum": ["AUTO_APPLY", "HUMAN_INPUT_REQUIRED", "UNSAFE_OR_OUT_OF_SCOPE"] },
-          "reason": { "type": "string", "minLength": 1 }
+          "reason": { "type": "string", "minLength": 1 },
+          "satisfiedByHumanInput": { "type": "boolean" }
         }
       }
     },
