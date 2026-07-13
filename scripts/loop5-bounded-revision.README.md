@@ -54,3 +54,42 @@ The Loop 4 sidecar detects changes to the evaluation JSON when the sidecar has n
 The mechanism does not defend against an actor deliberately modifying an artifact and recomputing all associated hashes or sidecars.
 
 Stronger tamper resistance would require anchoring hashes in trusted external state such as a Git commit, signed manifest, or append-only ledger.
+
+## Future enhancement: Evaluate whether human-supplied revisions fit the surrounding argument
+
+### Problem
+
+Loop 5 can correctly apply a human-supplied change, and Loop 4 can verify that the requested instruction was satisfied, while still missing that the inserted material is editorially incoherent with the rest of the piece.
+
+### Example
+
+In issue #18, the prototyping example was valid, sourceable, and relevant to “skills half-life,” but it did not mesh naturally with the note’s larger argument. It passed structural and grounding checks while weakening editorial coherence.
+
+### Risk
+
+A reviewer may supply material intended for another piece, respond late or imprecisely, or provide content that is locally relevant but globally misplaced. The system should not assume that human-supplied material is editorially appropriate merely because it satisfies the requested slot.
+
+### Future enhancement
+
+Add a post-integration coherence check that evaluates:
+
+- whether the inserted material advances the central argument
+- whether it connects naturally to the surrounding section
+- whether it introduces a new topic or frame without support
+- whether it duplicates or contradicts another part of the piece
+- whether the human input appears to belong to a different artifact
+- whether the revision improves the piece as a whole rather than only satisfying the instruction
+
+### Expected behavior
+
+Human input remains authoritative as source material, but not automatically authoritative as placement or editorial fit.
+
+Loop 4 may return `REVISE` or `HOLD_FOR_HUMAN_CONFIRMATION` when supplied material is grounded but poorly integrated.
+
+The system should never silently discard or rewrite human input to make it fit.
+
+The review should surface the mismatch and ask whether to remove, relocate, or replace the material.
+
+### Scope
+
+Record only as a future enhancement. Do not implement it now.
