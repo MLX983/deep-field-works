@@ -42,7 +42,7 @@ Start here:
 * AGENTS.md
 * docs/editorial-guidelines.md
 * docs/content-types.md
-* docs/publishing-workflow.md
+* docs/workflows/publishing-workflow.md
 
 These files describe the purpose, structure, and operating principles of the project.
 

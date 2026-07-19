@@ -8,7 +8,7 @@ Before major content, metadata, taxonomy, publishing, or public-facing changes, 
 
 Use the smallest adequate artifact type: `seed`, `note`, `field-report`, `essay`, `experiment`, `prototype-note`, `concept`, `checkpoint`, or `project-log`.
 
-Follow `content-schema.md`, `publishing-workflow.md`, `editorial-guidelines.md`, and `voice-and-style.md` as applicable.
+Follow `content-schema.md`, `docs/workflows/publishing-workflow.md`, `editorial-guidelines.md`, and `voice-and-style.md` as applicable.
 
 Preserve chronology. Do not modify source-of-truth documents, publish content, change draft status, or change canonical status without human approval.
 
@@ -51,7 +51,9 @@ docs/source-of-truth/
 
 That folder contains the canonical Deep Field Works source-of-truth documents.
 
-Use the source-of-truth documents for:
+Authoritative operational publishing guidance lives at `docs/workflows/publishing-workflow.md`.
+
+Use the source-of-truth documents together with the publishing workflow for:
 
 * project purpose
 * content strategy
@@ -97,7 +99,7 @@ docs/source-of-truth/voice-and-style.md
 For publishing or workflow decisions:
 
 ```text
-docs/source-of-truth/publishing-workflow.md
+docs/workflows/publishing-workflow.md
 docs/source-of-truth/content-schema.md
 ```
 
@@ -338,7 +340,7 @@ Not generated.
 
 ## Publishing Guidance
 
-Before publishing or restructuring content, consult the canonical publishing workflow in the source-of-truth folder.
+Before publishing or restructuring content, consult the authoritative operational publishing guidance at `docs/workflows/publishing-workflow.md`.
 
 Agents may draft, organize, summarize, edit, classify, and propose.
 

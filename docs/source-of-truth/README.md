@@ -116,7 +116,7 @@ Use these to improve:
 Read:
 
 ```text
-publishing-workflow.md
+docs/workflows/publishing-workflow.md
 content-schema.md
 ```
 
@@ -218,7 +218,10 @@ Use for:
 
 ---
 
-## `publishing-workflow.md`
+## `docs/workflows/publishing-workflow.md`
+
+This document lives outside `docs/source-of-truth/` but remains the
+authoritative operational guidance for publishing.
 
 Defines how material moves through the system.
 
@@ -424,10 +427,11 @@ Humans approve canonical changes.
   voice-and-style.md
   article-templates.md
   content-schema.md
-  publishing-workflow.md
   domain-structure.md
   concept-registry.md
   agent-instructions.md
+/workflows/
+  publishing-workflow.md
 ```
 
 Some documents may not exist yet.
