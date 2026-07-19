@@ -222,6 +222,13 @@ Prototype-note fixtures additionally verify:
 The readiness fixture suite also preserves existing non-prototype behavior for
 ready, insufficient-material, and unverified-external cases.
 
+## Known follow-up
+
+Generated Loop 2 packets now use omission as the canonical representation when
+no `blockingCondition` exists. Some legacy Loop 3 documentation and synthetic
+Loop 4/5 fixtures still allow or contain `null`; current downstream consumers
+accept both representations. Cleanup was intentionally deferred.
+
 ## Exit codes
 
 | Code | Meaning |
