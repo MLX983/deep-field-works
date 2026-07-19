@@ -147,6 +147,18 @@ Loop 2 does **not** map disposition directly to `draftReadiness`. Disposition is
 - No source verification blocker
 - No drafting path that would require invented support
 
+Review flags trigger `research-required` only when they explicitly require
+research, verification, validation, evidence gathering, sourcing, citations,
+factual support, or fact-checking. A standalone keyword is not enough.
+
+Current-state cautions remain compatible with `ready` when the source is
+otherwise sufficient. In particular, a review flag does not block merely
+because it mentions a source, describes a prototype as proposed or untested,
+preserves an evidence boundary, or warns against presenting unimplemented
+behavior as observed fact. Explicit instructions such as “verify the cited
+source before proceeding” or “additional evidence is needed” remain blockers.
+Negated requirements such as “research is not required” do not block.
+
 ### `sourceSufficiency`
 
 Every packet includes:
@@ -205,6 +217,10 @@ Prototype-note fixtures additionally verify:
 - canonical artifact-type output
 - clear refusal when grounding is incomplete
 - no packet or summary on grounding failure
+- phrase-level review-flag readiness, including explicit negation
+
+The readiness fixture suite also preserves existing non-prototype behavior for
+ready, insufficient-material, and unverified-external cases.
 
 ## Exit codes
 

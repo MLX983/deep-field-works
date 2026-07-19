@@ -1,0 +1,74 @@
+{
+  "nonBlocking": [
+    {
+      "name": "source-current-state-boundary",
+      "flag": "The source proposes a screen structure but does not establish that it has been built, tested, or observed in use."
+    },
+    {
+      "name": "proposed-not-built-or-tested",
+      "flag": "The prototype is proposed and has not been built or tested."
+    },
+    {
+      "name": "evidence-boundary-observed-fact",
+      "flag": "Preserve the evidence boundary and do not present the unimplemented prototype as observed fact."
+    },
+    {
+      "name": "generic-primary",
+      "flag": "The primary review concern is whether the proposed states remain legible."
+    },
+    {
+      "name": "generic-announcement",
+      "flag": "The announcement is mentioned only as context for the proposed interaction."
+    },
+    {
+      "name": "standalone-confirm",
+      "flag": "Confirm the current-state boundary during editorial review."
+    },
+    {
+      "name": "negated-research",
+      "flag": "Research is not required before drafting."
+    },
+    {
+      "name": "negated-additional-evidence",
+      "flag": "No additional evidence is needed."
+    },
+    {
+      "name": "negated-source-verification",
+      "flag": "The cited source does not require verification."
+    },
+    {
+      "name": "verified-factual-claim",
+      "flag": "The factual claim is verified."
+    },
+    {
+      "name": "untested-with-negated-research",
+      "flag": "The prototype is untested, but no research is required."
+    }
+  ],
+  "blocking": [
+    {
+      "name": "research-required",
+      "flag": "Research is required before drafting."
+    },
+    {
+      "name": "verify-source",
+      "flag": "Verify the cited source before proceeding."
+    },
+    {
+      "name": "additional-evidence",
+      "flag": "Additional evidence is needed to support this claim."
+    },
+    {
+      "name": "find-authoritative-sources",
+      "flag": "Find authoritative sources for the current-state claim."
+    },
+    {
+      "name": "unverified-factual-claim",
+      "flag": "The factual claim remains unverified."
+    },
+    {
+      "name": "unsupported-factual-claim",
+      "flag": "The factual claim is unsupported."
+    }
+  ]
+}

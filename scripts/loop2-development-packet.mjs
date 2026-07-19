@@ -59,6 +59,23 @@ const UNVERIFIED_EXTERNAL_PATTERNS = [
   /\bverify\b/i,
 ];
 
+const REVIEW_FLAG_RESEARCH_PATTERNS = [
+  /\b(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\s+(?:is|are|remains?)\s+(?:needed|required)\b/i,
+  /\b(?:additional|more|further)\s+(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\b[^.!?;]{0,40}\b(?:needed|required)\b/i,
+  /\b(?:verify|confirm|validate|fact-check|research)\b[^.!?;]{0,160}\b(?:before\s+(?:drafting|proceeding|development|developing)|(?:cited\s+)?(?:sources?|citations?|claims?|facts?|evidence|announcements?|specifications?))\b/i,
+  /\b(?:find|gather|collect|locate|provide|add)\b[^.!?;]{0,120}\b(?:authoritative\s+)?(?:sources?|evidence|citations?)\b/i,
+  /\b(?:factual\s+)?(?:claim|statement|assertion)\b[^.!?;]{0,80}\b(?:is|are|remains?)?\s*(?:unverified|unsupported|unconfirmed|uncited)\b/i,
+  /\b(?:unverified|unsupported|unconfirmed|uncited)\s+(?:factual\s+)?(?:claim|statement|assertion)\b/i,
+  /\b(?:requires?|needs?)\s+(?:additional\s+)?(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\b/i,
+];
+
+const NEGATED_REVIEW_FLAG_RESEARCH_PATTERNS = [
+  /\bno\s+(?:additional\s+|more\s+|further\s+)?(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\s+(?:is|are)\s+(?:needed|required)\b/i,
+  /\b(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\s+(?:is|are|remains?)\s+not\s+(?:needed|required)\b/i,
+  /\b(?:sources?|evidence|claims?|facts?|citations?|announcements?|specifications?)\b[^.!?;]{0,80}\b(?:does|do)\s+not\s+require\s+(?:research|verification|validation|fact-checking|additional evidence|sourcing|citations?)\b/i,
+  /\b(?:factual\s+)?(?:claim|statement|assertion)\s+(?:is|are|remains?)\s+(?:verified|supported|confirmed|cited)\b/i,
+];
+
 const ARTIFACT_THRESHOLDS = {
   note: { min: 3, ready: 5 },
   seed: { min: 1, ready: 2 },
@@ -534,6 +551,25 @@ function assessSourceSufficiency({
   };
 }
 
+function reviewFlagRequiresResearch(flag) {
+  if (!flag) return false;
+
+  const clauses = flag
+    .split(/(?:[.;!?]\s+|,\s+but\s+|\bhowever\b)/i)
+    .map((clause) => clause.trim())
+    .filter(Boolean);
+
+  return clauses.some((clause) => {
+    if (
+      NEGATED_REVIEW_FLAG_RESEARCH_PATTERNS.some((pattern) =>
+        pattern.test(clause))
+    ) {
+      return false;
+    }
+    return REVIEW_FLAG_RESEARCH_PATTERNS.some((pattern) => pattern.test(clause));
+  });
+}
+
 function determineDraftReadiness(recommendation, sufficiency, targetRef, duplicateCluster) {
   const disposition = recommendation.disposition;
 
@@ -554,12 +590,7 @@ function determineDraftReadiness(recommendation, sufficiency, targetRef, duplica
 
   if (sufficiency.unverifiedExternal.length > 0) return 'research-required';
 
-  if (
-    recommendation.uncertaintyOrReviewFlag &&
-    /\b(verif|confirm|source|announcement|whether|primary)\b/i.test(
-      recommendation.uncertaintyOrReviewFlag,
-    )
-  ) {
+  if (reviewFlagRequiresResearch(recommendation.uncertaintyOrReviewFlag)) {
     return 'research-required';
   }
 
