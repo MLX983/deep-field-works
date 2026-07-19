@@ -1,0 +1,97 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": {
+    "number": 10,
+    "title": "Essay: natural UI becomes operational UI",
+    "url": "https://github.com/MLX983/dfw-intake/issues/10"
+  },
+  "approvedArtifactType": "essay",
+  "primaryDomain": "Human-Machine Workflows",
+  "theme": "agent-governance",
+  "workingTitle": "Natural interfaces become operational interfaces",
+  "readerQuestion": "If AI can interpret intent directly, what happens to interfaces that historically translated goals into machine actions?",
+  "centralTension": "Operational interfaces may recede as intent becomes executable, while governance interfaces become more important because authority, trust, escalation, and audit still need explicit form.",
+  "verifiedObservations": [
+    "The issue proposes two models: intent to interface to system to action, and intent to AI interpretation to system to action.",
+    "The issue distinguishes operational interfaces from governance interfaces.",
+    "The issue identifies the operational-governance distinction, rather than conversation alone, as its strongest original contribution.",
+    "The proposed hierarchy covers communication channels becoming operational, applications moving toward user intent, governance conditions, design implications, counterpoints, and unresolved questions."
+  ],
+  "inferences": [
+    "If intent can be translated into action reliably, some procedure-oriented interface work may move into an interpretation layer.",
+    "The value of visible interface design may shift toward authority, thresholds, interruption, escalation, approval, memory, and audit.",
+    "The movement has two directions: intent moves closer to systems, and systems move closer to intent."
+  ],
+  "speculation": [
+    "Operational interfaces may shrink dramatically while governance interfaces become the defining product surface.",
+    "Email may become strategically important as an operational channel because AI reduces translation cost."
+  ],
+  "sourceRequirements": [
+    "Verify historical claims about why forms, navigation, and fixed workflows developed and how broadly they mediated intent.",
+    "Find current evidence for natural-language interfaces executing cross-application actions rather than only producing text.",
+    "Verify product examples and capabilities close to drafting time.",
+    "Find evidence or counterexamples for the claim that operational UI shrinks as governance UI gains value.",
+    "Ground the email-as-operational-channel claim with examples or narrow it to an explicit hypothesis."
+  ],
+  "evidenceGaps": [
+    "The issue supplies a strong conceptual framework but not a research base for its broad historical and market-facing claims.",
+    "No empirical boundary yet shows where direct intent interpretation fails and conventional operational interfaces remain preferable.",
+    "The relationship between conversation, reliability, inspectability, and reversibility needs a stronger counterargument."
+  ],
+  "relatedMaterial": [
+    {
+      "reference": "issue-17",
+      "role": "supporting-example",
+      "note": "My AI Rules can illustrate a governance interface without carrying the essay's full argument."
+    }
+  ],
+  "recommendedStructure": [
+    "Opening: interfaces as translators between intent and fixed systems",
+    "The old and emerging operating models",
+    "Communication channels become operational",
+    "The inverse shift: applications move toward intent",
+    "The operational and governance interface split",
+    "Governance configures conditions rather than procedures",
+    "Implications for interface design",
+    "Counterargument: operational interfaces persist where ambiguity and consequence remain high",
+    "Evidence boundary and unresolved questions",
+    "Closing: the governance interface becomes the durable product surface"
+  ],
+  "unresolvedQuestions": [
+    "Which operational interfaces disappear, and which remain because direct manipulation is faster, safer, or more inspectable?",
+    "How should governance interfaces expose delegated authority without recreating system administration?",
+    "When does conversational flexibility reduce rather than improve control?",
+    "What evidence would distinguish a durable interface shift from a temporary interaction trend?"
+  ],
+  "draftReadiness": "research-required",
+  "nextAction": "Build a bounded research pack around the historical, product-capability, and counterexample claims before rerunning Loop 2 readiness.",
+  "sourceSufficiency": {
+    "status": "partial",
+    "reasons": [
+      "The source is sufficient for thesis, hierarchy, contribution, and unresolved questions.",
+      "It is not sufficient for broad historical, adoption, capability, or directional claims."
+    ],
+    "missingElements": [
+      "Historical interface sources",
+      "Current product capability evidence",
+      "Counterexamples and failure conditions",
+      "Evidence for or narrowing of the email claim"
+    ]
+  },
+  "researchPlan": {
+    "claimsRequiringVerification": [
+      "Traditional interfaces mainly compensated for systems that could not infer intent.",
+      "Communication channels are becoming operational interfaces across applications.",
+      "Applications are moving into AI environments rather than requiring users to visit each application.",
+      "Operational UI is shrinking while governance UI becomes more valuable.",
+      "Email has renewed strategic importance as an operational channel."
+    ],
+    "evidenceNeededForReady": [
+      "Primary or authoritative historical sources on interface abstraction and direct manipulation.",
+      "Current official documentation for representative cross-application action systems.",
+      "At least two counterexamples where conventional operational UI remains necessary.",
+      "A clearly bounded status for the email claim: evidenced observation or labeled hypothesis."
+    ]
+  },
+  "blockingCondition": "The essay's original distinction is ready for development, but its supporting historical and directional claims are not yet source-sufficient."
+}
