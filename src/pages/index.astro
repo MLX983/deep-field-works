@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { domains } from '../data/domains';
 import { formatDomainLabel } from '../utils/formatDomainLabel';
-import { notDraftInProd } from '../utils/notDraftInProd';
+import { publicEntriesOnly } from '../utils/publicEntriesOnly';
 import { entryChronologyDate } from '../utils/entryChronologyDate';
 
 const base = import.meta.env.BASE_URL;
@@ -13,7 +13,7 @@ const withBase = (path: string) =>
 const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
 
 const grouped = await Promise.all(
-  collectionNames.map((name) => getCollection(name, notDraftInProd)),
+  collectionNames.map((name) => getCollection(name, publicEntriesOnly)),
 );
 
 const recent = grouped

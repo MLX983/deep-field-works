@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/draft-presentation-plan.v1.schema.json",
+  "title": "Deep Field Works draft presentation plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "collection",
+    "slug",
+    "sectionOrder",
+    "pullQuotes",
+    "callouts",
+    "relatedConcepts",
+    "relatedPieces",
+    "draftWarning",
+    "internalEditorialFlags"
+  ],
+  "properties": {
+    "version": { "const": 1 },
+    "collection": { "enum": ["articles", "field-notes", "checkpoints"] },
+    "slug": { "type": "string", "minLength": 1 },
+    "pageTitle": { "type": "string", "minLength": 1 },
+    "dek": {
+      "description": "Optional visible dek. Omission renders no dek; frontmatter description is not displayed unless the plan explicitly selects it.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source"],
+          "properties": { "source": { "const": "description" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text"],
+          "properties": { "text": { "type": "string", "minLength": 1 } }
+        }
+      ]
+    },
+    "sectionOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "pullQuotes": {
+      "description": "Optional editorial treatments. Zero pull quotes is valid. Selection and placement are expected human-review points, not fully deterministic decisions.",
+      "type": "array",
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/treatment" }
+    },
+    "callouts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/callout" }
+    },
+    "relatedConcepts": { "type": "array", "items": { "type": "string" } },
+    "relatedPieces": { "type": "array", "items": { "type": "string" } },
+    "draftWarning": { "type": "string", "minLength": 1 },
+    "internalEditorialFlags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "message"],
+        "properties": {
+          "severity": { "enum": ["note", "warning", "blocking"] },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section", "paragraph"],
+      "properties": {
+        "section": { "type": ["string", "null"] },
+        "paragraph": { "type": "integer", "minimum": 0 },
+        "sentences": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "integer", "minimum": 0 }
+          ],
+          "items": false
+        }
+      }
+    },
+    "placement": {
+      "description": "Explicit editorial placement for a pull quote or callout.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["position", "section"],
+          "properties": {
+            "position": { "enum": ["before-section", "after-section"] },
+            "section": { "type": "string", "minLength": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["position", "section", "paragraph"],
+          "properties": {
+            "position": { "const": "after-paragraph" },
+            "section": { "type": "string", "minLength": 1 },
+            "paragraph": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "treatment": {
+      "type": "object",
+      "required": ["source", "placement"],
+      "properties": {
+        "source": { "$ref": "#/$defs/selection" },
+        "placement": { "$ref": "#/$defs/placement" }
+      }
+    },
+    "callout": {
+      "description": "A named callout treatment with an explicit source-handling decision.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variant", "sourceBehavior", "source", "placement"],
+      "properties": {
+        "variant": { "enum": ["operational"] },
+        "sourceBehavior": { "enum": ["reference", "extract"] },
+        "label": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/selection" },
+        "placement": { "$ref": "#/$defs/placement" }
+      }
+    }
+  }
+}

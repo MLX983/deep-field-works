@@ -2,13 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BackLink from '../components/BackLink.astro';
 import { getCollection } from 'astro:content';
-import { notDraftInProd } from '../utils/notDraftInProd';
+import { publicEntriesOnly } from '../utils/publicEntriesOnly';
 import { entryChronologyDate } from '../utils/entryChronologyDate';
 
 const collectionNames = ['articles', 'field-notes', 'checkpoints'] as const;
 
 const grouped = await Promise.all(
-  collectionNames.map((name) => getCollection(name, notDraftInProd)),
+  collectionNames.map((name) => getCollection(name, publicEntriesOnly)),
 );
 
 const entries = grouped

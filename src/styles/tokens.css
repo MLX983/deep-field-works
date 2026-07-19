@@ -1,6 +1,7 @@
 /*
  * Deep Field Works — design tokens
- * Source of truth: Figma "The process is the proof" article frame.
+ * Source of truth: Figma Design Tokens page (0:1) and canonical
+ * Interface Components section (2054:113).
  * Values marked (derived) are not explicit Figma variables; they are
  * reasonable supporting values chosen to complete the system.
  */
@@ -8,6 +9,7 @@
 :root {
   /* Surface / background */
   --color-surface-primary: #faf9f7;
+  --color-surface-secondary: #f0efed;
 
   /* Text */
   --color-text-body: #3c3c3c;

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/assert-production-exclusions.mjs",
     "loop:intake": "node scripts/loop1-intake-understanding.mjs",
     "loop:packet": "node scripts/loop2-development-packet.mjs",
     "loop:draft": "node scripts/loop3-constrained-draft.mjs",
@@ -20,6 +20,7 @@
     "loop:orchestrate:fixtures": "node scripts/run-orchestration-fixtures.mjs",
     "loop:human-input:fixtures": "node scripts/run-loop5-human-input-fixtures.mjs",
     "preview": "astro preview",
+    "review:drafts": "astro dev --open /review-drafts",
     "astro": "astro"
   },
   "dependencies": {

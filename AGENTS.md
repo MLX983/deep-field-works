@@ -415,6 +415,37 @@ When asked to revise content:
 
 ---
 
+## Presentation System
+
+The Deep Field Works presentation system is governed by the following documents.
+
+Priority order:
+
+1. docs/source-of-truth/presentation-system.md
+2. docs/source-of-truth/presentation-plans.md
+3. docs/source-of-truth/presentation-review.md
+4. src/presentation/componentRegistry.ts
+
+Editorial meaning is defined by the Markdown documentation.
+
+Figma is the canonical visual authoring source.
+
+The component registry provides stable machine-readable identifiers and mappings.
+
+When the repository conflicts with Figma:
+
+- do not invent a resolution
+- report the conflict
+- wait for human review
+
+Do not create new presentation components unless explicitly requested.
+
+Do not infer missing Figma metadata.
+
+When Figma MCP is unavailable, use the approved repository specification rather than inventing behavior.
+
+---
+
 ## Human Review Rule
 
 Human review is required before publication when content:

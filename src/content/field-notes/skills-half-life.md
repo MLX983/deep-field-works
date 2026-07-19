@@ -16,8 +16,6 @@ relatedPieces: []
 canonical: false
 ---
 
-<!-- Internal editorial note: The prototyping example was inserted to test the human-input handoff. It satisfies the requested example structurally but does not fit the note’s argument well. Remove or replace it before final editorial approval. -->
-
 # Skills half-life
 
 AI adoption is often framed as a training problem. Employees need to learn AI skills so organizations can benefit from the tools. But AI changes so quickly that many tool-specific skills begin decaying before they become workplace habits.

@@ -4,9 +4,10 @@ import '../styles/tokens.css';
 interface Props {
   title: string;
   description?: string;
+  noindex?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
@@ -21,6 +22,7 @@ const withBase = (path: string) =>
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex, nofollow, noarchive" />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

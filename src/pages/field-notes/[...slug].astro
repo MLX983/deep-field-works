@@ -5,11 +5,11 @@ import BackToTop from '../../components/BackToTop.astro';
 import { resolveEntryDomain } from '../../data/domains';
 import { formatDomainLabel } from '../../utils/formatDomainLabel';
 import { getCollection, render } from 'astro:content';
-import { notDraftInProd } from '../../utils/notDraftInProd';
+import { publicEntriesOnly } from '../../utils/publicEntriesOnly';
 import { entryChronologyDate } from '../../utils/entryChronologyDate';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('field-notes', notDraftInProd);
+  const entries = await getCollection('field-notes', publicEntriesOnly);
   return entries.map((entry) => ({
     params: { slug: entry.id },
     props: { entry },

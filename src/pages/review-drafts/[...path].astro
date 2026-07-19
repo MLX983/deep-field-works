@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
+import DraftReviewPage from '../../components/DraftReviewPage.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import {
+  presentationCollections,
+  planKey,
+  type PresentationCollection,
+  type PresentationPlan,
+} from '../../presentation/presentationPlan';
+import { presentationPlans } from '../../presentation/presentationPlans';
+
+interface ReviewItem {
+  collection: PresentationCollection;
+  entry: CollectionEntry<'articles'> | CollectionEntry<'field-notes'> | CollectionEntry<'checkpoints'>;
+  plan: PresentationPlan;
+}
+
+export async function getStaticPaths() {
+  if (import.meta.env.PROD) return [];
+
+  const items: ReviewItem[] = [];
+  for (const collection of presentationCollections) {
+    const entries = await getCollection(collection);
+    for (const entry of entries) {
+      const plan = presentationPlans.get(planKey(collection, entry.id));
+      if (entry.data.draft && plan) items.push({ collection, entry, plan });
+    }
+  }
+
+  return [
+    { params: { path: undefined }, props: { items } },
+    ...items.map((item) => ({
+      params: { path: `${item.collection}/${item.entry.id}` },
+      props: { ...item, items },
+    })),
+  ];
+}
+
+const { collection, entry, plan, items = [] } = Astro.props as {
+  collection?: PresentationCollection;
+  entry?: ReviewItem['entry'];
+  plan?: PresentationPlan;
+  items?: ReviewItem[];
+};
+---
+
+{
+  entry && plan && collection ? (
+    <DraftReviewPage collection={collection} entry={entry} plan={plan} />
+  ) : (
+    <BaseLayout
+      title="Draft review — Deep Field Works"
+      description="Local-only review queue for unpublished Deep Field Works drafts."
+      noindex
+    >
+      <BackLink />
+      <h1>Draft review</h1>
+      <p>This local-only queue contains drafts with an explicit presentation plan.</p>
+      {items.length > 0 ? (
+        <ul class="link-list">
+          {items.map((item) => (
+            <li>
+                <a href={`/review-drafts/${item.collection}/${item.entry.id}`}>
+                {item.plan.pageTitle ?? item.entry.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No draft presentation plans are ready for review.</p>
+      )}
+    </BaseLayout>
+  )
+}

@@ -1,0 +1,384 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BackLink from './BackLink.astro';
+import BackToTop from './BackToTop.astro';
+import { resolveEntryDomain } from '../data/domains';
+import { formatDomainLabel } from '../utils/formatDomainLabel';
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import type { PresentationCollection, PresentationPlan } from '../presentation/presentationPlan';
+
+interface Props {
+  collection: PresentationCollection;
+  entry: CollectionEntry<'articles'> | CollectionEntry<'field-notes'> | CollectionEntry<'checkpoints'>;
+  plan: PresentationPlan;
+}
+
+const { entry, plan } = Astro.props;
+const { Content } = await render(entry);
+
+const typeLabels: Record<string, string> = {
+  seed: 'Seed',
+  note: 'Note',
+  'field-report': 'Field Report',
+  essay: 'Essay',
+  experiment: 'Experiment',
+  'prototype-note': 'Prototype Note',
+  concept: 'Concept',
+  checkpoint: 'Checkpoint',
+  'project-log': 'Project Log',
+};
+
+const pageTitle = plan.pageTitle ?? entry.data.title;
+const dek = plan.dek
+  ? 'source' in plan.dek
+    ? entry.data.description
+    : plan.dek.text
+  : undefined;
+const domain = resolveEntryDomain(entry.data);
+const domainLabel = domain?.title ?? entry.data.domainPath?.[0] ?? entry.data.theme;
+
+const base = import.meta.env.BASE_URL;
+const withBase = (path: string) =>
+  `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+---
+
+<BaseLayout
+  title={`${pageTitle} — Draft review — Deep Field Works`}
+  description={entry.data.description}
+  noindex
+>
+  <header class="review-shell__header">
+    <BackLink label="Review queue" href="review-drafts" />
+    <p class="draft-warning" role="status">{plan.draftWarning}</p>
+  </header>
+
+  <aside class="editorial-flags" aria-labelledby="editorial-flags-title">
+    <p class="editorial-flags__eyebrow" id="editorial-flags-title">Internal editorial review</p>
+    {plan.internalEditorialFlags.map((flag) => (
+      <p class:list={['editorial-flags__item', `editorial-flags__item--${flag.severity}`]}>
+        <strong>{flag.severity === 'blocking' ? 'Blocking' : flag.severity === 'warning' ? 'Warning' : 'Note'}:</strong>{' '}
+        {flag.message}
+      </p>
+    ))}
+  </aside>
+
+  <article class="article" data-draft-review-root>
+    <header class="article__header">
+      <p class="article__meta">
+        <span>{typeLabels[entry.data.documentType]}</span>
+        {domainLabel && (
+          <>
+            <span class="article__meta-sep"> · </span>
+            {domain ? (
+              <a class="article__meta-domain" href={withBase(`domains/${domain.slug}`)}>
+                {formatDomainLabel(domain.title)}
+              </a>
+            ) : (
+              <span>{domainLabel}</span>
+            )}
+          </>
+        )}
+      </p>
+      <h1 class="article__title">{pageTitle}</h1>
+      {dek && <p class="article__dek">{dek}</p>}
+    </header>
+
+    <div class="article__body" data-draft-body>
+      <Content />
+    </div>
+
+    {(plan.relatedConcepts.length > 0 || plan.relatedPieces.length > 0) && (
+      <footer class="article__related">
+        {plan.relatedConcepts.length > 0 && (
+          <section>
+            <h2 class="article__related-title">Related concepts</h2>
+            <ul>
+              {plan.relatedConcepts.map((concept) => <li>{concept}</li>)}
+            </ul>
+          </section>
+        )}
+        {plan.relatedPieces.length > 0 && (
+          <section>
+            <h2 class="article__related-title">Related pieces</h2>
+            <ul>
+              {plan.relatedPieces.map((piece) => <li>{piece}</li>)}
+            </ul>
+          </section>
+        )}
+      </footer>
+    )}
+  </article>
+
+  <footer class="review-shell__footer">
+    <BackToTop />
+  </footer>
+
+  <script type="application/json" id="draft-presentation-plan" set:html={JSON.stringify(plan)} />
+  <script>
+    interface Selection {
+      section: string | null;
+      paragraph: number;
+      sentences?: [number, number];
+    }
+
+    interface ReviewPlan {
+      sectionOrder: string[];
+      pullQuotes: Array<{
+        source: Selection;
+        placement:
+          | { position: 'before-section' | 'after-section'; section: string }
+          | { position: 'after-paragraph'; section: string; paragraph: number };
+      }>;
+      callouts: Array<{
+        variant: 'operational';
+        sourceBehavior: 'reference' | 'extract';
+        label?: string;
+        source: Selection;
+        placement:
+          | { position: 'before-section' | 'after-section'; section: string }
+          | { position: 'after-paragraph'; section: string; paragraph: number };
+      }>;
+    }
+
+    const planNode = document.querySelector<HTMLScriptElement>('#draft-presentation-plan');
+    const body = document.querySelector<HTMLElement>('[data-draft-body]');
+
+    if (planNode && body) {
+      const plan = JSON.parse(planNode.textContent ?? '{}') as ReviewPlan;
+
+      const sourceTitle = body.querySelector(':scope > h1');
+      sourceTitle?.remove();
+
+      const intro: Node[] = [];
+      const sections = new Map<string, Node[]>();
+      let current: Node[] = intro;
+
+      for (const node of [...body.childNodes]) {
+        if (node instanceof HTMLHeadingElement && node.tagName === 'H2') {
+          current = [node];
+          sections.set(node.textContent?.trim() ?? '', current);
+        } else {
+          current.push(node);
+        }
+      }
+
+      body.replaceChildren(...intro);
+      const ordered = new Set(plan.sectionOrder);
+      for (const heading of plan.sectionOrder) {
+        const nodes = sections.get(heading);
+        if (nodes) body.append(...nodes);
+      }
+      for (const [heading, nodes] of sections) {
+        if (!ordered.has(heading)) body.append(...nodes);
+      }
+
+      const findSectionNodes = (heading: string | null): Node[] => {
+        if (heading === null) return intro;
+        const headingNode = [...body.children].find(
+          (node) => node.tagName === 'H2' && node.textContent?.trim() === heading,
+        );
+        if (!headingNode) return [];
+        const nodes: Node[] = [headingNode];
+        let next = headingNode.nextSibling;
+        while (next && !(next instanceof HTMLHeadingElement && next.tagName === 'H2')) {
+          nodes.push(next);
+          next = next.nextSibling;
+        }
+        return nodes;
+      };
+
+      const selectedParagraph = (selection: Selection): HTMLParagraphElement | null => {
+        const paragraphs = findSectionNodes(selection.section).filter(
+          (node): node is HTMLParagraphElement => node instanceof HTMLParagraphElement,
+        );
+        return paragraphs[selection.paragraph] ?? null;
+      };
+
+      const selectedText = (selection: Selection): string | null => {
+        const paragraph = selectedParagraph(selection);
+        if (!paragraph) return null;
+        const text = paragraph.textContent?.trim() ?? '';
+        if (!selection.sentences) return text;
+        const sentences = text.match(/[^.!?]+[.!?]+[”’"']?|[^.!?]+$/g) ?? [text];
+        return sentences
+          .slice(selection.sentences[0], selection.sentences[1] + 1)
+          .map((sentence) => sentence.trim())
+          .join(' ');
+      };
+
+      const place = (
+        element: HTMLElement,
+        placement:
+          | { position: 'before-section' | 'after-section'; section: string }
+          | { position: 'after-paragraph'; section: string; paragraph: number },
+      ) => {
+        const nodes = findSectionNodes(placement.section);
+        if (placement.position === 'after-paragraph') {
+          const paragraphs = nodes.filter(
+            (node): node is HTMLParagraphElement => node instanceof HTMLParagraphElement,
+          );
+          const paragraph = paragraphs[placement.paragraph];
+          if (paragraph) paragraph.after(element);
+          return;
+        }
+        const anchor = placement.position === 'before-section' ? nodes[0] : nodes.at(-1);
+        if (!anchor) return;
+        if (placement.position === 'before-section') anchor.before(element);
+        else anchor.after(element);
+      };
+
+      for (const pullQuote of plan.pullQuotes) {
+        const text = selectedText(pullQuote.source);
+        if (!text) continue;
+        const quote = document.createElement('blockquote');
+        quote.className = 'review-pull-quote';
+        quote.dataset.reviewPullQuote = '';
+        quote.textContent = text;
+        place(quote, pullQuote.placement);
+      }
+
+      for (const callout of plan.callouts) {
+        const sourceParagraph = selectedParagraph(callout.source);
+        const text = selectedText(callout.source);
+        if (!text) continue;
+        const aside = document.createElement('aside');
+        aside.className = `review-callout review-callout--${callout.variant}`;
+        aside.dataset.reviewCallout = '';
+        aside.dataset.calloutVariant = callout.variant;
+        if (callout.label) {
+          const label = document.createElement('strong');
+          label.textContent = `${callout.label}: `;
+          aside.append(label);
+        }
+        aside.append(text);
+        place(aside, callout.placement);
+        if (callout.sourceBehavior === 'extract') sourceParagraph?.remove();
+      }
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .review-shell__header {
+    margin-bottom: var(--space-300);
+  }
+
+  .review-shell__header :global(.back-link) {
+    margin-bottom: var(--space-200);
+  }
+
+  .draft-warning {
+    display: inline-block;
+    margin: 0;
+    padding: var(--space-50) var(--space-100);
+    border: 1px solid var(--color-text-link);
+    color: var(--color-text-link);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .editorial-flags {
+    margin: 0 0 var(--space-400);
+    padding: var(--space-200);
+    border: 1px solid #c9a66b;
+    background: #f6f0e5;
+  }
+
+  .editorial-flags__eyebrow {
+    margin: 0 0 var(--space-100);
+    color: var(--color-text-header);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .editorial-flags__item {
+    margin: 0;
+  }
+
+  .article__header {
+    margin-bottom: var(--space-300);
+  }
+
+  .article__title {
+    margin-bottom: var(--space-100);
+  }
+
+  .article__meta {
+    margin: 0 0 var(--space-100);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-footnote);
+  }
+
+  .article__meta-domain {
+    color: var(--color-text-link);
+  }
+
+  .article__dek {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-family: var(--font-serif);
+    font-size: var(--font-size-subheader);
+    font-weight: var(--font-weight-light);
+    line-height: var(--line-height-heading);
+  }
+
+  .article__body :global(.review-pull-quote) {
+    margin: var(--space-400) var(--space-300);
+    padding: var(--space-200) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .article__body :global(.review-callout) {
+    margin: var(--space-200) 0;
+  }
+
+  .article__body :global(.review-callout--operational) {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    padding: var(--space-100);
+    gap: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--color-surface-secondary);
+    box-shadow: none;
+    color: var(--color-text-body);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-light);
+    line-height: var(--line-height-body);
+    overflow-wrap: break-word;
+  }
+
+  .article__related {
+    display: grid;
+    gap: var(--space-200);
+    margin-top: var(--space-400);
+    padding-top: var(--space-300);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .article__related-title {
+    margin: 0 0 var(--space-100);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .article__related ul {
+    margin: 0;
+  }
+
+  .review-shell__footer {
+    margin-top: var(--space-300);
+  }
+</style>

@@ -4,10 +4,10 @@ import BackLink from '../../components/BackLink.astro';
 import BackToTop from '../../components/BackToTop.astro';
 import EntryList, { type ListItem } from '../../components/EntryList.astro';
 import { getCollection } from 'astro:content';
-import { notDraftInProd } from '../../utils/notDraftInProd';
+import { publicEntriesOnly } from '../../utils/publicEntriesOnly';
 import { entryChronologyDate } from '../../utils/entryChronologyDate';
 
-const entries = await getCollection('checkpoints', notDraftInProd);
+const entries = await getCollection('checkpoints', publicEntriesOnly);
 
 const items: ListItem[] = entries
   .map((entry) => ({ entry, collection: 'checkpoints' as const }))
