@@ -31,6 +31,12 @@ npm run loop:revise -- \
 
 The runner preserves frontmatter identity, domain, type, provenance, draft state, and `canonical: false`.
 
+The protected artifact types include `note`, `field-report`, and
+`prototype-note`. For prototype notes, bounded cleanup may operate on existing
+packet-grounded sections, but it may not convert a proposed interaction into a
+claim of implementation or testing, invent interface behavior, or reclassify
+the artifact as a concept or essay.
+
 ## Content integrity
 
 Loop 5 verifies the exact packet, draft, Loop 3 report, and Loop 4 evaluation bytes before classification or revision. It recomputes Loop 4's combined-input hash and verifies the evaluation against the adjacent `<evaluation>.sha256` sidecar written by Loop 4. Legacy pre-hash reports and evaluations are rejected explicitly; there is no compatibility flag.

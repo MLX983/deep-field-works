@@ -42,7 +42,7 @@
     },
     "artifactType": {
       "type": "string",
-      "enum": ["note", "field-report"]
+      "enum": ["note", "field-report", "prototype-note"]
     },
     "sourcePacketSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "sourceIssueSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },

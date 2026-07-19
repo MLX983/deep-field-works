@@ -12,6 +12,13 @@ It does not rewrite drafts, publish, access or mutate GitHub, or implement Loop 
 
 Deterministic checks are authoritative for input consistency, metadata, structure, length measurement, and unsupported sentences, named entities, dates, statistics, and quotations. Artifact-length targets are advisory: an out-of-range draft records a risk, while `REVISE` requires a corresponding substantive defect such as an underdeveloped section, missing editorial function, weak grounding, unclear tension, weak ending, repetition, or unnecessary expansion. Loop 4 does not request padding merely to cross a numeric threshold. Reproducible editorial heuristics assess concrete examples, generic AI language, repetition, reader question, tension, description, ending, and preserved uncertainty.
 
+First-class artifact criteria currently cover `note`, `field-report`, and
+`prototype-note`. Prototype notes use the canonical 300–800 word range and
+must include the design problem, interaction choice, grouped control surface,
+why it matters, current-state boundary, and remaining questions. A concrete
+control, state, or interface group satisfies the example function; Loop 4 must
+not demand an invented workplace example or imply tested behavior.
+
 ## Usage
 
 ```bash

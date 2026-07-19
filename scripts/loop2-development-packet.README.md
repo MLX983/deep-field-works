@@ -8,6 +8,9 @@ Local runner that converts an approved Loop 1 recommendation and source intake i
 
 Loop 2 does **not** generate article prose, mutate GitHub, or implement Loop 3.
 
+First-class packet generation currently supports the existing artifact
+behavior plus structured grounding for `prototype-note`.
+
 ## Purpose
 
 Produce a development packet that separates:
@@ -39,6 +42,50 @@ When `draftReadiness` is not `ready`, the runner writes the packet, prints a blo
 
 No article prose is written.
 
+## Prototype-note grounding
+
+Loop 2 recognizes `prototype-note` and `prototype note`, and emits the canonical
+artifact type `prototype-note`.
+
+The source issue must provide every prototype field explicitly:
+
+```md
+## The design problem
+
+Source-grounded problem statement.
+
+## The interaction choice
+
+Source-grounded design decision.
+
+## How the control surface is grouped
+
+### Group title
+
+- Explicit item
+
+## Design principles
+
+- Explicit principle
+
+## Current state
+
+Explicit implementation or testing boundary.
+```
+
+The generated `prototypeNote` object copies these sections into:
+
+- `designProblem`
+- `interactionChoice`
+- `interactionGroups`
+- `designPrinciples`
+- `currentState`
+
+Loop 2 does not infer missing prototype details from the recommendation,
+ordinary claims, related material, or generic defaults. If any required field,
+group title, or group item is absent, Loop 2 exits with code `1`, names every
+missing field, and writes neither a packet nor a summary.
+
 ## Test input layers
 
 | Layer | Location | Use |
@@ -56,6 +103,9 @@ npm run loop:packet -- \
   --issue scripts/fixtures/intake-issues/issue-001-minimal-seed.md \
   --recommendation scripts/fixtures/loop1-recommendations/issue-9001-minimal.json \
   --out-dir /tmp/dfw-loop2-smoke
+
+# Sanitized prototype-note fixtures
+npm run loop:packet:fixtures
 
 # Manual evaluation example (#18)
 npm run loop:packet -- \
@@ -148,6 +198,13 @@ Tracked under `scripts/fixtures/loop2-adversarial/`:
 | unverified external + develop independently | `research-required` |
 | bounded ready note | `ready` |
 | duplicate cluster + `#21` target | `combine-first` |
+
+Prototype-note fixtures additionally verify:
+
+- schema-valid structured grounding
+- canonical artifact-type output
+- clear refusal when grounding is incomplete
+- no packet or summary on grounding failure
 
 ## Exit codes
 

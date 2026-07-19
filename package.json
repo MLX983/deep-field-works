@@ -10,7 +10,9 @@
     "build": "astro build && node scripts/assert-production-exclusions.mjs",
     "loop:intake": "node scripts/loop1-intake-understanding.mjs",
     "loop:packet": "node scripts/loop2-development-packet.mjs",
+    "loop:packet:fixtures": "node scripts/run-loop2-fixtures.mjs",
     "loop:draft": "node scripts/loop3-constrained-draft.mjs",
+    "loop:draft:fixtures": "node scripts/run-loop3-fixtures.mjs",
     "loop:evaluate": "node scripts/loop4-editorial-evaluation.mjs",
     "loop:evaluate:fixtures": "node scripts/run-loop4-fixtures.mjs",
     "loop:revise": "node scripts/loop5-bounded-revision.mjs",
@@ -25,5 +27,8 @@
   },
   "dependencies": {
     "astro": "^6.4.2"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
   }
 }

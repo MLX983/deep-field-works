@@ -1,0 +1,68 @@
+{
+  "contractVersion": "loop2-development-packet.v1",
+  "issueReference": {
+    "number": 9601,
+    "title": "Visible review boundary",
+    "url": "https://example.invalid/issues/9601"
+  },
+  "approvedArtifactType": "prototype-note",
+  "primaryDomain": "Interfaces for Judgment",
+  "theme": "visible review boundaries",
+  "workingTitle": "Visible review boundary",
+  "readerQuestion": "Does a compact review panel make the approval boundary clear without adding unnecessary controls?",
+  "centralTension": "Keeping the action and its review boundary together may make delegated authority easier to inspect.",
+  "verifiedObservations": [
+    "A review control is difficult to use when pending actions and their approval states are separated."
+  ],
+  "inferences": [
+    "Keeping the action and its review boundary together may make delegated authority easier to inspect."
+  ],
+  "speculation": [],
+  "sourceRequirements": [],
+  "evidenceGaps": [],
+  "relatedMaterial": [],
+  "recommendedStructure": [
+    "The design problem",
+    "The interaction choice",
+    "How the control surface is grouped",
+    "Why it matters",
+    "Current state",
+    "Remaining questions"
+  ],
+  "unresolvedQuestions": [
+    "Does a compact review panel make the approval boundary clear without adding unnecessary controls?"
+  ],
+  "draftReadiness": "ready",
+  "nextAction": "Draft a concise prototype note while preserving the unimplemented current-state boundary.",
+  "sourceSufficiency": {
+    "status": "sufficient",
+    "reasons": [
+      "The source contains explicit prototype grounding and a bounded open question."
+    ],
+    "missingElements": []
+  },
+  "prototypeNote": {
+    "designProblem": "A reviewer needs to see which proposed actions require a decision without opening a separate detail view for each action.",
+    "interactionChoice": "The proposed panel groups pending actions by review state and keeps the available decision beside each action.",
+    "interactionGroups": [
+      {
+        "title": "Needs review",
+        "items": [
+          "Show actions that cannot proceed without a reviewer decision.",
+          "Keep approve and decline controls beside the action they affect."
+        ]
+      },
+      {
+        "title": "Already resolved",
+        "items": [
+          "Show recently approved or declined actions as read-only history."
+        ]
+      }
+    ],
+    "designPrinciples": [
+      "Keep the decision boundary visible.",
+      "Distinguish proposed behavior from implemented behavior."
+    ],
+    "currentState": "This is a proposed interaction structure. It has not been implemented or tested."
+  }
+}

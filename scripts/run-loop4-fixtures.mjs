@@ -39,6 +39,7 @@ for (const fixture of cases) {
     sourceSufficiency: { status: 'sufficient', reasons: [], missingElements: [] },
     blockingCondition: null,
     nextAction: 'Evaluate the constrained fixture draft.',
+    ...(fixture.prototypeNote ? { prototypeNote: fixture.prototypeNote } : {}),
   };
   const draft = `---\ntitle: ${yamlString(fixture.title)}\ndescription: ${yamlString(fixture.description)}\ndraftDate: 2026-07-11\nupdatedDate:\ndraft: true\ndocumentType: ${fixture.draftArtifactType}\ntheme: editorial-evaluation-fixture\nstatus: draft\nsourceNote: ${yamlString('Sanitized Loop 4 fixture')}\ndomainPath:\n  - "Human-Machine Workflows"\nrelatedConcepts: []\nrelatedPieces: []\ncanonical: false\n---\n\n${fixture.body.trim()}\n`;
   const packetBytes = Buffer.from(`${JSON.stringify(packet, null, 2)}\n`, 'utf8');

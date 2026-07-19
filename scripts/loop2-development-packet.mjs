@@ -63,6 +63,7 @@ const ARTIFACT_THRESHOLDS = {
   note: { min: 3, ready: 5 },
   seed: { min: 1, ready: 2 },
   'field-report': { min: 5, ready: 7 },
+  'prototype-note': { min: 5, ready: 7 },
   essay: { min: 7, ready: 9 },
   default: { min: 2, ready: 4 },
 };
@@ -128,6 +129,111 @@ function extractIssueMetadata(body) {
     rawBody,
     bodyExcerpt: rawBody.replace(/\s+/g, ' ').slice(0, 1200),
   };
+}
+
+function canonicalArtifactType(value) {
+  const normalized = value.toLowerCase().trim();
+  if (normalized === 'prototype-note' || normalized === 'prototype note') {
+    return 'prototype-note';
+  }
+  return value;
+}
+
+function extractLevelTwoSection(rawBody, heading) {
+  const lines = rawBody.split(/\r?\n/);
+  const normalizedHeading = heading.toLowerCase();
+  const start = lines.findIndex((line) => {
+    const match = line.match(/^##\s+(.+?)\s*$/);
+    return match?.[1].trim().toLowerCase() === normalizedHeading;
+  });
+  if (start < 0) return '';
+
+  const section = [];
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^#{1,2}\s+/.test(lines[index])) break;
+    section.push(lines[index]);
+  }
+  return section.join('\n').trim();
+}
+
+function firstExplicitParagraph(section) {
+  return section
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .find((block) =>
+      block &&
+      !/^#{1,6}\s+/.test(block) &&
+      !block.split(/\r?\n/).every((line) => /^\s*[-*]\s+/.test(line)),
+    )
+    ?.replace(/\s+/g, ' ')
+    .trim() ?? '';
+}
+
+function explicitBullets(section) {
+  return section
+    .split(/\r?\n/)
+    .map((line) => line.match(/^\s*[-*]\s+(.+?)\s*$/)?.[1]?.trim() ?? '')
+    .filter(Boolean);
+}
+
+function explicitInteractionGroups(section) {
+  const groups = [];
+  let current = null;
+
+  for (const line of section.split(/\r?\n/)) {
+    const heading = line.match(/^###\s+(.+?)\s*$/)?.[1]?.trim();
+    if (heading) {
+      current = { title: heading, items: [] };
+      groups.push(current);
+      continue;
+    }
+
+    const item = line.match(/^\s*[-*]\s+(.+?)\s*$/)?.[1]?.trim();
+    if (item && current) current.items.push(item);
+  }
+
+  return groups;
+}
+
+function extractPrototypeNote(rawBody) {
+  return {
+    designProblem: firstExplicitParagraph(
+      extractLevelTwoSection(rawBody, 'The design problem'),
+    ),
+    interactionChoice: firstExplicitParagraph(
+      extractLevelTwoSection(rawBody, 'The interaction choice'),
+    ),
+    interactionGroups: explicitInteractionGroups(
+      extractLevelTwoSection(rawBody, 'How the control surface is grouped'),
+    ),
+    designPrinciples: explicitBullets(
+      extractLevelTwoSection(rawBody, 'Design principles'),
+    ),
+    currentState: firstExplicitParagraph(
+      extractLevelTwoSection(rawBody, 'Current state'),
+    ),
+  };
+}
+
+function missingPrototypeGrounding(prototypeNote) {
+  const missing = [];
+  if (!prototypeNote.designProblem) missing.push('designProblem');
+  if (!prototypeNote.interactionChoice) missing.push('interactionChoice');
+  if (prototypeNote.interactionGroups.length === 0) {
+    missing.push('interactionGroups');
+  } else {
+    for (const [index, group] of prototypeNote.interactionGroups.entries()) {
+      if (!group.title) missing.push(`interactionGroups[${index}].title`);
+      if (group.items.length === 0) {
+        missing.push(`interactionGroups[${index}].items`);
+      }
+    }
+  }
+  if (prototypeNote.designPrinciples.length === 0) {
+    missing.push('designPrinciples');
+  }
+  if (!prototypeNote.currentState) missing.push('currentState');
+  return missing;
 }
 
 function tokenize(text) {
@@ -274,6 +380,9 @@ function buildCarryForwardMaterial(recommendation, issueMeta, claims) {
 
 function artifactThreshold(suggestedArtifact) {
   const lower = suggestedArtifact.toLowerCase();
+  if (lower.includes('prototype-note') || lower.includes('prototype note')) {
+    return ARTIFACT_THRESHOLDS['prototype-note'];
+  }
   if (lower.includes('note')) return ARTIFACT_THRESHOLDS.note;
   if (lower.includes('field report') || lower.includes('field-report')) {
     return ARTIFACT_THRESHOLDS['field-report'];
@@ -646,7 +755,12 @@ function validateRecommendation(rec) {
   }
 }
 
-function buildRecommendedStructure(recommendation, draftReadiness, claims) {
+function buildRecommendedStructure(
+  recommendation,
+  draftReadiness,
+  claims,
+  approvedArtifactType,
+) {
   if (draftReadiness === 'combine-first') {
     return [
       'Preserve source issue examples and framing as supporting material',
@@ -658,6 +772,16 @@ function buildRecommendedStructure(recommendation, draftReadiness, claims) {
     return [
       'Maintain as seed until primary sources are verified',
       'Separate verified observations from inference after source review',
+    ];
+  }
+  if (approvedArtifactType === 'prototype-note') {
+    return [
+      'The design problem',
+      'The interaction choice',
+      'How the control surface is grouped',
+      'Why it matters',
+      'Current state',
+      'Remaining questions',
     ];
   }
   return [
@@ -741,6 +865,8 @@ function buildPacket({
   sotSummaries,
   sourceSufficiency,
   draftReadiness,
+  approvedArtifactType,
+  prototypeNote,
 }) {
   const workingTitle = deriveWorkingTitle(issueMeta, recommendation);
   const centralTension = deriveCentralTension(claims, recommendation, sourceSufficiency);
@@ -755,7 +881,7 @@ function buildPacket({
         issueMeta.url ||
         `https://github.com/MLX983/dfw-intake/issues/${recommendation.issueNumber}`,
     },
-    approvedArtifactType: recommendation.suggestedArtifact,
+    approvedArtifactType,
     primaryDomain: recommendation.primaryDomain,
     theme: recommendation.themeOrCluster || '',
     workingTitle,
@@ -767,7 +893,12 @@ function buildPacket({
     sourceRequirements: [],
     evidenceGaps: [],
     relatedMaterial,
-    recommendedStructure: buildRecommendedStructure(recommendation, draftReadiness, claims),
+    recommendedStructure: buildRecommendedStructure(
+      recommendation,
+      draftReadiness,
+      claims,
+      approvedArtifactType,
+    ),
     unresolvedQuestions: [
       ...claims.unresolvedQuestions,
       recommendation.uncertaintyOrReviewFlag,
@@ -780,6 +911,10 @@ function buildPacket({
       missingElements: sourceSufficiency.missingElements,
     },
   };
+
+  if (approvedArtifactType === 'prototype-note') {
+    packet.prototypeNote = prototypeNote;
+  }
 
   if (draftReadiness === 'combine-first') {
     packet.combinationPlan = buildCombinationPlan(
@@ -824,6 +959,12 @@ function buildPacket({
   );
 
   packet.blockingCondition = buildBlockingCondition(packet);
+  if (
+    approvedArtifactType === 'prototype-note' &&
+    packet.blockingCondition === null
+  ) {
+    delete packet.blockingCondition;
+  }
   return packet;
 }
 
@@ -895,6 +1036,20 @@ function validatePacket(packet) {
   }
   if (packet.draftReadiness === 'ready' && packet.sourceSufficiency.status !== 'sufficient') {
     throw new Error('ready packet requires sourceSufficiency.status = sufficient');
+  }
+  if (packet.approvedArtifactType === 'prototype-note') {
+    const missing = missingPrototypeGrounding(packet.prototypeNote ?? {
+      designProblem: '',
+      interactionChoice: '',
+      interactionGroups: [],
+      designPrinciples: [],
+      currentState: '',
+    });
+    if (missing.length > 0) {
+      throw new Error(
+        `Prototype-note grounding is incomplete. Missing: ${missing.join(', ')}`,
+      );
+    }
   }
 }
 
@@ -979,6 +1134,9 @@ async function main() {
   const issueMeta = extractIssueMetadata(issueBody);
   const recommendation = await readJson(recommendationPath);
   validateRecommendation(recommendation);
+  const approvedArtifactType = canonicalArtifactType(
+    recommendation.suggestedArtifact,
+  );
 
   if (issueMeta.number && recommendation.issueNumber !== issueMeta.number) {
     throw new Error(
@@ -987,6 +1145,17 @@ async function main() {
   }
 
   const claims = parseLabeledClaims(issueMeta.rawBody);
+  const prototypeNote = approvedArtifactType === 'prototype-note'
+    ? extractPrototypeNote(issueMeta.rawBody)
+    : null;
+  if (prototypeNote) {
+    const missing = missingPrototypeGrounding(prototypeNote);
+    if (missing.length > 0) {
+      throw new Error(
+        `Prototype-note grounding is incomplete. Missing: ${missing.join(', ')}`,
+      );
+    }
+  }
 
   const pinned = [];
   const targetRef = parseIssueReference(recommendation);
@@ -1053,6 +1222,8 @@ async function main() {
     sotSummaries,
     sourceSufficiency,
     draftReadiness,
+    approvedArtifactType,
+    prototypeNote,
   });
 
   validatePacket(packet);

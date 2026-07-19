@@ -162,10 +162,57 @@
         }
       }
     },
+    "prototypeNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "designProblem",
+        "interactionChoice",
+        "interactionGroups",
+        "designPrinciples",
+        "currentState"
+      ],
+      "properties": {
+        "designProblem": { "type": "string", "minLength": 1 },
+        "interactionChoice": { "type": "string", "minLength": 1 },
+        "interactionGroups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "items"],
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "designPrinciples": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "currentState": { "type": "string", "minLength": 1 }
+      }
+    },
     "blockingCondition": {
       "type": "string",
       "minLength": 1,
       "description": "Human-readable explanation when draftReadiness is not ready."
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "approvedArtifactType": { "const": "prototype-note" } },
+        "required": ["approvedArtifactType"]
+      },
+      "then": { "required": ["prototypeNote"] }
+    }
+  ]
 }

@@ -10,8 +10,8 @@ const base = process.argv[2] || '/tmp/dfw-orchestration-fixtures';
 const cases = JSON.parse(await fs.readFile(path.join(root, 'scripts/fixtures/orchestration/cases.json'), 'utf8'));
 let failures = 0;
 
-async function rewriteEvaluation(outRoot, updates) {
-  const evaluationPath = path.join(outRoot, 'loop4', 'loop4-9201-evaluation.json');
+async function rewriteEvaluation(outRoot, updates, issueNumber = 9201) {
+  const evaluationPath = path.join(outRoot, 'loop4', `loop4-${issueNumber}-evaluation.json`);
   const evaluation = JSON.parse(await fs.readFile(evaluationPath, 'utf8'));
   Object.assign(evaluation, updates);
   const bytes = Buffer.from(`${JSON.stringify(evaluation, null, 2)}\n`);
@@ -28,7 +28,9 @@ async function mutateDraftAndRefreshLoop3(outRoot, addition) {
   await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 }
 
-function fixtureObserver(scenario) {
+function fixtureObserver(fixture) {
+  const { scenario } = fixture;
+  const issueNumber = fixture.issueNumber ?? 9201;
   return async ({ stage, outRoot }) => {
     if (stage === 'loop3') {
       if (scenario === 'loop4-integrity-failure') {
@@ -42,6 +44,7 @@ function fixtureObserver(scenario) {
       }
     }
     if (stage === 'loop4') {
+      if (scenario === 'prototype-note-pass') await rewriteEvaluation(outRoot, { verdict: 'PASS_TO_HUMAN', blockingProblems: [], revisionInstructions: [] }, issueNumber);
       if (scenario === 'loop4-pass') await rewriteEvaluation(outRoot, { verdict: 'PASS_TO_HUMAN', blockingProblems: [], revisionInstructions: [] });
       if (scenario === 'loop4-hold') await rewriteEvaluation(outRoot, { verdict: 'HOLD', blockingProblems: ['Sanitized orchestration hold fixture.'], revisionInstructions: [] });
       if (scenario === 'loop5-revised') await rewriteEvaluation(outRoot, { verdict: 'REVISE', blockingProblems: [], revisionInstructions: ['Remove the repeated paragraph and keep the first instance.'] });
@@ -57,10 +60,18 @@ function fixtureObserver(scenario) {
 await fs.mkdir(base, { recursive: true });
 for (const fixture of cases) {
   const outRoot = path.join(base, fixture.name);
+  await fs.rm(outRoot, { recursive: true, force: true });
   const blocked = fixture.scenario === 'loop3-blocked';
-  const packetPath = path.join(root, `scripts/fixtures/loop3/${blocked ? 'packet-research-required.json' : 'packet-ready-note.json'}`);
-  const issuePath = path.join(root, `scripts/fixtures/loop3/${blocked ? 'issue-fixture.md' : 'issue-ready-note.md'}`);
-  const recommendationPath = path.join(root, `scripts/fixtures/loop3/${blocked ? 'recommendation-fixture.json' : 'recommendation-ready-note.json'}`);
+  const prototype = fixture.scenario === 'prototype-note-pass';
+  const packetPath = prototype
+    ? path.join(root, 'scripts/fixtures/loop3/packet-ready-prototype-note.json')
+    : path.join(root, `scripts/fixtures/loop3/${blocked ? 'packet-research-required.json' : 'packet-ready-note.json'}`);
+  const issuePath = prototype
+    ? path.join(root, 'scripts/fixtures/loop3/issue-ready-prototype-note.md')
+    : path.join(root, `scripts/fixtures/loop3/${blocked ? 'issue-fixture.md' : 'issue-ready-note.md'}`);
+  const recommendationPath = prototype
+    ? path.join(root, 'scripts/fixtures/loop3/recommendation-ready-prototype-note.json')
+    : path.join(root, `scripts/fixtures/loop3/${blocked ? 'recommendation-fixture.json' : 'recommendation-ready-note.json'}`);
   let humanInputPath = '';
   if (fixture.scenario === 'valid-human-input') {
     humanInputPath = path.join(outRoot, 'human-input.json');
@@ -69,7 +80,7 @@ for (const fixture of cases) {
   }
   let result;
   try {
-    result = await orchestrate({ packetPath, issuePath, recommendationPath, humanInputPath, outRoot, afterStage: fixtureObserver(fixture.scenario) });
+    result = await orchestrate({ packetPath, issuePath, recommendationPath, humanInputPath, outRoot, afterStage: fixtureObserver(fixture) });
   } catch (error) {
     console.error(`FAIL ${fixture.name}: ${error.message}`); failures += 1; continue;
   }

@@ -8,5 +8,6 @@
   { "name": "loop5-blocked", "scenario": "loop5-blocked", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop5", "loop5Expected": true },
   { "name": "loop4-integrity-failure", "scenario": "loop4-integrity-failure", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop4", "loop5Expected": false },
   { "name": "loop5-integrity-failure", "scenario": "loop5-integrity-failure", "expectedStatus": "BLOCKED", "stoppedAtStage": "loop5", "loop5Expected": true },
-  { "name": "valid-human-input", "scenario": "valid-human-input", "expectedStatus": "REVISED_STILL_NEEDS_WORK", "stoppedAtStage": "loop4-reevaluation", "loop5Expected": true }
+  { "name": "valid-human-input", "scenario": "valid-human-input", "expectedStatus": "REVISED_STILL_NEEDS_WORK", "stoppedAtStage": "loop4-reevaluation", "loop5Expected": true },
+  { "name": "prototype-note-pass", "scenario": "prototype-note-pass", "issueNumber": 9601, "expectedStatus": "READY_FOR_HUMAN_EDITORIAL_REVIEW", "stoppedAtStage": "loop4", "loop5Expected": false }
 ]

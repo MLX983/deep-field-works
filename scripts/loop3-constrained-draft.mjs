@@ -24,10 +24,11 @@ const PACKET_SCHEMA_REQUIRED = [
   'centralTension',
 ];
 
-const SUPPORTED_ARTIFACTS = new Set(['note', 'field-report']);
+const SUPPORTED_ARTIFACTS = new Set(['note', 'field-report', 'prototype-note']);
 const TARGET_WORD_RANGES = {
   note: { min: 200, max: 600 },
   'field-report': { min: 500, max: 1200 },
+  'prototype-note': { min: 300, max: 800 },
 };
 
 const NOTE_SECTIONS = [
@@ -159,6 +160,7 @@ function normalizeArtifactType(approvedArtifactType) {
   const lower = approvedArtifactType.toLowerCase().trim();
   if (lower === 'note') return 'note';
   if (lower === 'field-report' || lower === 'field report') return 'field-report';
+  if (lower === 'prototype-note' || lower === 'prototype note') return 'prototype-note';
   return null;
 }
 
@@ -197,6 +199,9 @@ function evaluateHardGate(packet, recommendation) {
     failures.push(
       `approved artifact type "${packet.approvedArtifactType}" is not supported in Loop 3 MVP`,
     );
+  }
+  if (artifactType === 'prototype-note' && !packet.prototypeNote) {
+    failures.push('prototype-note packet is missing the required prototypeNote grounding object');
   }
 
   return { passed: failures.length === 0, failures, artifactType };
@@ -434,10 +439,73 @@ function buildFieldReportBody(packet) {
   };
 }
 
+function buildPrototypeNoteBody(packet) {
+  const title = packet.workingTitle || packet.issueReference.title;
+  const prototype = packet.prototypeNote;
+  const groups = prototype.interactionGroups.flatMap((group) => [
+    `### ${group.title}`,
+    '',
+    ...group.items.map((item) => `- ${item}`),
+    '',
+  ]);
+  const { readerFacing, editorialWorkflowNotes } = partitionPacketGaps(packet);
+  const remaining = readerFacingItems(packet.unresolvedQuestions);
+  const why = [packet.centralTension, ...prototype.designPrinciples].filter(Boolean);
+  const markdownParts = [
+    `# ${title}`,
+    '',
+    '## The design problem',
+    '',
+    prototype.designProblem,
+    '',
+    '## The interaction choice',
+    '',
+    prototype.interactionChoice,
+    '',
+    '## How the control surface is grouped',
+    '',
+    ...groups,
+    '## Why it matters',
+    '',
+    paragraphize(why),
+    '',
+    '## Current state',
+    '',
+    prototype.currentState,
+    '',
+  ];
+  if (remaining.length) {
+    markdownParts.push('## Remaining questions', '', paragraphize(remaining), '');
+  }
+  return {
+    sections: [
+      'title', 'the design problem', 'the interaction choice',
+      'how the control surface is grouped', 'why it matters', 'current state',
+      ...(remaining.length ? ['remaining questions'] : []),
+    ],
+    markdown: markdownParts.join('\n'),
+    claimsUsed: [
+      prototype.designProblem,
+      prototype.interactionChoice,
+      ...prototype.interactionGroups.flatMap((group) => group.items),
+      ...prototype.designPrinciples,
+      prototype.currentState,
+      packet.centralTension,
+    ].filter(Boolean),
+    speculationIncluded: [...packet.speculation],
+    readerFacingGapsPreserved: readerFacing,
+    editorialWorkflowNotesOmitted: editorialWorkflowNotes,
+    blockedContentOmitted: [...(packet.sourceRequirements ?? [])],
+  };
+}
+
 function buildDraft(packet, artifactType, issueMeta) {
   const frontmatter = buildFrontmatter(packet, artifactType, issueMeta);
-  const body =
-    artifactType === 'field-report' ? buildFieldReportBody(packet) : buildNoteBody(packet);
+  const body = artifactType === 'field-report'
+    ? buildFieldReportBody(packet)
+    : artifactType === 'prototype-note'
+      ? buildPrototypeNoteBody(packet)
+      : buildNoteBody(packet);
   const markdown = `${renderFrontmatter(frontmatter)}\n\n${body.markdown}`;
   return { frontmatter, ...body, markdown };
 }
@@ -457,6 +525,11 @@ function allowedClaimCorpus(packet, relatedTexts = []) {
     ...packet.unresolvedQuestions,
     ...packet.evidenceGaps,
     ...(packet.relatedMaterial ?? []).map((item) => `${item.reference} ${item.note ?? ''}`),
+    packet.prototypeNote?.designProblem,
+    packet.prototypeNote?.interactionChoice,
+    ...(packet.prototypeNote?.interactionGroups ?? []).flatMap((group) => [group.title, ...group.items]),
+    ...(packet.prototypeNote?.designPrinciples ?? []),
+    packet.prototypeNote?.currentState,
     ...relatedTexts,
   ];
   return chunks.filter(Boolean).map(normalizeText);

@@ -97,7 +97,7 @@ function sentences(body) {
 
 function classifyInstruction(instruction) {
   const text = normalize(instruction);
-  if (/\b(?:turn|convert|change)\b.*\b(?:note|field report)\b.*\b(?:essay|field report|note)\b/.test(text) ||
+  if (/\b(?:turn|convert|change)\b.*\b(?:note|field report|prototype note)\b.*\b(?:essay|field report|prototype note|note)\b/.test(text) ||
       /\b(?:research|invent|add statistics|add facts|unsupported facts|unsupported factual claims|change the approved domain|change the domain|change the artifact type|reclassify|publish)\b/.test(text)) {
     return { instruction, classification: 'UNSAFE_OR_OUT_OF_SCOPE', reason: 'The instruction requires research, invention, publication, or a change to approved scope or classification.' };
   }
@@ -162,7 +162,10 @@ function packetCorpus(packet) {
   return [packet.workingTitle, packet.readerQuestion, packet.centralTension,
     ...(packet.verifiedObservations ?? []), ...(packet.inferences ?? []),
     ...(packet.speculation ?? []), ...(packet.unresolvedQuestions ?? []),
-    ...(packet.evidenceGaps ?? [])].filter(Boolean).join(' ');
+    ...(packet.evidenceGaps ?? []), packet.prototypeNote?.designProblem,
+    packet.prototypeNote?.interactionChoice,
+    ...(packet.prototypeNote?.interactionGroups ?? []).flatMap((group) => [group.title, ...group.items]),
+    ...(packet.prototypeNote?.designPrinciples ?? []), packet.prototypeNote?.currentState].filter(Boolean).join(' ');
 }
 
 function applyInstruction(body, classification, packet) {
@@ -178,7 +181,11 @@ function applyInstruction(body, classification, packet) {
   if (/\bexpand\b.*\bexisting\b/.test(text)) {
     const candidate = [packet.centralTension, ...(packet.inferences ?? [])].find((item) => item && !normalize(body).includes(normalize(item)));
     if (!candidate) return { body, changed: false, change: '', removed: [], added: [] };
-    const marker = body.includes('## Current interpretation') ? '## Current interpretation' : '## Why it may matter';
+    const marker = body.includes('## Current interpretation')
+      ? '## Current interpretation'
+      : body.includes('## Why it matters')
+        ? '## Why it matters'
+        : '## Why it may matter';
     const index = body.indexOf(marker);
     if (index < 0) return { body, changed: false, change: '', removed: [], added: [] };
     const next = body.indexOf('\n## ', index + marker.length);

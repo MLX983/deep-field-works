@@ -106,5 +106,26 @@
     "centralTension": "Coordination can be delegated while judgment remains accountable.",
     "approvedMaterial": ["Coordination can be delegated while judgment remains accountable.", "Where should judgment return?"],
     "body": "# Coordination and judgment\n\nCoordination can be delegated while judgment remains accountable.\n\n## Why it may matter\n\nJudgment remains accountable.\n\n## Current interpretation\n\nCoordination can be delegated.\n\n## Open question\n\nWhere should judgment return?"
+  },
+  {
+    "name": "prototype-note-generic-cleanup",
+    "issueNumber": 9509,
+    "artifactType": "prototype-note",
+    "expectedStatus": "REVISED",
+    "verdict": "REVISE",
+    "instructions": ["Remove the generic AI setup while retaining the grounded observation."],
+    "title": "A visible authority control",
+    "description": "A proposed control surface for making delegated authority visible.",
+    "readerQuestion": "Can delegated authority remain visible?",
+    "centralTension": "Delegated authority needs a visible control boundary.",
+    "approvedMaterial": ["In today's rapidly changing world, AI unlocks new possibilities.", "Delegated authority needs a visible control boundary.", "Can delegated authority remain visible?"],
+    "prototypeNote": {
+      "designProblem": "Delegated authority needs a visible control boundary.",
+      "interactionChoice": "The screen groups knowledge, access, and action rules.",
+      "interactionGroups": [{ "title": "Actions", "items": ["Actions can be allowed, blocked, or returned for approval."] }],
+      "designPrinciples": ["The boundary stays visible."],
+      "currentState": "This is a proposed screen."
+    },
+    "body": "# A visible authority control\n\nIn today's rapidly changing world, AI unlocks new possibilities. Delegated authority needs a visible control boundary.\n\n## The design problem\n\nDelegated authority needs a visible control boundary.\n\n## The interaction choice\n\nThe screen groups knowledge, access, and action rules.\n\n## How the control surface is grouped\n\n### Actions\n\n- Actions can be allowed, blocked, or returned for approval.\n\n## Why it matters\n\nThe boundary stays visible.\n\n## Current state\n\nThis is a proposed screen.\n\n## Remaining questions\n\nCan delegated authority remain visible?"
   }
 ]

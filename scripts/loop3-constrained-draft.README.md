@@ -19,7 +19,7 @@ Refuses to draft unless **all** are true:
 | Loop 1 recommendation | `humanApprovalStatus: approved` (via `--recommendation`) |
 | `blockingCondition` | absent / null |
 | `sourceRequirements` | empty |
-| Artifact type | `note` or `field-report` only |
+| Artifact type | `note`, `field-report`, or `prototype-note` only |
 
 On refusal: clear blocking message, no article prose, exit code `2`.
 
@@ -29,8 +29,27 @@ On refusal: clear blocking message, no article prose, exit code `2`.
 |------|-------------------|
 | **note** | title, opening observation/question, why it may matter, current interpretation, open question |
 | **field-report** | title, the signal, why it may matter, deeper tension, what is not being said, what to watch next |
+| **prototype-note** | title, design problem, interaction choice, grouped controls, why it matters, current state, remaining questions |
 
 Essays and other artifact types are **rejected explicitly**.
+
+## Future enhancement: Extend Loops 3–5 for prototype-note, concept, and essay artifacts
+
+Current first-class drafting and evaluation support began with `note` and
+`field-report`. The planned expansion adds `prototype-note`, `concept`, and
+`essay` with distinct drafting structures, required and optional sections,
+length guidance, grounding requirements, Loop 4 evaluation criteria, Loop 5
+revision boundaries, type-specific fixtures, and full-page preview behavior.
+
+Implementation order is `prototype-note` → `concept` → `essay`. A
+`prototype-note` records a specific screen, interaction, state, design choice,
+or proposed prototype behavior. A `concept` defines durable reusable vocabulary
+or a framework. An `essay` develops a larger sourced argument with a reader
+question, central tension, evidence, counterargument, and durable takeaway.
+
+This section is the roadmap for all three types. `prototype-note` is the first
+implemented expansion; `concept` and `essay` remain roadmap-only and must not
+inherit the prototype-note structure by default.
 
 ## Inputs
 
@@ -111,6 +130,9 @@ npm run loop:draft -- \
   --issue scripts/fixtures/loop3/issue-ready-note.md \
   --recommendation scripts/fixtures/loop3/recommendation-ready-note.json \
   --out-dir /tmp/dfw-loop3-smoke/ready
+
+# Sanitized prototype-note fixture
+npm run loop:draft:fixtures
 
 # Real evaluation (#18)
 npm run loop:draft -- \

@@ -8,10 +8,18 @@ import { isSha256, sha256Bytes, sha256Combined } from './lib/content-fingerprint
 const ROOT = process.cwd();
 const CONTRACT = 'loop4-editorial-evaluation.v1';
 const VERDICTS = new Set(['PASS_TO_HUMAN', 'REVISE', 'HOLD']);
-const TARGETS = { note: [200, 600], 'field-report': [500, 1200] };
+const TARGETS = { note: [200, 600], 'field-report': [500, 1200], 'prototype-note': [300, 800] };
 const REQUIRED_SECTIONS = {
   note: [['why it may matter'], ['current interpretation'], ['open question']],
   'field-report': [['the signal'], ['why it may matter'], ['the deeper tension'], ['what to watch next']],
+  'prototype-note': [
+    ['the design problem'],
+    ['the interaction choice'],
+    ['how the control surface is grouped'],
+    ['why it matters'],
+    ['current state'],
+    ['remaining questions'],
+  ],
 };
 const SOURCE_OF_TRUTH = [
   'docs/source-of-truth/editorial-guidelines.md',
@@ -195,6 +203,11 @@ function unsupportedClaims(body, packet) {
     ...(packet.speculation ?? []),
     ...(packet.unresolvedQuestions ?? []),
     ...(packet.evidenceGaps ?? []),
+    packet.prototypeNote?.designProblem,
+    packet.prototypeNote?.interactionChoice,
+    ...(packet.prototypeNote?.interactionGroups ?? []).flatMap((group) => [group.title, ...group.items]),
+    ...(packet.prototypeNote?.designPrinciples ?? []),
+    packet.prototypeNote?.currentState,
   ].filter(Boolean).join(' ');
   const errors = [];
   for (const sentence of sentences(body)) {
@@ -212,6 +225,10 @@ function unsupportedClaims(body, packet) {
 
 function hasConcreteExample(body) {
   return /\b(?:for example|for instance|a manager|a (?:project )?team|an employee|a designer|a developer|a worker|in a workplace|in practice|when [a-z]+ (?:uses|reviews|learns|moves|delegates)|before\/after)\b/i.test(body);
+}
+
+function hasPrototypeInteractionExample(body) {
+  return /^###\s+.+$/m.test(body) && /^\s*-\s+.+$/m.test(body);
 }
 
 function repetitionRisk(body) {
@@ -256,19 +273,30 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
 
   const [min, max] = TARGETS[type] ?? [0, Infinity];
   const words = wordCount(body);
-  if (!hasConcreteExample(body)) {
-    risks.push('The abstract distinction lacks a concrete operational example.');
-    revisions.push(packet.issueReference?.number === 18
-      ? 'Add one concrete workplace or training example showing a tool-specific skill decaying while a more durable judgment skill remains useful.'
-      : 'Add one concrete workplace or training example showing the central distinction in action; source the example from human editorial judgment rather than inventing it in Loop 4.');
-  } else strengths.push('A concrete operational example makes the abstract shift visible.');
+  const exampleVisible = type === 'prototype-note'
+    ? hasPrototypeInteractionExample(body)
+    : hasConcreteExample(body);
+  if (!exampleVisible) {
+    risks.push(type === 'prototype-note'
+      ? 'The proposed interaction lacks a concrete control, state, or grouped interface example.'
+      : 'The abstract distinction lacks a concrete operational example.');
+    revisions.push(type === 'prototype-note'
+      ? 'Add one packet-grounded control, state, or interface group that makes the proposed interaction inspectable; do not invent tested behavior.'
+      : packet.issueReference?.number === 18
+        ? 'Add one concrete workplace or training example showing a tool-specific skill decaying while a more durable judgment skill remains useful.'
+        : 'Add one concrete workplace or training example showing the central distinction in action; source the example from human editorial judgment rather than inventing it in Loop 4.');
+  } else strengths.push(type === 'prototype-note'
+    ? 'Concrete controls and states make the proposed interaction inspectable.'
+    : 'A concrete operational example makes the abstract shift visible.');
 
   if (words < min) {
     risks.push(`Body length is ${words} words, below the ${min}–${max} target for ${type}.`);
     const counts = sectionWordCounts(body);
     const functionalMinimums = type === 'note'
       ? [['why it may matter', 15], ['current interpretation', 10], ['open question', 4]]
-      : [['the signal', 35], ['why it may matter', 20], ['the deeper tension', 20], ['what to watch next', 8]];
+      : type === 'prototype-note'
+        ? [['the design problem', 20], ['the interaction choice', 20], ['why it matters', 20], ['current state', 8], ['remaining questions', 8]]
+        : [['the signal', 35], ['why it may matter', 20], ['the deeper tension', 20], ['what to watch next', 8]];
     for (const [section, minimumWords] of functionalMinimums) {
       if (counts.has(section) && counts.get(section) < minimumWords) {
         revisions.push(`Develop the “${section}” section enough to perform its editorial function using only packet-grounded material; do not pad to meet a numeric target.`);
@@ -278,7 +306,7 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
     risks.push(`Body length is ${words} words, above the ${min}–${max} target for ${type}.`);
   } else strengths.push(`Body length (${words} words) fits the ${type} target.`);
 
-  if (!questionVisible && tensionVisible && !hasConcreteExample(body)) {
+  if (!questionVisible && tensionVisible && !exampleVisible) {
     revisions.push('Recheck whether the opening creates enough tension after the example is added; revise only if the central question remains unclear.');
   } else if (!questionVisible) {
     revisions.push('State the packet’s reader question or its direct equivalent near the opening.');
