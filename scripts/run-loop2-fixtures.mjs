@@ -87,6 +87,11 @@ try {
     true,
     `Generated prototype packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
   );
+  assert.equal(
+    Object.hasOwn(generatedPacket, 'blockingCondition'),
+    false,
+    'Ready prototype packet must omit blockingCondition',
+  );
   assert.equal(generatedPacket.approvedArtifactType, 'prototype-note');
   assert.deepEqual(generatedPacket.prototypeNote, expectedPacket.prototypeNote);
   await fs.access(path.join(validOut, 'loop2-9601-summary.md'));
@@ -233,6 +238,28 @@ try {
       fixture.expectedReadiness,
       fixture.name,
     );
+    assert.equal(
+      validate(casePacket),
+      true,
+      `${fixture.name}: packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
+    );
+    if (fixture.expectedReadiness === 'ready') {
+      assert.equal(
+        Object.hasOwn(casePacket, 'blockingCondition'),
+        false,
+        `${fixture.name}: ready packet must omit blockingCondition`,
+      );
+    } else {
+      assert.equal(
+        typeof casePacket.blockingCondition,
+        'string',
+        `${fixture.name}: blocked packet must include a string blockingCondition`,
+      );
+      assert.ok(
+        casePacket.blockingCondition.length > 0,
+        `${fixture.name}: blockingCondition must be non-empty`,
+      );
+    }
     console.log(
       `PASS non-prototype-${fixture.name}: ${fixture.expectedReadiness}`,
     );

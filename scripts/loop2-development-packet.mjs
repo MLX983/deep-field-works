@@ -989,12 +989,9 @@ function buildPacket({
     })),
   );
 
-  packet.blockingCondition = buildBlockingCondition(packet);
-  if (
-    approvedArtifactType === 'prototype-note' &&
-    packet.blockingCondition === null
-  ) {
-    delete packet.blockingCondition;
+  const blockingCondition = buildBlockingCondition(packet);
+  if (blockingCondition !== null) {
+    packet.blockingCondition = blockingCondition;
   }
   return packet;
 }
