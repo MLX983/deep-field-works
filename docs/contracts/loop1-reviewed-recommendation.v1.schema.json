@@ -82,6 +82,11 @@
       },
       "description": "Pointers to related backlog or published material. Omit when empty."
     },
+    "combineTargetReference": {
+      "type": "string",
+      "pattern": "^#[1-9][0-9]*$",
+      "description": "Explicit target issue for an approved combine disposition. Omit for related-but-separate material."
+    },
     "nextAction": {
       "type": "string",
       "minLength": 1,

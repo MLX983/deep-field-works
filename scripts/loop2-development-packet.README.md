@@ -125,7 +125,11 @@ Loop 2 retrieves from:
 
 Retrieval prefers content-bearing text from titles, excerpts, and body content. It down-weights broad metadata terms (`dfw`, `intake`, `issue`, `seed`, etc.) and does not rank primarily on labels or filenames.
 
-Pinned combine targets from `relatedMaterial` (`#21`, `#20`) are loaded from the intake cache when available.
+Approved combine targets are selected by `combineTargetReference` and loaded
+from the intake cache when available. For backward compatibility, a combine
+disposition with exactly one `#N` related-material reference can still use that
+unambiguous reference as its target. Other issue references remain related
+material and do not imply combine intent.
 
 ## Draft readiness rules
 
@@ -134,7 +138,7 @@ Loop 2 does **not** map disposition directly to `draftReadiness`. Disposition is
 ### Decision order
 
 1. `not-for-publication` — operational or administrative material
-2. `combine-first` — combine disposition, named `#N` destination, or duplicate cluster override
+2. `combine-first` — approved combine disposition with a resolved target
 3. `research-required` — research disposition, unverified external claims, or verification flags
 4. `insufficient-material` — thin source, partial sufficiency, or non-develop dispositions
 5. `ready` — develop independently **and** `sourceSufficiency.status = sufficient` **and** no blockers
@@ -191,6 +195,11 @@ Packet must include `combinationPlan` with:
 - `materialToCarryForward`
 - `doNotStandalone: true`
 
+The reviewed recommendation should provide `combineTargetReference` when more
+than one issue appears in `relatedMaterial`. Exact issue references identify
+artifacts; only the approved combine disposition and resolved target assign the
+`combine-target` role.
+
 ### research-required requirements
 
 Packet must include:
@@ -209,7 +218,7 @@ Tracked under `scripts/fixtures/loop2-adversarial/`:
 | thin body + develop independently | `insufficient-material` |
 | unverified external + develop independently | `research-required` |
 | bounded ready note | `ready` |
-| duplicate cluster + `#21` target | `combine-first` |
+| approved combine disposition + `#21` target | `combine-first` |
 
 Prototype-note fixtures additionally verify:
 

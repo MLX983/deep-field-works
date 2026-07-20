@@ -51,6 +51,11 @@ const DISPOSITION_HINTS = {
   'not for publication': 'not-for-publication',
 };
 
+const COMBINE_DISPOSITIONS = new Set([
+  'combine with existing material',
+  'combine with overlapping material',
+]);
+
 const UNVERIFIED_EXTERNAL_PATTERNS = [
   /\b(?:google|meta|microsoft|openai|anthropic|tesla|apple)\b/i,
   /\b(?:announced|announcement|reported|according to|the article|press release)\b/i,
@@ -473,29 +478,6 @@ function detectUnverifiedExternalDeps(rawBody, claims) {
   return [...new Set(hits)];
 }
 
-function jaccardSimilarity(a, b) {
-  if (a.size === 0 || b.size === 0) return 0;
-  let overlap = 0;
-  for (const token of a) if (b.has(token)) overlap += 1;
-  return overlap / (a.size + b.size - overlap);
-}
-
-function detectDuplicateCluster(issueMeta, targetIssue) {
-  if (!targetIssue?.meta?.rawBody) return false;
-  const sourceTokens = new Set(tokenize(issueMeta.rawBody));
-  const targetTokens = new Set(tokenize(targetIssue.meta.rawBody));
-  const similarity = jaccardSimilarity(sourceTokens, targetTokens);
-  const sharedThemes = [
-    'evaluation',
-    'loop',
-    'agent',
-    'memory',
-    'governance',
-    'agile',
-  ].filter((term) => issueMeta.rawBody.toLowerCase().includes(term) && targetIssue.meta.rawBody.toLowerCase().includes(term));
-  return similarity >= 0.08 || sharedThemes.length >= 2;
-}
-
 function centralTensionFromSource(claims) {
   if (claims.inferences[0]) return { value: claims.inferences[0], invented: false };
   if (claims.verifiedObservations[0]) return { value: claims.verifiedObservations[0], invented: false };
@@ -535,7 +517,10 @@ function assessSourceSufficiency({
     missingElements.push(`enough substance for approved artifact type (${recommendation.suggestedArtifact})`);
   }
 
-  if (tension.invented || !tension.value) {
+  const hasApprovedCentralTension = Boolean(
+    tension.value || recommendation.rationale?.trim(),
+  );
+  if (!hasApprovedCentralTension) {
     missingElements.push('identifiable central tension from source material');
   }
 
@@ -602,19 +587,12 @@ function reviewFlagRequiresResearch(flag) {
   });
 }
 
-function determineDraftReadiness(recommendation, sufficiency, targetRef, duplicateCluster) {
+function determineDraftReadiness(recommendation, sufficiency) {
   const disposition = recommendation.disposition;
 
   if (disposition === 'not for publication') return 'not-for-publication';
 
-  if (
-    disposition === 'combine with existing material' ||
-    disposition === 'combine with overlapping material'
-  ) {
-    return 'combine-first';
-  }
-
-  if (targetRef && duplicateCluster && disposition === 'develop independently') {
+  if (COMBINE_DISPOSITIONS.has(disposition)) {
     return 'combine-first';
   }
 
@@ -639,7 +617,6 @@ function determineDraftReadiness(recommendation, sufficiency, targetRef, duplica
   if (
     disposition === 'develop independently' &&
     sufficiency.status === 'sufficient' &&
-    !targetRef &&
     !sufficiency.speculationDraftingRisk
   ) {
     return 'ready';
@@ -678,13 +655,56 @@ function deriveReaderQuestion(issueMeta, recommendation, draftReadiness) {
   return `What should a reader understand about ${deriveWorkingTitle(issueMeta, recommendation)} within ${recommendation.primaryDomain}?`;
 }
 
-function parseIssueReference(recommendation) {
-  const refs = recommendation.relatedMaterial ?? [];
-  for (const item of refs) {
-    const match = item.reference.match(/^#(\d+)$/);
-    if (match) return { number: Number(match[1]), note: item.note ?? '' };
+function parseExactIssueReference(reference) {
+  const match = reference?.match(/^#([1-9]\d*)$/);
+  return match ? Number(match[1]) : null;
+}
+
+function resolveCombineTarget(recommendation) {
+  if (!COMBINE_DISPOSITIONS.has(recommendation.disposition)) return null;
+
+  if (recommendation.combineTargetReference) {
+    const number = parseExactIssueReference(
+      recommendation.combineTargetReference,
+    );
+    if (!number) {
+      throw new Error('combineTargetReference must be an exact #N reference');
+    }
+    const matchingRelatedMaterial = (recommendation.relatedMaterial ?? [])
+      .find((item) => parseExactIssueReference(item.reference) === number);
+    return {
+      number,
+      reference: `#${number}`,
+      note: matchingRelatedMaterial?.note ?? '',
+    };
   }
-  return null;
+
+  const issueReferences = [
+    ...new Set(
+      (recommendation.relatedMaterial ?? [])
+        .map((item) => parseExactIssueReference(item.reference))
+        .filter(Boolean),
+    ),
+  ];
+  if (issueReferences.length === 1) {
+    const number = issueReferences[0];
+    const matchingRelatedMaterial = recommendation.relatedMaterial.find(
+      (item) => parseExactIssueReference(item.reference) === number,
+    );
+    return {
+      number,
+      reference: `#${number}`,
+      note: matchingRelatedMaterial?.note ?? '',
+    };
+  }
+  if (issueReferences.length === 0) {
+    throw new Error(
+      'Combine disposition requires combineTargetReference or one exact #N related-material reference',
+    );
+  }
+  throw new Error(
+    'Combine disposition with multiple issue references requires combineTargetReference',
+  );
 }
 
 function relatedMaterialIdentity(item) {
@@ -878,6 +898,14 @@ function validateRecommendation(rec) {
   for (const key of required) {
     if (!rec[key]) throw new Error(`Recommendation missing required field: ${key}`);
   }
+  if (
+    rec.combineTargetReference &&
+    !COMBINE_DISPOSITIONS.has(rec.disposition)
+  ) {
+    throw new Error(
+      'combineTargetReference is only valid for an approved combine disposition',
+    );
+  }
 }
 
 function buildRecommendedStructure(
@@ -917,10 +945,15 @@ function buildRecommendedStructure(
   ].filter(Boolean);
 }
 
-function buildCombinationPlan(recommendation, issueMeta, claims, targetIssue) {
-  const targetRef = parseIssueReference(recommendation);
+function buildCombinationPlan(
+  recommendation,
+  issueMeta,
+  claims,
+  targetIssue,
+  targetRef,
+) {
   if (!targetRef) {
-    throw new Error('combine-first requires a #N target in recommendation.relatedMaterial');
+    throw new Error('combine-first requires an approved combine target');
   }
   const carryForward = buildCarryForwardMaterial(recommendation, issueMeta, claims);
   return {
@@ -948,7 +981,7 @@ function buildResearchPlan(recommendation, claims) {
   };
 }
 
-function buildBlockingCondition(packet) {
+function buildBlockingCondition(packet, recommendation) {
   const { draftReadiness } = packet;
   if (draftReadiness === 'ready') return null;
 
@@ -970,6 +1003,16 @@ function buildBlockingCondition(packet) {
   }
 
   if (draftReadiness === 'insufficient-material') {
+    if (
+      packet.sourceSufficiency?.missingElements?.length === 0 &&
+      (
+        recommendation.disposition === 'preserve as seed' ||
+        recommendation.disposition === 'defer' ||
+        recommendation.disposition === 'needs human judgment'
+      )
+    ) {
+      return 'Loop 2 stopped before drafting because the reviewed recommendation does not approve standalone development.';
+    }
     const gaps = packet.sourceSufficiency?.missingElements?.join('; ') || 'see sourceSufficiency';
     return `Loop 2 stopped before drafting because the source material is not yet sufficient for development. Missing: ${gaps}`;
   }
@@ -992,6 +1035,7 @@ function buildPacket({
   draftReadiness,
   approvedArtifactType,
   prototypeNote,
+  targetRef,
 }) {
   const workingTitle = deriveWorkingTitle(issueMeta, recommendation);
   const centralTension = deriveCentralTension(claims, recommendation, sourceSufficiency);
@@ -1047,6 +1091,7 @@ function buildPacket({
       issueMeta,
       claims,
       targetIssue,
+      targetRef,
     );
     packet.evidenceGaps = [
       recommendation.uncertaintyOrReviewFlag,
@@ -1083,7 +1128,7 @@ function buildPacket({
     })),
   );
 
-  const blockingCondition = buildBlockingCondition(packet);
+  const blockingCondition = buildBlockingCondition(packet, recommendation);
   if (blockingCondition !== null) {
     packet.blockingCondition = blockingCondition;
   }
@@ -1280,14 +1325,13 @@ async function main() {
   }
 
   const pinned = [];
-  const targetRef = parseIssueReference(recommendation);
+  const targetRef = resolveCombineTarget(recommendation);
   let targetIssue = null;
   if (targetRef?.number) {
     pinned.push(targetRef.number);
     targetIssue = await findIssueInCache(intakeCachePath, targetRef.number);
   }
 
-  const duplicateCluster = detectDuplicateCluster(issueMeta, targetIssue);
   const sourceSufficiency = assessSourceSufficiency({
     issueMeta,
     recommendation,
@@ -1298,8 +1342,6 @@ async function main() {
   const draftReadiness = determineDraftReadiness(
     recommendation,
     sourceSufficiency,
-    targetRef,
-    duplicateCluster,
   );
 
   const queryParts = [
@@ -1317,12 +1359,16 @@ async function main() {
   const relatedMaterialCandidates = [
     ...(recommendation.relatedMaterial ?? []).map((item) => ({
       reference: item.reference,
-      role: item.reference.startsWith('#') ? 'combine-target' : 'related-theme',
+      role:
+        targetRef &&
+        parseExactIssueReference(item.reference) === targetRef.number
+          ? 'combine-target'
+          : 'related-theme',
       note: item.note ?? '',
       notePriority: 2,
     })),
     ...ranked.map((match) => ({
-      reference: match.path,
+      reference: match.issueNumber ? `#${match.issueNumber}` : match.path,
       role: match.issueNumber ? 'related-backlog' : 'published-corpus',
       note: match.title,
       issueNumber: match.issueNumber,
@@ -1330,12 +1376,14 @@ async function main() {
     })),
   ];
 
-  if (targetIssue) {
+  if (targetRef) {
     relatedMaterialCandidates.unshift({
-      reference: `#${targetIssue.meta.number}`,
+      reference: targetRef.reference,
       role: 'combine-target',
-      note: targetIssue.meta.title.replace(/^\[DFW Intake\]\s*/i, ''),
-      issueNumber: targetIssue.meta.number,
+      note:
+        targetIssue?.meta.title.replace(/^\[DFW Intake\]\s*/i, '') ??
+        targetRef.note,
+      issueNumber: targetRef.number,
       notePriority: 1,
     });
   }
@@ -1353,6 +1401,7 @@ async function main() {
     draftReadiness,
     approvedArtifactType,
     prototypeNote,
+    targetRef,
   });
 
   validatePacket(packet);

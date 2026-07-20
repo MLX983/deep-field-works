@@ -6,6 +6,7 @@
   "primaryDomain": "Human-Machine Workflows",
   "themeOrCluster": "agent evaluation and loop engineering",
   "rationale": "The source should strengthen an existing evaluation-loop cluster without becoming a standalone artifact.",
+  "combineTargetReference": "#21",
   "relatedMaterial": [
     {
       "reference": "#21",

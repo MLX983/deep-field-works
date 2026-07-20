@@ -402,6 +402,183 @@ try {
     'PASS conceptual-assertion: empty verified observations preserve sufficiency and combine carry-forward material',
   );
 
+  const relatedSeparateOut = path.join(tempRoot, 'related-separate');
+  const relatedSeparateRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(adversarialFixtureRoot, 'issue-related-separate.md'),
+    '--recommendation',
+    path.join(
+      adversarialFixtureRoot,
+      'recommendation-related-separate.json',
+    ),
+    '--intake-cache',
+    path.join(adversarialFixtureRoot, 'related-material-cache'),
+    '--out-dir',
+    relatedSeparateOut,
+  ]);
+  assert.equal(
+    relatedSeparateRun.code,
+    2,
+    relatedSeparateRun.stderr || relatedSeparateRun.stdout,
+  );
+
+  const relatedSeparatePacket = JSON.parse(
+    await fs.readFile(
+      path.join(relatedSeparateOut, 'loop2-9108-packet.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(
+    validate(relatedSeparatePacket),
+    true,
+    `Generated related-but-separate packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
+  );
+  assert.equal(relatedSeparatePacket.approvedArtifactType, 'seed');
+  assert.equal(
+    relatedSeparatePacket.primaryDomain,
+    'Human-Machine Workflows',
+  );
+  assert.equal(
+    relatedSeparatePacket.theme,
+    'capability versus expertise and review burden',
+  );
+  assert.equal(relatedSeparatePacket.draftReadiness, 'insufficient-material');
+  assert.equal(
+    Object.hasOwn(relatedSeparatePacket, 'combinationPlan'),
+    false,
+    'Related issue identity must not create a combination plan',
+  );
+  assert.deepEqual(relatedSeparatePacket.verifiedObservations, []);
+  assert.ok(
+    relatedSeparatePacket.centralTension.includes(
+      'capability-versus-judgment tension',
+    ),
+    'Approved rationale must provide the conceptual central tension',
+  );
+  assert.equal(
+    relatedSeparatePacket.sourceSufficiency.missingElements.includes(
+      'identifiable central tension from source material',
+    ),
+    false,
+    'Sufficiency must recognize the approved central tension without treating it as verified evidence',
+  );
+  assert.equal(
+    relatedSeparatePacket.sourceSufficiency.reasons.some((reason) =>
+      /combin/i.test(reason)),
+    false,
+    'Ordinary related material must not introduce combine sufficiency reasons',
+  );
+  assert.equal(
+    relatedSeparatePacket.sourceSufficiency.missingElements.some((item) =>
+      /merge|destination/i.test(item)),
+    false,
+    'Ordinary related material must not introduce merge requirements',
+  );
+  assert.equal(
+    /combine|merge/i.test(relatedSeparatePacket.blockingCondition),
+    false,
+    'Related-but-separate blocker must not require combination',
+  );
+
+  const issue3Entries = relatedSeparatePacket.relatedMaterial.filter(
+    (item) => item.reference === '#3',
+  );
+  assert.equal(issue3Entries.length, 1);
+  assert.equal(issue3Entries[0].role, 'related-theme');
+  assert.match(issue3Entries[0].note, /not a combine target/);
+  assert.equal(
+    relatedSeparatePacket.relatedMaterial.some(
+      (item) => item.reference === '#9108',
+    ),
+    false,
+    'Active source issue must not relate to itself',
+  );
+  assert.equal(
+    relatedSeparatePacket.relatedMaterial.some(
+      (item) => item.reference.includes('related-material-cache'),
+    ),
+    false,
+    'Known cached issues must serialize with stable issue identity, not cache paths',
+  );
+  assert.ok(
+    relatedSeparatePacket.relatedMaterial.some(
+      (item) =>
+        item.reference === 'src/content/field-notes/skills-half-life.md' &&
+        item.role === 'related-theme',
+    ),
+    'Repository artifact references must preserve their stable repository path',
+  );
+  assert.equal(
+    relatedSeparatePacket.nextAction,
+    'Preserve this as a separate seed linked to Issue #3 and Skills half-life.',
+  );
+  console.log(
+    'PASS related-separate: exact issue identity remains related, central tension is consistent, and cached paths are portable',
+  );
+
+  const selfSourceRecommendationPath = path.join(
+    tempRoot,
+    'recommendation-self-source.json',
+  );
+  await fs.writeFile(
+    selfSourceRecommendationPath,
+    `${JSON.stringify({
+      contractVersion: 'loop1-reviewed-recommendation.v1',
+      issueNumber: 3,
+      disposition: 'preserve as seed',
+      suggestedArtifact: 'seed',
+      primaryDomain: 'Institutions in Transition',
+      rationale:
+        'The management-role question remains a separate seed related to, but not combined with, Issue #22.',
+      relatedMaterial: [
+        {
+          reference: '#22',
+          note: 'Related field record, not a combine target.',
+        },
+      ],
+      nextAction: 'Preserve the source as a separate seed.',
+      humanApprovalStatus: 'approved',
+    }, null, 2)}\n`,
+  );
+  const selfSourceOut = path.join(tempRoot, 'self-source');
+  const selfSourceRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(
+      adversarialFixtureRoot,
+      'related-material-cache',
+      '0003-changing-management-roles.md',
+    ),
+    '--recommendation',
+    selfSourceRecommendationPath,
+    '--intake-cache',
+    path.join(adversarialFixtureRoot, 'related-material-cache'),
+    '--out-dir',
+    selfSourceOut,
+  ]);
+  assert.equal(
+    selfSourceRun.code,
+    2,
+    selfSourceRun.stderr || selfSourceRun.stdout,
+  );
+  const selfSourcePacket = JSON.parse(
+    await fs.readFile(
+      path.join(selfSourceOut, 'loop2-3-packet.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(
+    selfSourcePacket.relatedMaterial.some(
+      (item) => item.reference === '#3',
+    ),
+    false,
+    'An issue read directly from the intake cache must remain excluded from its own related material',
+  );
+  console.log(
+    'PASS self-source: stable cached identity serialization does not reintroduce the active issue',
+  );
+
   const relatedMaterialOut = path.join(tempRoot, 'related-material-dedup');
   const relatedMaterialRun = await runNode([
     runnerPath,
@@ -468,8 +645,74 @@ try {
     similarTitleIssueEntries[1].note,
     /distinct field record/,
   );
+  assert.equal(
+    similarTitleIssueEntries[1].role,
+    'related-theme',
+    'Only the explicit target may receive combine-target role',
+  );
+  assert.equal(
+    relatedMaterialPacket.combinationPlan.targetReference,
+    '#21',
+  );
+  assert.equal(
+    relatedMaterialPacket.sourceSufficiency.reasons.some((reason) =>
+      /combined/i.test(reason)),
+    true,
+    'Genuine combine recommendation must retain its combine requirement',
+  );
+  assert.equal(
+    relatedMaterialPacket.relatedMaterial.some(
+      (item) => item.reference.includes('related-material-cache'),
+    ),
+    false,
+    'Ranked cached issues must serialize as stable #N identities',
+  );
   console.log(
     'PASS related-material-dedup: merged duplicate issue identity and preserved distinct similar title',
+  );
+
+  const ambiguousRecommendationPath = path.join(
+    tempRoot,
+    'recommendation-ambiguous-combine.json',
+  );
+  const ambiguousRecommendation = JSON.parse(
+    await fs.readFile(
+      path.join(
+        adversarialFixtureRoot,
+        'recommendation-related-material-dedup.json',
+      ),
+      'utf8',
+    ),
+  );
+  delete ambiguousRecommendation.combineTargetReference;
+  await fs.writeFile(
+    ambiguousRecommendationPath,
+    `${JSON.stringify(ambiguousRecommendation, null, 2)}\n`,
+  );
+  const ambiguousOut = path.join(tempRoot, 'ambiguous-combine');
+  const ambiguousRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(adversarialFixtureRoot, 'issue-related-material-dedup.md'),
+    '--recommendation',
+    ambiguousRecommendationPath,
+    '--intake-cache',
+    path.join(adversarialFixtureRoot, 'related-material-cache'),
+    '--out-dir',
+    ambiguousOut,
+  ]);
+  assert.equal(ambiguousRun.code, 1);
+  assert.match(
+    ambiguousRun.stderr,
+    /multiple issue references requires combineTargetReference/,
+  );
+  assert.deepEqual(
+    await fs.readdir(ambiguousOut).catch(() => []),
+    [],
+    'Ambiguous combine recommendation must write no packet or summary',
+  );
+  console.log(
+    'PASS ambiguous-combine: multiple related issues require an explicit target',
   );
 } finally {
   await fs.rm(tempRoot, { recursive: true, force: true });
