@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
 const REPO_ROOT = process.cwd();
@@ -376,6 +377,24 @@ function isIssueCacheCandidate(candidate) {
   return Boolean(candidate.issueMetadata?.number || candidate.issueMetadata?.url);
 }
 
+function semanticIssueTitle(title) {
+  let normalized = (title ?? '').trim();
+  const wrappers = [
+    /^Issue\s+#\d+\s*:\s*/i,
+    /^\[DFW Intake\]\s*/i,
+  ];
+
+  let previous;
+  do {
+    previous = normalized;
+    for (const wrapper of wrappers) {
+      normalized = normalized.replace(wrapper, '').trim();
+    }
+  } while (normalized !== previous);
+
+  return normalized;
+}
+
 function likelyDuplicateOrSelfSource(issueSummary, candidate) {
   if (!isIssueCacheCandidate(candidate)) return false;
 
@@ -417,13 +436,9 @@ function candidateText(candidate) {
     .join('\n');
 }
 
-function rankCandidates(issueSummary, proposal, candidates) {
-  const titleQuery = weightedTokenMap([
-    { text: issueSummary.title, weight: 1 },
-    { text: issueSummary.subject, weight: 1 },
-  ]);
-  const query = weightedTokenMap([
-    { text: issueSummary.title, weight: 4 },
+function retrievalQuery(issueSummary, proposal) {
+  return weightedTokenMap([
+    { text: semanticIssueTitle(issueSummary.title), weight: 4 },
     { text: issueSummary.subject, weight: 3 },
     { text: issueSummary.bodyExcerpt, weight: 2 },
     { text: issueSummary.rawBody, weight: 1 },
@@ -432,43 +447,75 @@ function rankCandidates(issueSummary, proposal, candidates) {
     { text: proposal?.recommendedAction, weight: 1 },
     { text: (proposal?.domainPath ?? []).join(' '), weight: 1 },
   ]);
+}
 
-  const ranked = candidates.map((candidate) => {
-    const issueCacheCandidate = isIssueCacheCandidate(candidate);
-    const parts = weightedTokenMap([
-      { text: candidate.metadata.title, weight: issueCacheCandidate ? 9 : 5 },
-      { text: candidate.issueMetadata?.title, weight: issueCacheCandidate ? 10 : 0 },
-      { text: candidate.issueMetadata?.originalSubject, weight: issueCacheCandidate ? 8 : 0 },
-      { text: candidate.issueMetadata?.number ? `issue ${candidate.issueMetadata.number}` : '', weight: 4 },
-      { text: candidate.issueMetadata?.labels, weight: 3 },
-      { text: candidate.metadata.description, weight: issueCacheCandidate ? 2 : 4 },
-      { text: candidate.metadata.documentType, weight: 2 },
-      { text: candidate.metadata.theme, weight: 2 },
-      { text: (candidate.metadata.domainPath ?? []).join(' '), weight: 2 },
-      { text: (candidate.metadata.relatedConcepts ?? []).join(' '), weight: 2 },
-      { text: candidate.headings.join(' '), weight: 2 },
-      { text: candidate.excerpt, weight: 1 },
-      {
-        text: candidate.sections.map((section) => `${section.heading} ${section.excerpt}`).join(' '),
-        weight: 1,
-      },
-    ]);
+function candidateScoreFields(candidate) {
+  if (isIssueCacheCandidate(candidate)) {
+    const semanticTitle = [
+      candidate.issueMetadata.originalSubject,
+      candidate.issueMetadata.title,
+      candidate.metadata.title,
+    ]
+      .map(semanticIssueTitle)
+      .find(Boolean);
 
-    let score = 0;
-    const matched = [];
+    return [
+      { name: 'semanticTitle', text: semanticTitle, weight: 5 },
+      { name: 'substantiveBody', text: candidate.issueMetadata.bodyExcerpt, weight: 1 },
+    ];
+  }
+
+  return [
+    { name: 'title', text: candidate.metadata.title, weight: 5 },
+    { name: 'description', text: candidate.metadata.description, weight: 4 },
+    { name: 'documentType', text: candidate.metadata.documentType, weight: 2 },
+    { name: 'theme', text: candidate.metadata.theme, weight: 2 },
+    { name: 'domainPath', text: (candidate.metadata.domainPath ?? []).join(' '), weight: 2 },
+    {
+      name: 'relatedConcepts',
+      text: (candidate.metadata.relatedConcepts ?? []).join(' '),
+      weight: 2,
+    },
+    { name: 'headings', text: candidate.headings.join(' '), weight: 2 },
+    { name: 'excerpt', text: candidate.excerpt, weight: 1 },
+    {
+      name: 'sections',
+      text: candidate.sections.map((section) => `${section.heading} ${section.excerpt}`).join(' '),
+      weight: 1,
+    },
+  ];
+}
+
+function scoreCandidate(issueSummary, proposal, candidate) {
+  const query = retrievalQuery(issueSummary, proposal);
+  const scoreByField = {};
+  const matched = new Set();
+
+  for (const field of candidateScoreFields(candidate)) {
+    const fieldTokens = weightedTokenMap([field]);
+    let fieldScore = 0;
     for (const [token, queryWeight] of query.entries()) {
-      const candidateWeight = parts.get(token) ?? 0;
+      const candidateWeight = fieldTokens.get(token) ?? 0;
       if (candidateWeight > 0) {
-        score += queryWeight * candidateWeight;
-        matched.push(token);
+        fieldScore += queryWeight * candidateWeight;
+        matched.add(token);
       }
     }
-    for (const [token, queryWeight] of titleQuery.entries()) {
-      const candidateWeight = parts.get(token) ?? 0;
-      if (candidateWeight > 0 && issueCacheCandidate) {
-        score += queryWeight * candidateWeight * 3;
-      }
-    }
+    scoreByField[field.name] = fieldScore;
+  }
+
+  return {
+    score: Object.values(scoreByField).reduce((total, fieldScore) => total + fieldScore, 0),
+    matchedTerms: [...matched].sort().slice(0, 18),
+    scoreByField,
+    bonuses: 0,
+    penalties: 0,
+  };
+}
+
+function rankCandidates(issueSummary, proposal, candidates) {
+  const ranked = candidates.map((candidate) => {
+    const { score, matchedTerms } = scoreCandidate(issueSummary, proposal, candidate);
 
     const relationType = likelyDuplicateOrSelfSource(issueSummary, candidate)
       ? 'likely-duplicate-or-self-source'
@@ -478,7 +525,7 @@ function rankCandidates(issueSummary, proposal, candidates) {
       ...candidate,
       score,
       relationType,
-      matchedTerms: [...new Set(matched)].sort().slice(0, 18),
+      matchedTerms,
     };
   });
 
@@ -1063,7 +1110,19 @@ async function main() {
   console.log(output.trim());
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+export {
+  buildCandidate,
+  likelyDuplicateOrSelfSource,
+  parseIssue,
+  rankCandidates,
+  scoreCandidate,
+  semanticIssueTitle,
+  toModelMatch,
+};
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}

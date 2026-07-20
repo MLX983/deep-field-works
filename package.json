@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/assert-production-exclusions.mjs",
     "loop:intake": "node scripts/loop1-intake-understanding.mjs",
+    "loop:intake:fixtures": "node scripts/run-loop1-retrieval-fixtures.mjs",
     "loop:packet": "node scripts/loop2-development-packet.mjs",
     "loop:packet:fixtures": "node scripts/run-loop2-fixtures.mjs",
     "loop:draft": "node scripts/loop3-constrained-draft.mjs",
