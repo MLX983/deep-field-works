@@ -1,0 +1,12 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9106,
+  "disposition": "develop independently",
+  "suggestedArtifact": "note",
+  "primaryDomain": "Interfaces for Judgment",
+  "themeOrCluster": "visible review boundaries",
+  "rationale": "The source provides a bounded test of separating observed behavior from interpretation and proposed behavior.",
+  "nextAction": "Develop a short note that preserves the source's evidence boundaries.",
+  "uncertaintyOrReviewFlag": "The proposed interaction has not been tested, and it is too early to know whether it improves review quality.",
+  "humanApprovalStatus": "approved"
+}

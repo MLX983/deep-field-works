@@ -42,6 +42,6 @@ The proposed panel groups pending actions by review state and keeps the availabl
 
 ## Current state
 
-This is a proposed interaction structure. It has not been implemented or tested.
+This is a proposed interaction structure. It has not been implemented or tested. It is too early to know whether it improves review quality.
 
 ---

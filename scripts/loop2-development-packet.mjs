@@ -269,19 +269,48 @@ function weightedTokenMap(parts) {
   return map;
 }
 
+const NON_VERIFIED_OBSERVATION_PATTERNS = [
+  /\b(?:proposed|proposal|hypothetical|speculative|prediction|recommendation)\b/i,
+  /\b(?:may|might|could|should|would)\b/i,
+  /\b(?:not|never)\s+(?:been\s+)?(?:implemented|built|tested|measured|verified|validated|observed|documented)\b/i,
+  /\bno\s+(?:test|measurement|verification|validation)\s+(?:has|had)\s+been\s+(?:run|performed|completed)\b/i,
+  /\b(?:unimplemented|untested|unverified|unvalidated|unknown|unclear)\b/i,
+  /\btoo early to know\b/i,
+  /\b(?:which|therefore|so)\s+(?:suggests?|implies?|indicates?)\b/i,
+  /\b(?:announced|announcement|reported|according to|press release)\b/i,
+];
+
+const EVIDENCE_LABEL =
+  String.raw`(?:Observation|Observed|Verified (?:observation|fact)|Tested behavior|Test result|Measured result|Documented current state)`;
+const EVIDENCE_LABEL_LINE = new RegExp(
+  String.raw`^(?:[-*+][ \t]+)?(?:\*\*${EVIDENCE_LABEL}:\*\*|${EVIDENCE_LABEL}:)[ \t]*(.*)$`,
+  'i',
+);
+
+function qualifiesAsVerifiedObservation(text) {
+  return !NON_VERIFIED_OBSERVATION_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 function parseLabeledClaims(rawBody) {
   const verifiedObservations = [];
   const inferences = [];
   const speculation = [];
   const unresolvedQuestions = [];
 
+  for (const line of rawBody.split(/\r?\n/)) {
+    const match = line.trimStart().match(EVIDENCE_LABEL_LINE);
+    const text = match?.[1].trim().replace(/\s+/g, ' ') ?? '';
+    if (text && qualifiesAsVerifiedObservation(text)) {
+      verifiedObservations.push(text);
+    }
+  }
+
   const patterns = [
-    { regex: /(?:^|\n)\s*Observation:\s*(.+)/gi, bucket: verifiedObservations },
-    { regex: /(?:^|\n)\s*Working model:\s*(.+)/gi, bucket: inferences },
-    { regex: /(?:^|\n)\s*Working thesis:\s*(.+)/gi, bucket: inferences },
-    { regex: /(?:^|\n)\s*Possible claim:\s*(.+)/gi, bucket: speculation },
-    { regex: /(?:^|\n)\s*Possible DFW framing:\s*(.+)/gi, bucket: speculation },
-    { regex: /(?:^|\n)\s*Open question:\s*(.+)/gi, bucket: unresolvedQuestions },
+    { regex: /(?:^|\n)[ \t]*Working model:[ \t]*([^\r\n]+)/gi, bucket: inferences },
+    { regex: /(?:^|\n)[ \t]*Working thesis:[ \t]*([^\r\n]+)/gi, bucket: inferences },
+    { regex: /(?:^|\n)[ \t]*Possible claim:[ \t]*([^\r\n]+)/gi, bucket: speculation },
+    { regex: /(?:^|\n)[ \t]*Possible DFW framing:[ \t]*([^\r\n]+)/gi, bucket: speculation },
+    { regex: /(?:^|\n)[ \t]*Open question:[ \t]*([^\r\n]+)/gi, bucket: unresolvedQuestions },
     { regex: /(?:^|\n)\s*Questions to preserve:\s*([\s\S]*?)(?:\n\n|$)/gi, bucket: unresolvedQuestions },
   ];
 
@@ -298,11 +327,6 @@ function parseLabeledClaims(rawBody) {
         bucket.push(text);
       }
     }
-  }
-
-  if (verifiedObservations.length === 0) {
-    const substantive = extractSubstantiveParagraphs(rawBody);
-    if (substantive[0]) verifiedObservations.push(substantive[0].slice(0, 500));
   }
 
   return {
@@ -415,6 +439,14 @@ function computeSubstanceScore(claims, substantiveParagraphs, rawBody) {
   if (claims.inferences.length > 0) score += 2;
   if (claims.unresolvedQuestions.length > 0) score += 1;
   if (claims.speculation.length > 0) score += 1;
+  if (
+    claims.verifiedObservations.length === 0 &&
+    claims.inferences.length === 0 &&
+    claims.speculation.length === 0 &&
+    substantiveParagraphs.length > 0
+  ) {
+    score += 2;
+  }
   score += Math.min(substantiveParagraphs.length, 3);
   if (rawBody.replace(/\s+/g, ' ').trim().length >= 250) score += 1;
   if (rawBody.replace(/\s+/g, ' ').trim().length >= 600) score += 1;
@@ -523,8 +555,8 @@ function assessSourceSufficiency({
     (unverifiedExternal.length > 0 || substanceScore < threshold.ready);
 
   if (speculationDraftingRisk) {
-    reasons.push('Drafting would likely require speculation without verified support');
-    missingElements.push('verified observations before drafting');
+    reasons.push('Drafting would likely overstate speculative source material');
+    missingElements.push('source support or narrower scope for speculative claims');
   }
 
   let status = 'sufficient';

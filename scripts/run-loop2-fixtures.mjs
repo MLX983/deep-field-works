@@ -92,8 +92,18 @@ try {
     false,
     'Ready prototype packet must omit blockingCondition',
   );
+  assert.deepEqual(
+    generatedPacket.verifiedObservations,
+    [
+      'A review control is difficult to use when pending actions and their approval states are separated.',
+    ],
+    'Proposed, unimplemented, and untested prototype behavior must not become verified observation',
+  );
   assert.equal(generatedPacket.approvedArtifactType, 'prototype-note');
   assert.deepEqual(generatedPacket.prototypeNote, expectedPacket.prototypeNote);
+  assert.match(generatedPacket.prototypeNote.currentState, /proposed interaction/);
+  assert.match(generatedPacket.prototypeNote.currentState, /not been implemented or tested/);
+  assert.match(generatedPacket.prototypeNote.currentState, /too early to know/);
   await fs.access(path.join(validOut, 'loop2-9601-summary.md'));
   console.log('PASS valid-prototype-note: generated packet is schema-valid');
 
@@ -260,10 +270,137 @@ try {
         `${fixture.name}: blockingCondition must be non-empty`,
       );
     }
+    if (fixture.name === 'unverified-external') {
+      assert.deepEqual(
+        casePacket.verifiedObservations,
+        [],
+        'An external announcement awaiting research must not be labeled verified',
+      );
+    }
     console.log(
       `PASS non-prototype-${fixture.name}: ${fixture.expectedReadiness}`,
     );
   }
+
+  const evidencePostureOut = path.join(tempRoot, 'evidence-posture');
+  const evidencePostureRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(adversarialFixtureRoot, 'issue-evidence-posture.md'),
+    '--recommendation',
+    path.join(adversarialFixtureRoot, 'recommendation-evidence-posture.json'),
+    '--out-dir',
+    evidencePostureOut,
+  ]);
+  assert.equal(
+    evidencePostureRun.code,
+    0,
+    evidencePostureRun.stderr || evidencePostureRun.stdout,
+  );
+
+  const evidencePosturePacket = JSON.parse(
+    await fs.readFile(
+      path.join(evidencePostureOut, 'loop2-9106-packet.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(
+    validate(evidencePosturePacket),
+    true,
+    `Generated evidence-posture packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
+  );
+  assert.equal(evidencePosturePacket.draftReadiness, 'ready');
+  assert.deepEqual(
+    evidencePosturePacket.verifiedObservations,
+    [
+      'During the documented fixture run, the packet writer emitted one JSON file and one Markdown summary.',
+      'In the fixture run, the status panel kept the review state beside each generated action.',
+      'The checked repository snapshot contains both the packet writer and its fixture runner.',
+    ],
+    'Only explicitly observed or verified source statements may enter verifiedObservations',
+  );
+  assert.deepEqual(
+    evidencePosturePacket.inferences,
+    [
+      'A compact status panel may help reviewers distinguish completed work from work that still needs judgment.',
+    ],
+  );
+  assert.deepEqual(
+    evidencePosturePacket.speculation,
+    ['A future panel could make every delegated workflow trustworthy.'],
+  );
+  assert.ok(
+    evidencePosturePacket.unresolvedQuestions.some((item) =>
+      item.includes('has not been tested') &&
+      item.includes('too early to know'),
+    ),
+    'The reviewed uncertainty boundary must remain in serialized output',
+  );
+  assert.equal(
+    evidencePosturePacket.verifiedObservations.some((item) =>
+      /right interface|easier to trust|proposed|not been tested|not been verified|no test has been run|too early to know/i.test(item),
+    ),
+    false,
+    'Conceptual, mixed-interpretation, proposed, untested, unverified, and premature claims must not be verified',
+  );
+  console.log(
+    'PASS evidence-posture: serialized packet preserves observation, interpretation, speculation, and uncertainty boundaries',
+  );
+
+  const conceptualAssertionOut = path.join(tempRoot, 'conceptual-assertion');
+  const conceptualAssertionRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(adversarialFixtureRoot, 'issue-conceptual-assertion.md'),
+    '--recommendation',
+    path.join(
+      adversarialFixtureRoot,
+      'recommendation-conceptual-assertion.json',
+    ),
+    '--intake-cache',
+    path.join(adversarialFixtureRoot, 'related-material-cache'),
+    '--out-dir',
+    conceptualAssertionOut,
+  ]);
+  assert.equal(
+    conceptualAssertionRun.code,
+    2,
+    conceptualAssertionRun.stderr || conceptualAssertionRun.stdout,
+  );
+
+  const conceptualAssertionPacket = JSON.parse(
+    await fs.readFile(
+      path.join(conceptualAssertionOut, 'loop2-9107-packet.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(
+    validate(conceptualAssertionPacket),
+    true,
+    `Generated conceptual combine-first packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
+  );
+  assert.equal(conceptualAssertionPacket.draftReadiness, 'combine-first');
+  assert.equal(conceptualAssertionPacket.sourceSufficiency.status, 'partial');
+  assert.deepEqual(conceptualAssertionPacket.verifiedObservations, []);
+  assert.deepEqual(conceptualAssertionPacket.inferences, []);
+  assert.deepEqual(conceptualAssertionPacket.speculation, []);
+  assert.ok(
+    conceptualAssertionPacket.combinationPlan.materialToCarryForward.some(
+      (item) => item.includes('disclosure label') &&
+        item.includes('control surface'),
+    ),
+    'Conceptual source material must remain in the existing combination plan',
+  );
+  assert.equal(
+    conceptualAssertionPacket.sourceSufficiency.missingElements.some(
+      (item) => item.includes('verified observation'),
+    ),
+    false,
+    'A conceptual note must not require research merely to populate verifiedObservations',
+  );
+  console.log(
+    'PASS conceptual-assertion: empty verified observations preserve sufficiency and combine carry-forward material',
+  );
 
   const relatedMaterialOut = path.join(tempRoot, 'related-material-dedup');
   const relatedMaterialRun = await runNode([
