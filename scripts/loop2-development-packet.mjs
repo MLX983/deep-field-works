@@ -74,6 +74,17 @@ const REVIEW_FLAG_RESEARCH_PATTERNS = [
   /\b(?:requires?|needs?)\s+(?:additional\s+)?(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\b/i,
 ];
 
+const EXPLICIT_RESEARCH_ACTION_PATTERN =
+  /\b(?:verify|confirm|validate|fact-check|locate|gather|collect|find|document|compare|test|identify)\b/i;
+const NEUTRAL_RESEARCH_CLAIM =
+  'The source’s factual claims and cited evidence require verification.';
+const NEUTRAL_RESEARCH_REQUIREMENTS = [
+  'Verify the source’s factual claims and cited evidence',
+  'Confirm quotation context and attribution where applicable',
+  'Locate concrete examples and contrary evidence relevant to the central argument',
+  'Distinguish documented observations from interpretation and speculation',
+];
+
 const NEGATED_REVIEW_FLAG_RESEARCH_PATTERNS = [
   /\bno\s+(?:additional\s+|more\s+|further\s+)?(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\s+(?:is|are)\s+(?:needed|required)\b/i,
   /\b(?:research|evidence|verification|validation|sourcing|citations?|factual support|fact-checking)\s+(?:is|are|remains?)\s+not\s+(?:needed|required)\b/i,
@@ -964,19 +975,60 @@ function buildCombinationPlan(
   };
 }
 
+function isExplicitResearchRequirement(value) {
+  return Boolean(
+    value &&
+    EXPLICIT_RESEARCH_ACTION_PATTERN.test(value)
+  );
+}
+
+function uniqueResearchItems(items, limit = 8) {
+  return [...new Set(items.map((item) => item?.trim()).filter(Boolean))]
+    .slice(0, limit);
+}
+
 function buildResearchPlan(recommendation, claims) {
-  const claimsRequiringVerification = [
+  const reviewedRequirements = uniqueResearchItems([
+    recommendation.nextAction,
     recommendation.uncertaintyOrReviewFlag,
+  ].filter(isExplicitResearchRequirement));
+  const sourceRequirements = uniqueResearchItems(
+    claims.unresolvedQuestions,
+  );
+  const sourceClaims = uniqueResearchItems([
+    ...claims.unresolvedQuestions,
     ...claims.speculation.slice(0, 3),
-    ...claims.inferences.filter((item) => /may|might|could|appears/i.test(item)).slice(0, 2),
-  ].filter(Boolean);
-  const evidenceNeededForReady = [
-    'Primary source or announcement verified against the issue claims',
-    'Clear distinction between capability discovery and authorization/governance',
-    'Document what the standard exposes, authorizes, and leaves outside the protocol',
-  ];
+    ...claims.inferences
+      .filter((item) => /\b(?:may|might|could|appears?)\b/i.test(item))
+      .slice(0, 2),
+  ]);
+  const reviewedResearchFlag = reviewFlagRequiresResearch(
+    recommendation.uncertaintyOrReviewFlag,
+  )
+    ? recommendation.uncertaintyOrReviewFlag
+    : '';
+
+  let evidenceNeededForReady = NEUTRAL_RESEARCH_REQUIREMENTS;
+  if (sourceRequirements.length > 0) {
+    evidenceNeededForReady = sourceRequirements;
+  }
+  if (reviewedRequirements.length > 0) {
+    evidenceNeededForReady = reviewedRequirements;
+  }
+
+  let claimsRequiringVerification = uniqueResearchItems([
+    reviewedResearchFlag,
+    ...reviewedRequirements,
+  ]);
+  if (claimsRequiringVerification.length === 0) {
+    claimsRequiringVerification = sourceClaims;
+  }
+  if (claimsRequiringVerification.length === 0) {
+    claimsRequiringVerification = [NEUTRAL_RESEARCH_CLAIM];
+  }
+
   return {
-    claimsRequiringVerification: [...new Set(claimsRequiringVerification)].slice(0, 8),
+    claimsRequiringVerification,
     evidenceNeededForReady,
   };
 }
@@ -986,11 +1038,16 @@ function buildBlockingCondition(packet, recommendation) {
   if (draftReadiness === 'ready') return null;
 
   if (draftReadiness === 'research-required') {
+    const claims = packet.researchPlan?.claimsRequiringVerification ?? [];
+    const evidence = (packet.researchPlan?.evidenceNeededForReady ?? [])
+      .filter((item) => !claims.includes(item));
     return [
       'Loop 2 stopped before drafting because source verification is required.',
-      `Claims requiring verification: ${packet.researchPlan?.claimsRequiringVerification?.join('; ') || 'see sourceRequirements'}`,
-      `Evidence needed for ready: ${packet.researchPlan?.evidenceNeededForReady?.join('; ') || 'see evidenceGaps'}`,
-    ].join(' ');
+      `Claims requiring verification: ${claims.join('; ') || 'see sourceRequirements'}`,
+      evidence.length > 0
+        ? `Evidence needed for ready: ${evidence.join('; ')}`
+        : '',
+    ].filter(Boolean).join(' ');
   }
 
   if (draftReadiness === 'combine-first') {
@@ -1102,15 +1159,12 @@ function buildPacket({
   if (draftReadiness === 'research-required') {
     packet.researchPlan = buildResearchPlan(recommendation, claims);
     packet.sourceRequirements = [
-      'Primary announcement or specification for the cited standard',
-      'Independent confirmation of authorization versus discovery scope',
-      ...(recommendation.relatedMaterial ?? []).map((item) => item.reference),
-    ];
-    packet.evidenceGaps = [
-      recommendation.uncertaintyOrReviewFlag,
-      'What the standard exposes, authorizes, and leaves to external governance',
       ...packet.researchPlan.evidenceNeededForReady,
-    ].filter(Boolean);
+    ];
+    packet.evidenceGaps = uniqueResearchItems([
+      ...packet.researchPlan.claimsRequiringVerification,
+      ...packet.researchPlan.evidenceNeededForReady,
+    ], 16);
   }
 
   if (draftReadiness === 'ready') {

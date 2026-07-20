@@ -218,6 +218,38 @@ try {
       expectedCode: 2,
       expectedReadiness: 'research-required',
     },
+    {
+      name: 'research-legitimacy',
+      issue: 'issue-research-legitimacy.md',
+      recommendation: 'recommendation-research-legitimacy.json',
+      issueNumber: 9110,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
+      name: 'research-sparse',
+      issue: 'issue-research-sparse.md',
+      recommendation: 'recommendation-research-sparse.json',
+      issueNumber: 9111,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
+      name: 'research-source-question',
+      issue: 'issue-unverified-external.md',
+      recommendation: 'recommendation-research-source-question.json',
+      issueNumber: 9102,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
+      name: 'research-reviewed-precedence',
+      issue: 'issue-research-reviewed-precedence.md',
+      recommendation: 'recommendation-research-reviewed-precedence.json',
+      issueNumber: 9112,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
   ];
 
   for (const fixture of nonPrototypeCases) {
@@ -276,6 +308,129 @@ try {
         [],
         'An external announcement awaiting research must not be labeled verified',
       );
+      assert.ok(
+        casePacket.sourceRequirements.some((item) =>
+          /announcement/i.test(item)),
+        'A protocol source must retain its reviewed announcement requirement',
+      );
+      assert.ok(
+        casePacket.evidenceGaps.some((item) =>
+          /standard authorizes/i.test(item)),
+        'Grounded protocol and authorization language must remain available',
+      );
+    }
+    if (fixture.name === 'research-legitimacy') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [
+          'Verify the cited public-opinion findings and quotation context, then locate concrete institutional examples.',
+          'Confirm whether the cited survey measures adoption, trust, or legitimacy.',
+        ],
+        'Reviewed source-specific research direction must determine source requirements',
+      );
+      assert.equal(
+        casePacket.sourceRequirements.includes(
+          'src/content/articles/my-ai-rules.md',
+        ),
+        false,
+        'Related material must not become a source requirement',
+      );
+      assert.equal(
+        /protocol|standard|capability discovery|authorization|governance/i.test(
+          JSON.stringify({
+            sourceRequirements: casePacket.sourceRequirements,
+            evidenceGaps: casePacket.evidenceGaps,
+            researchPlan: casePacket.researchPlan,
+            blockingCondition: casePacket.blockingCondition,
+          }),
+        ),
+        false,
+        'A non-protocol source must not inherit protocol-specific guidance',
+      );
+    }
+    if (fixture.name === 'research-sparse') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [
+          'Verify the source’s factual claims and cited evidence',
+          'Confirm quotation context and attribution where applicable',
+          'Locate concrete examples and contrary evidence relevant to the central argument',
+          'Distinguish documented observations from interpretation and speculation',
+        ],
+        'A sparse research-required source must receive neutral fallback guidance',
+      );
+      assert.equal(
+        /protocol|standard|capability discovery|authorization|governance|technical interface/i.test(
+          JSON.stringify(casePacket.researchPlan),
+        ),
+        false,
+        'Neutral fallback guidance must not assume a topic',
+      );
+    }
+    if (fixture.name === 'research-source-question') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [
+          'What does the announced standard actually authorize versus merely expose?',
+        ],
+        'A labeled source question must supply guidance when review is not specific',
+      );
+      assert.equal(
+        casePacket.sourceRequirements.includes('Hold this seed for research.'),
+        false,
+        'A non-specific reviewed action must not displace source-grounded guidance',
+      );
+    }
+    if (fixture.name === 'research-reviewed-precedence') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [
+          'Verify the municipal survey dataset and compare documented trust outcomes with reported adoption rates.',
+          'Confirm the survey sample and attribution before developing the note.',
+        ],
+        'Reviewed requirements must take precedence over source-level questions',
+      );
+      assert.equal(
+        /protocol|capabilit|authorization/i.test(
+          JSON.stringify(casePacket.researchPlan),
+        ),
+        false,
+        'A source question outside the reviewed direction must not override human review',
+      );
+    }
+    if (fixture.expectedReadiness === 'research-required') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        casePacket.researchPlan.evidenceNeededForReady,
+        `${fixture.name}: source requirements and research plan must stay aligned`,
+      );
+      assert.equal(
+        new Set(casePacket.sourceRequirements).size,
+        casePacket.sourceRequirements.length,
+        `${fixture.name}: source requirements must be deduplicated`,
+      );
+      for (const item of [
+        ...casePacket.researchPlan.claimsRequiringVerification,
+        ...casePacket.researchPlan.evidenceNeededForReady,
+      ]) {
+        assert.ok(
+          casePacket.evidenceGaps.includes(item),
+          `${fixture.name}: evidence gaps must contain each research-plan item`,
+        );
+        assert.ok(
+          casePacket.blockingCondition.includes(item),
+          `${fixture.name}: blocking condition must describe each research-plan item`,
+        );
+      }
+    }
+    if (fixture.name === 'ready-note') {
+      assert.equal(
+        Object.hasOwn(casePacket, 'researchPlan'),
+        false,
+        'A ready packet must not receive a fallback research plan',
+      );
+      assert.deepEqual(casePacket.sourceRequirements, []);
+      assert.equal(Object.hasOwn(casePacket, 'blockingCondition'), false);
     }
     console.log(
       `PASS non-prototype-${fixture.name}: ${fixture.expectedReadiness}`,
