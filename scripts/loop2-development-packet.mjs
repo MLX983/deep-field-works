@@ -655,6 +655,68 @@ function parseIssueReference(recommendation) {
   return null;
 }
 
+function relatedMaterialIdentity(item) {
+  if (Number.isInteger(item.issueNumber) && item.issueNumber > 0) {
+    return `issue:${item.issueNumber}`;
+  }
+
+  if (typeof item.reference !== 'string' || !item.reference.trim()) {
+    return null;
+  }
+
+  const reference = item.reference;
+  const issueMatch = reference.match(/^#(\d+)$/);
+  if (issueMatch) return `issue:${Number(issueMatch[1])}`;
+
+  const normalizedReference = path.posix
+    .normalize(reference.trim().replaceAll('\\', '/'))
+    .replace(/^\.\//, '');
+  return `reference:${normalizedReference}`;
+}
+
+function deduplicateRelatedMaterial(items) {
+  const deduplicated = [];
+  const indexesByIdentity = new Map();
+  const notePrioritiesByIdentity = new Map();
+
+  for (const item of items) {
+    const identity = relatedMaterialIdentity(item);
+    const outputItem = {
+      reference: item.reference,
+      role: item.role,
+      note: item.note ?? '',
+    };
+    if (identity === null) {
+      deduplicated.push(outputItem);
+      continue;
+    }
+
+    const existingIndex = indexesByIdentity.get(identity);
+    if (existingIndex === undefined) {
+      indexesByIdentity.set(identity, deduplicated.length);
+      notePrioritiesByIdentity.set(identity, item.notePriority ?? 0);
+      deduplicated.push(outputItem);
+      continue;
+    }
+
+    const existing = deduplicated[existingIndex];
+    const incomingNote = item.note ?? '';
+    const incomingNotePriority = item.notePriority ?? 0;
+    if (
+      incomingNote.trim() &&
+      (
+        !existing.note.trim() ||
+        incomingNotePriority > notePrioritiesByIdentity.get(identity)
+      )
+    ) {
+      existing.note = incomingNote;
+      notePrioritiesByIdentity.set(identity, incomingNotePriority);
+    }
+  }
+
+  return deduplicated;
+}
+
 async function findIssueInCache(cacheDir, issueNumber) {
   if (!cacheDir || !issueNumber) return null;
   const files = await walkMarkdown(cacheDir);
@@ -1220,26 +1282,33 @@ async function main() {
   const ranked = rankCorpus(corpus, queryParts, pinned);
   const sotSummaries = await loadSourceOfTruthSummaries();
 
-  const relatedMaterial = [
+  const relatedMaterialCandidates = [
     ...(recommendation.relatedMaterial ?? []).map((item) => ({
       reference: item.reference,
       role: item.reference.startsWith('#') ? 'combine-target' : 'related-theme',
       note: item.note ?? '',
+      notePriority: 2,
     })),
     ...ranked.map((match) => ({
       reference: match.path,
       role: match.issueNumber ? 'related-backlog' : 'published-corpus',
       note: match.title,
+      issueNumber: match.issueNumber,
+      notePriority: 0,
     })),
   ];
 
   if (targetIssue) {
-    relatedMaterial.unshift({
+    relatedMaterialCandidates.unshift({
       reference: `#${targetIssue.meta.number}`,
       role: 'combine-target',
       note: targetIssue.meta.title.replace(/^\[DFW Intake\]\s*/i, ''),
+      issueNumber: targetIssue.meta.number,
+      notePriority: 1,
     });
   }
+
+  const relatedMaterial = deduplicateRelatedMaterial(relatedMaterialCandidates);
 
   const packet = buildPacket({
     issueMeta,

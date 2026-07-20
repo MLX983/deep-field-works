@@ -264,6 +264,76 @@ try {
       `PASS non-prototype-${fixture.name}: ${fixture.expectedReadiness}`,
     );
   }
+
+  const relatedMaterialOut = path.join(tempRoot, 'related-material-dedup');
+  const relatedMaterialRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(adversarialFixtureRoot, 'issue-related-material-dedup.md'),
+    '--recommendation',
+    path.join(
+      adversarialFixtureRoot,
+      'recommendation-related-material-dedup.json',
+    ),
+    '--intake-cache',
+    path.join(adversarialFixtureRoot, 'related-material-cache'),
+    '--out-dir',
+    relatedMaterialOut,
+  ]);
+  assert.equal(
+    relatedMaterialRun.code,
+    2,
+    relatedMaterialRun.stderr || relatedMaterialRun.stdout,
+  );
+
+  const relatedMaterialPacket = JSON.parse(
+    await fs.readFile(
+      path.join(relatedMaterialOut, 'loop2-9105-packet.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(
+    validate(relatedMaterialPacket),
+    true,
+    `Generated combine-first packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
+  );
+  assert.equal(relatedMaterialPacket.draftReadiness, 'combine-first');
+
+  const issue21Entries = relatedMaterialPacket.relatedMaterial.filter(
+    (item) => item.reference === '#21',
+  );
+  assert.equal(
+    issue21Entries.length,
+    1,
+    'Resolved target and reviewed recommendation must produce one #21 entry',
+  );
+  assert.equal(issue21Entries[0].role, 'combine-target');
+  assert.equal(
+    issue21Entries[0].note,
+    'The established cluster supplies the operating context and evaluation boundary.',
+    'Preferred entry must retain the richer reviewed-recommendation note without repeating the cached title',
+  );
+  assert.deepEqual(
+    Object.keys(issue21Entries[0]).sort(),
+    ['note', 'reference', 'role'],
+    'Internal identity and precedence metadata must not reach packet output',
+  );
+
+  const similarTitleIssueEntries = relatedMaterialPacket.relatedMaterial.filter(
+    (item) => item.reference === '#21' || item.reference === '#22',
+  );
+  assert.deepEqual(
+    similarTitleIssueEntries.map((item) => item.reference),
+    ['#21', '#22'],
+    'Distinct issue identities must remain despite overlapping titles',
+  );
+  assert.match(
+    similarTitleIssueEntries[1].note,
+    /distinct field record/,
+  );
+  console.log(
+    'PASS related-material-dedup: merged duplicate issue identity and preserved distinct similar title',
+  );
 } finally {
   await fs.rm(tempRoot, { recursive: true, force: true });
 }

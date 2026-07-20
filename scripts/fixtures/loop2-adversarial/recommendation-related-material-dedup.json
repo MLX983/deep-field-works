@@ -1,0 +1,21 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9105,
+  "disposition": "combine with existing material",
+  "suggestedArtifact": "note",
+  "primaryDomain": "Human-Machine Workflows",
+  "themeOrCluster": "agent evaluation and loop engineering",
+  "rationale": "The source should strengthen an existing evaluation-loop cluster without becoming a standalone artifact.",
+  "relatedMaterial": [
+    {
+      "reference": "#21",
+      "note": "The established cluster supplies the operating context and evaluation boundary."
+    },
+    {
+      "reference": "#22",
+      "note": "A distinct field record about applying evaluation loops in practice."
+    }
+  ],
+  "nextAction": "Combine the bounded handoff observation with #21 while preserving #22 as separate related material.",
+  "humanApprovalStatus": "approved"
+}
