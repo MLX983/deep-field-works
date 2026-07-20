@@ -50,6 +50,18 @@ Tracked fixture for smoke testing: `scripts/fixtures/intake-issues/issue-001-min
 - `scripts/fixtures/intake-issues`
 - `--intake-cache` directory when provided
 
+## Corpus Boundary Principle
+
+Keep production editorial retrieval roots structurally clean.
+
+Every file placed inside a production editorial retrieval root is eligible content. Documentation, tests, fixtures, administrative files, and other non-editorial artifacts should live outside those roots whenever repository structure can express the distinction.
+
+Prefer correcting repository organization over adding retrieval filters or content-based exclusion rules. Retrieval scoring ranks eligible candidates; it should not determine whether a file belongs to the editorial corpus.
+
+Use code-level exclusions only when repository structure cannot represent the boundary cleanly.
+
+The tracked fixture directory and optional intake cache are explicit supporting inputs, not production editorial retrieval roots.
+
 ## Outputs
 
 | Output | Location | Contents |
