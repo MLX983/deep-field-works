@@ -4,10 +4,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
+  activeQueryFields,
   buildCandidate,
   likelyDuplicateOrSelfSource,
   parseIssue,
   rankCandidates,
+  retrievalQuery,
   scoreCandidate,
   semanticIssueTitle,
   toModelMatch,
@@ -59,6 +61,177 @@ assert.equal(
   semanticIssueTitle('An issue in agent evaluation'),
   'An issue in agent evaluation',
   'Ordinary editorial titles must not be broadly rewritten',
+);
+assert.equal(
+  semanticIssueTitle('Issue framing: DFW Intake remains editorial context'),
+  'Issue framing: DFW Intake remains editorial context',
+);
+assert.equal(
+  semanticIssueTitle('Intake protocols: preserve punctuation?'),
+  'Intake protocols: preserve punctuation?',
+);
+assert.equal(
+  semanticIssueTitle('DFW field note: permissions & control'),
+  'DFW field note: permissions & control',
+);
+assert.equal(
+  semanticIssueTitle("[DFW Intake] Tools don't equal talent: skills & leverage?"),
+  "Tools don't equal talent: skills & leverage?",
+);
+
+const activeFields = activeQueryFields(issueSummary, proposal);
+assert.deepEqual(
+  activeFields.map(({ name, weight }) => [name, weight]),
+  [
+    ['semanticTitle', 4],
+    ['substantiveBody', 2],
+    ['documentType', 1],
+    ['theme', 1],
+    ['recommendedAction', 1],
+    ['domainPath', 1],
+  ],
+  'Equivalent title/subject and excerpt/raw-body fields must be represented once',
+);
+
+const exactTitleQuery = retrievalQuery(
+  {
+    ...issueSummary,
+    title: 'Content   idea',
+    subject: 'content idea',
+    bodyExcerpt: 'Evaluation evidence',
+    rawBody: 'Evaluation evidence',
+  },
+  {},
+);
+assert.equal(exactTitleQuery.get('content'), 4);
+assert.equal(exactTitleQuery.get('idea'), 4);
+
+const wrappedTitleQuery = retrievalQuery(
+  {
+    ...issueSummary,
+    title: 'Issue #9810: [DFW Intake] Content idea',
+    subject: 'Content idea',
+    bodyExcerpt: 'Evaluation evidence',
+    rawBody: 'Evaluation evidence',
+  },
+  {},
+);
+assert.equal(wrappedTitleQuery.get('content'), 4);
+assert.equal(wrappedTitleQuery.get('idea'), 4);
+assert.equal(wrappedTitleQuery.has('dfw'), false);
+assert.equal(wrappedTitleQuery.has('intake'), false);
+assert.equal(wrappedTitleQuery.has('issue'), false);
+
+const distinctTitleFields = activeQueryFields(
+  {
+    ...issueSummary,
+    title: 'Tools do not equal talent',
+    subject: 'Skills and leverage',
+    bodyExcerpt: 'Evaluation evidence',
+    rawBody: 'Evaluation evidence',
+  },
+  {},
+);
+assert.deepEqual(
+  distinctTitleFields.slice(0, 2).map(({ name, text, weight }) => ({
+    name,
+    text,
+    weight,
+  })),
+  [
+    { name: 'semanticTitle', text: 'Tools do not equal talent', weight: 4 },
+    { name: 'subject', text: 'Skills and leverage', weight: 3 },
+  ],
+);
+
+const exactBodyFields = activeQueryFields(
+  {
+    ...issueSummary,
+    title: 'Evidence boundary',
+    subject: 'Evidence boundary',
+    bodyExcerpt: 'Measured result',
+    rawBody: 'Measured result',
+  },
+  {},
+);
+assert.deepEqual(
+  exactBodyFields.filter(({ name }) => /Body|body/.test(name)),
+  [{ name: 'substantiveBody', text: 'Measured result', weight: 2 }],
+);
+
+const fullPrefixBody = `${'Measured result remains bounded. '.repeat(30)}Final observation.`;
+const prefixBodyFields = activeQueryFields(
+  {
+    ...issueSummary,
+    title: 'Evidence boundary',
+    subject: 'Evidence boundary',
+    bodyExcerpt: fullPrefixBody.slice(0, 700),
+    rawBody: fullPrefixBody,
+  },
+  {},
+);
+assert.deepEqual(
+  prefixBodyFields.filter(({ name }) => /Body|body/.test(name)),
+  [{ name: 'substantiveBody', text: fullPrefixBody, weight: 2 }],
+  'A truncated prefix must resolve to one complete substantive body',
+);
+
+const distinctBodyFields = activeQueryFields(
+  {
+    ...issueSummary,
+    title: 'Evidence boundary',
+    subject: 'Evidence boundary',
+    bodyExcerpt: 'Direct observation',
+    rawBody: 'Separate structured source note',
+  },
+  {},
+);
+assert.deepEqual(
+  distinctBodyFields.filter(({ name }) => /Body|body/.test(name)),
+  [
+    { name: 'bodyExcerpt', text: 'Direct observation', weight: 2 },
+    { name: 'rawBody', text: 'Separate structured source note', weight: 1 },
+  ],
+  'Genuinely distinct source fields must retain their existing field weights',
+);
+
+const sharedOpeningBodyFields = activeQueryFields(
+  {
+    ...issueSummary,
+    title: 'Evidence boundary',
+    subject: 'Evidence boundary',
+    bodyExcerpt: 'Control',
+    rawBody: 'Control systems require explicit permission boundaries.',
+  },
+  {},
+);
+assert.deepEqual(
+  sharedOpeningBodyFields.filter(({ name }) => /Body|body/.test(name)),
+  [
+    { name: 'bodyExcerpt', text: 'Control', weight: 2 },
+    {
+      name: 'rawBody',
+      text: 'Control systems require explicit permission boundaries.',
+      weight: 1,
+    },
+  ],
+  'A short structured field must not be collapsed merely because it prefixes another field',
+);
+
+const repeatedBodyQuery = retrievalQuery(
+  {
+    ...issueSummary,
+    title: 'Evidence boundary',
+    subject: 'Evidence boundary',
+    bodyExcerpt: 'Judgment judgment',
+    rawBody: 'Judgment judgment',
+  },
+  {},
+);
+assert.equal(
+  repeatedBodyQuery.get('judgment'),
+  4,
+  'Internal repetition within one substantive body must retain ordinary term frequency',
 );
 
 const bodyMatch = byName.get('issue-body-match.md');
@@ -124,6 +297,23 @@ assert.ok(
   'Repeated transport metadata must not outrank substantive overlap',
 );
 
+const genericIssueSummary = parseIssue(
+  await fs.readFile(fixturePath('active-generic-title.md'), 'utf8'),
+  fixturePath('active-generic-title.md'),
+);
+const genericTitleCandidate = await buildCandidate(
+  fixturePath('issue-generic-title.md'),
+);
+const genericRanking = rankCandidates(
+  genericIssueSummary,
+  proposal,
+  [genericTitleCandidate, bodyMatch],
+);
+assert.ok(
+  genericRanking[0].path.endsWith('issue-body-match.md'),
+  'A duplicated generic query title must not outrank stronger substantive-body overlap',
+);
+
 const boundary = byName.get('issue-distinct-boundary.md');
 const ledger = byName.get('issue-distinct-ledger.md');
 assert.notEqual(
@@ -181,7 +371,17 @@ assert.equal(
 
 const repositoryArtifact = byName.get('repository-artifact.md');
 const repositoryScore = scoreCandidate(issueSummary, proposal, repositoryArtifact);
-assert.equal(repositoryScore.score, 285);
+assert.deepEqual(repositoryScore.scoreByField, {
+  title: 35,
+  description: 40,
+  documentType: 4,
+  theme: 28,
+  domainPath: 4,
+  relatedConcepts: 14,
+  headings: 14,
+  excerpt: 34,
+  sections: 17,
+});
 assert.deepEqual(Object.keys(repositoryScore.scoreByField), [
   'title',
   'description',
@@ -196,12 +396,18 @@ assert.deepEqual(Object.keys(repositoryScore.scoreByField), [
 
 console.log('PASS wrapper-normalization: transport prefixes do not contribute');
 console.log('PASS cached-representation: one semantic title and one substantive body');
+console.log('PASS active-query-representation: exact title and body overlap contributes once');
 console.log('PASS generic-resistance: cache-envelope repetition contributes zero');
 console.log('PASS existing-behavior: duplicate detection, deterministic top five, evaluator shape');
 console.log(
   `SCORES ${JSON.stringify({
     bodyMatch: bodyMatchScore,
     genericEnvelope: genericScore,
+    genericTitleRanking: genericRanking.map(({ path: candidatePath, score }) => ({
+      path: candidatePath,
+      score,
+    })),
+    query: Object.fromEntries(retrievalQuery(issueSummary, proposal)),
     repositoryArtifact: repositoryScore,
     ranked: ranked.map(({ path: candidatePath, score }) => ({
       path: candidatePath,

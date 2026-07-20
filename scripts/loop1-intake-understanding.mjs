@@ -12,6 +12,11 @@ import yaml from 'js-yaml';
 const REPO_ROOT = process.cwd();
 const DEFAULT_CODEX_BIN = '/Applications/Codex.app/Contents/Resources/codex';
 const MAX_SNIPPET_CHARS = 700;
+const MAX_ACTIVE_BODY_EXCERPT_CHARS = 1200;
+const KNOWN_BODY_EXCERPT_BOUNDARIES = new Set([
+  MAX_SNIPPET_CHARS,
+  MAX_ACTIVE_BODY_EXCERPT_CHARS,
+]);
 const TOP_MATCHES = 5;
 const MODEL_TIMEOUT_MS = 120000;
 
@@ -436,17 +441,70 @@ function candidateText(candidate) {
     .join('\n');
 }
 
+function normalizeSourceText(text) {
+  return (text ?? '').trim().replace(/\s+/g, ' ');
+}
+
+function isTruncatedBodyExcerpt(normalizedExcerpt, normalizedRawBody) {
+  return (
+    KNOWN_BODY_EXCERPT_BOUNDARIES.has(normalizedExcerpt.length) &&
+    normalizedRawBody.startsWith(normalizedExcerpt)
+  );
+}
+
+function activeQueryFields(issueSummary, proposal) {
+  const fields = [];
+  const semanticTitle = semanticIssueTitle(issueSummary.title);
+  const semanticSubject = semanticIssueTitle(issueSummary.subject);
+
+  if (semanticTitle) {
+    fields.push({ name: 'semanticTitle', text: semanticTitle, weight: 4 });
+  }
+  if (
+    semanticSubject &&
+    normalizeSourceText(semanticSubject).toLowerCase() !==
+      normalizeSourceText(semanticTitle).toLowerCase()
+  ) {
+    fields.push({ name: 'subject', text: semanticSubject, weight: 3 });
+  }
+
+  const normalizedExcerpt = normalizeSourceText(issueSummary.bodyExcerpt);
+  const normalizedRawBody = normalizeSourceText(issueSummary.rawBody);
+  if (normalizedExcerpt && normalizedRawBody) {
+    const isDuplicateBodyRepresentation =
+      normalizedExcerpt === normalizedRawBody ||
+      isTruncatedBodyExcerpt(normalizedExcerpt, normalizedRawBody);
+    if (isDuplicateBodyRepresentation) {
+      fields.push({
+        name: 'substantiveBody',
+        text:
+          normalizedRawBody.length >= normalizedExcerpt.length
+            ? issueSummary.rawBody
+            : issueSummary.bodyExcerpt,
+        weight: 2,
+      });
+    } else {
+      fields.push({ name: 'bodyExcerpt', text: issueSummary.bodyExcerpt, weight: 2 });
+      fields.push({ name: 'rawBody', text: issueSummary.rawBody, weight: 1 });
+    }
+  } else if (normalizedExcerpt) {
+    fields.push({ name: 'bodyExcerpt', text: issueSummary.bodyExcerpt, weight: 2 });
+  } else if (normalizedRawBody) {
+    fields.push({ name: 'rawBody', text: issueSummary.rawBody, weight: 1 });
+  }
+
+  fields.push(
+    { name: 'documentType', text: proposal?.documentType, weight: 1 },
+    { name: 'theme', text: proposal?.theme, weight: 1 },
+    { name: 'recommendedAction', text: proposal?.recommendedAction, weight: 1 },
+    { name: 'domainPath', text: (proposal?.domainPath ?? []).join(' '), weight: 1 },
+  );
+
+  return fields;
+}
+
 function retrievalQuery(issueSummary, proposal) {
-  return weightedTokenMap([
-    { text: semanticIssueTitle(issueSummary.title), weight: 4 },
-    { text: issueSummary.subject, weight: 3 },
-    { text: issueSummary.bodyExcerpt, weight: 2 },
-    { text: issueSummary.rawBody, weight: 1 },
-    { text: proposal?.documentType, weight: 1 },
-    { text: proposal?.theme, weight: 1 },
-    { text: proposal?.recommendedAction, weight: 1 },
-    { text: (proposal?.domainPath ?? []).join(' '), weight: 1 },
-  ]);
+  return weightedTokenMap(activeQueryFields(issueSummary, proposal));
 }
 
 function candidateScoreFields(candidate) {
@@ -556,7 +614,7 @@ function parseIssue(body, issuePath) {
     to: field('To'),
     received: field('Received'),
     subject: field('Original subject'),
-    bodyExcerpt: rawBody.replace(/\s+/g, ' ').slice(0, 1200),
+    bodyExcerpt: rawBody.replace(/\s+/g, ' ').slice(0, MAX_ACTIVE_BODY_EXCERPT_CHARS),
     rawBody: rawBody.slice(0, 4000),
   };
 }
@@ -1111,10 +1169,12 @@ async function main() {
 }
 
 export {
+  activeQueryFields,
   buildCandidate,
   likelyDuplicateOrSelfSource,
   parseIssue,
   rankCandidates,
+  retrievalQuery,
   scoreCandidate,
   semanticIssueTitle,
   toModelMatch,

@@ -15,6 +15,6 @@
 
 ### Body
 
-Teams use evaluation rubrics to measure escalation failures at permission checkpoints and compare agent outputs with review decisions.
+Teams use evaluation rubrics to measure escalation failures at permission checkpoints and compare agent outputs with review decisions, criteria, approval boundaries, and human judgment.
 
 ---
