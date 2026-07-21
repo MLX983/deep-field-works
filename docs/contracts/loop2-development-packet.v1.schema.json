@@ -67,6 +67,26 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
+    "developmentMaterial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["content", "role", "evidencePosture", "provenance"],
+        "properties": {
+          "content": { "type": "string", "minLength": 1 },
+          "role": {
+            "enum": ["mechanism", "example", "distinction", "framing", "hypothesis", "question", "caution"]
+          },
+          "evidencePosture": {
+            "enum": ["inference", "speculation", "editorial-caution"]
+          },
+          "provenance": {
+            "enum": ["source", "reviewed-recommendation", "both"]
+          }
+        }
+      }
+    },
     "sourceRequirements": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }

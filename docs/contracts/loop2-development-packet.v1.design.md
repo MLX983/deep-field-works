@@ -41,6 +41,7 @@ Loop 2 does **not** always produce a draft. It may conclude that research, combi
   "verifiedObservations": [],
   "inferences": [],
   "speculation": [],
+  "developmentMaterial": [],
   "sourceRequirements": [],
   "evidenceGaps": [],
   "relatedMaterial": [],
@@ -65,6 +66,7 @@ Loop 2 does **not** always produce a draft. It may conclude that research, combi
 | `verifiedObservations` | Claims tied to verified sources or explicit issue observations |
 | `inferences` | Reasonable interpretations not yet fully evidenced |
 | `speculation` | Hypotheses explicitly marked provisional |
+| `developmentMaterial` | Approved conceptual grounding with role, evidence posture, and source/review provenance; not verified evidence |
 | `sourceRequirements` | Sources that must be verified or obtained before drafting |
 | `evidenceGaps` | Missing proof, examples, or counterevidence |
 | `relatedMaterial` | `{ reference, role, note? }` for backlog and published pieces |
@@ -77,7 +79,7 @@ Loop 2 does **not** always produce a draft. It may conclude that research, combi
 
 | Value | Meaning |
 |-------|---------|
-| `ready` | Enough verified material to begin a constrained draft |
+| `ready` | Enough approved, source-grounded material to begin a constrained draft without inventing support |
 | `research-required` | Source verification or field reporting must precede drafting |
 | `combine-first` | Material should merge into an existing cluster before standalone development |
 | `insufficient-material` | Observation exists but cannot yet support even a short note |

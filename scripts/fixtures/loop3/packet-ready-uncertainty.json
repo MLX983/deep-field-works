@@ -16,6 +16,38 @@
   "speculation": [
     "A lightweight signal may eventually be needed at the workflow layer."
   ],
+  "developmentMaterial": [
+    {
+      "content": "Delegated routine and required judgment can desynchronize.",
+      "role": "distinction",
+      "evidencePosture": "inference",
+      "provenance": "source"
+    },
+    {
+      "content": "Review habits may lag behind shifting delegation boundaries.",
+      "role": "mechanism",
+      "evidencePosture": "inference",
+      "provenance": "source"
+    },
+    {
+      "content": "A lightweight signal may eventually be needed at the workflow layer.",
+      "role": "hypothesis",
+      "evidencePosture": "speculation",
+      "provenance": "source"
+    },
+    {
+      "content": "What lightweight signal would tell a team delegated work has crossed into decision authority?",
+      "role": "question",
+      "evidencePosture": "inference",
+      "provenance": "source"
+    },
+    {
+      "content": "Keep observation, inference, and speculation separated.",
+      "role": "caution",
+      "evidencePosture": "editorial-caution",
+      "provenance": "reviewed-recommendation"
+    }
+  ],
   "sourceRequirements": [],
   "evidenceGaps": [
     "Non-blocking uncertainty: keep observation, inference, and speculation separated."

@@ -156,6 +156,46 @@ function sectionWordCounts(body) {
   return counts;
 }
 
+function sectionContent(body, targetHeading) {
+  const matches = [...body.matchAll(/^#{1,3}\s+(.+)$/gm)];
+  const matchIndex = matches.findIndex((match) => normalize(match[1]) === targetHeading);
+  if (matchIndex < 0) return '';
+  const start = matches[matchIndex].index + matches[matchIndex][0].length;
+  const end = matches[matchIndex + 1]?.index ?? body.length;
+  return body.slice(start, end).trim();
+}
+
+function openingContent(body) {
+  const firstSection = body.search(/^##\s+/m);
+  const opening = body.slice(0, firstSection < 0 ? body.length : firstSection);
+  return opening.replace(/^#\s+.+$/m, '').trim();
+}
+
+function isWorkflowDirective(value) {
+  return /^(?:keep|do not|don't|avoid|preserve|verify|confirm|validate|research|hold|defer|draft|develop|outline)\b/i
+    .test(String(value ?? '').trim());
+}
+
+function isFunctionalInquiry(value) {
+  const text = String(value ?? '').trim();
+  if (!text || isWorkflowDirective(text)) return false;
+  return /\?/.test(text)
+    || /^(?:how|what|why|when|where|which|who)\b/i.test(text)
+    || /\bwhether\b/i.test(text)
+    || /\b(?:remains?|is still) (?:unclear|unknown|unresolved)\b/i.test(text)
+    || /\b(?:open|unresolved) (?:question|inquiry) (?:is|concerns?)\b/i.test(text);
+}
+
+function nearDuplicate(left, right) {
+  const a = normalize(left);
+  const b = normalize(right);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const shorter = a.length <= b.length ? a : b;
+  const longer = a.length > b.length ? a : b;
+  return shorter.length >= 30 && longer.includes(shorter) && shorter.length / longer.length >= 0.85;
+}
+
 function unique(items) {
   return [...new Set(items.filter(Boolean))];
 }
@@ -203,6 +243,7 @@ function unsupportedClaims(body, packet) {
     ...(packet.speculation ?? []),
     ...(packet.unresolvedQuestions ?? []),
     ...(packet.evidenceGaps ?? []),
+    ...(packet.developmentMaterial ?? []).map((item) => item.content),
     packet.prototypeNote?.designProblem,
     packet.prototypeNote?.interactionChoice,
     ...(packet.prototypeNote?.interactionGroups ?? []).flatMap((group) => [group.title, ...group.items]),
@@ -257,6 +298,14 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
     const draftHeadings = headings(body);
     for (const alternatives of structure) {
       if (!alternatives.some((required) => draftHeadings.includes(required))) revisions.push(`Add the missing “${alternatives[0]}” section and give it only that section's required function.`);
+    }
+    if (type === 'note' && draftHeadings.includes('open question')) {
+      const openQuestion = sectionContent(body, 'open question');
+      const duplicatesOpening = nearDuplicate(openQuestion, openingContent(body));
+      if (!isFunctionalInquiry(openQuestion) || duplicatesOpening) {
+        risks.push('The “Open question” section does not function as a distinct reader-facing inquiry.');
+        revisions.push('Replace the nonfunctional “Open question” content with a distinct packet-grounded reader-facing inquiry, or omit the section if none is approved.');
+      }
     }
   }
 

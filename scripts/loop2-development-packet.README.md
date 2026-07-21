@@ -147,6 +147,8 @@ Loop 2 does **not** map disposition directly to `draftReadiness`. Disposition is
 
 - Approved Loop 1 recommendation
 - `sourceSufficiency.status = sufficient`
+- For a standalone note, at least three approved `developmentMaterial` items,
+  including a mechanism, distinction, or hypothesis
 - No unresolved combine requirement
 - No source verification blocker
 - No drafting path that would require invented support
@@ -179,6 +181,13 @@ Every packet includes:
 ```
 
 Assessed factors include: clear claim/question, artifact-type substance threshold, unverified external dependencies, central tension from source, combine requirement, and speculation risk.
+
+`developmentMaterial` carries bounded conceptual grounding that the reviewed
+decision authorizes for drafting. Each item records its editorial role, evidence
+posture, and provenance (`source`, `reviewed-recommendation`, or `both`). It does
+not promote conceptual mechanisms, examples, or hypotheses into
+`verifiedObservations`. Editorial cautions remain packet metadata and guide
+draft modality without becoming reader-facing prose.
 
 | Reviewed disposition | Typical `draftReadiness` |
 |----------------------|---------------------------|

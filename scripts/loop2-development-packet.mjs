@@ -416,6 +416,106 @@ function extractSubstantiveParagraphs(rawBody) {
     .map((part) => part.slice(0, 500));
 }
 
+function isWorkflowDirective(text) {
+  return /^(?:keep|do not|don't|avoid|preserve|verify|confirm|validate|research|hold|defer|draft|develop|outline)\b/i
+    .test(String(text ?? '').trim());
+}
+
+function developmentRole(text) {
+  if (/^mechanism:/i.test(text)) return 'mechanism';
+  if (/^working model:/i.test(text)) return 'framing';
+  if (/^possible claim:/i.test(text)) return 'hypothesis';
+  if (/^open question:/i.test(text)) return 'question';
+  if (/\?$/.test(text)) return 'question';
+  if (/\b(?:for example|for instance|a manager|a designer|a writer|a (?:project )?team|in practice)\b/i.test(text)) return 'example';
+  if (/\b(?:versus|rather than|not simply|difference|distinction|while|but)\b/i.test(text)) return 'distinction';
+  if (/\b(?:may|might|could|future|working (?:lens|hypothesis))\b/i.test(text)) return 'hypothesis';
+  return 'mechanism';
+}
+
+function developmentPosture(text, role) {
+  if (role === 'caution') return 'editorial-caution';
+  if (role === 'hypothesis' || /\b(?:may|might|could)\b/i.test(text)) return 'speculation';
+  return 'inference';
+}
+
+function buildDevelopmentMaterial(recommendation, issueMeta, claims) {
+  const items = [];
+  const add = (content, role, provenance, evidencePosture) => {
+    const normalized = String(content ?? '')
+      .replace(/^(?:observation|working model|mechanism|possible claim|open question):\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!normalized) return;
+    const existing = items.find((item) => item.content === normalized);
+    if (existing) {
+      if (existing.provenance !== provenance) existing.provenance = 'both';
+      if (evidencePosture === 'speculation') existing.evidencePosture = 'speculation';
+      return;
+    }
+    items.push({ content: normalized, role, evidencePosture, provenance });
+  };
+
+  if (!isWorkflowDirective(recommendation.rationale)) {
+    add(
+      recommendation.rationale,
+      developmentRole(recommendation.rationale ?? ''),
+      'reviewed-recommendation',
+      'inference',
+    );
+  }
+  for (const inference of claims.inferences) {
+    add(inference, developmentRole(inference), 'source', 'inference');
+  }
+  for (const speculation of claims.speculation) {
+    add(speculation, 'hypothesis', 'source', 'speculation');
+  }
+  for (const question of claims.unresolvedQuestions) {
+    add(question, 'question', 'source', 'inference');
+  }
+
+  const paragraphs = extractSubstantiveParagraphs(issueMeta.rawBody)
+    .filter((paragraph) => !isWorkflowDirective(paragraph));
+  const scopeTokens = new Set(tokenize([
+    recommendation.rationale,
+    recommendation.themeOrCluster,
+    recommendation.nextAction,
+  ].filter(Boolean).join(' ')));
+  const approvedExamples = /\b(?:source(?:'s)?|concrete) examples?\b/i
+    .test(recommendation.nextAction ?? '');
+
+  if (approvedExamples) {
+    for (const paragraph of paragraphs.filter((item) => developmentRole(item) === 'example').slice(0, 2)) {
+      add(paragraph, 'example', 'source', developmentPosture(paragraph, 'example'));
+    }
+  }
+  for (const paragraph of paragraphs) {
+    const overlap = new Set(tokenize(paragraph).filter((token) => scopeTokens.has(token))).size;
+    if (overlap < 2) continue;
+    const role = developmentRole(paragraph);
+    add(paragraph, role, 'source', developmentPosture(paragraph, role));
+    if (items.filter((item) => item.role !== 'caution').length >= 7) break;
+  }
+
+  if (recommendation.uncertaintyOrReviewFlag) {
+    add(
+      recommendation.uncertaintyOrReviewFlag,
+      'caution',
+      'reviewed-recommendation',
+      'editorial-caution',
+    );
+  }
+  return items.slice(0, 8);
+}
+
+function hasDraftableDevelopmentMaterial(material, artifactType) {
+  if (artifactType !== 'note') return true;
+  const readerFacing = material.filter((item) => item.role !== 'caution');
+  const hasExplanation = readerFacing.some((item) =>
+    ['mechanism', 'distinction', 'hypothesis'].includes(item.role));
+  return readerFacing.length >= 3 && hasExplanation;
+}
+
 function buildCarryForwardMaterial(recommendation, issueMeta, claims) {
   const items = [];
 
@@ -500,6 +600,8 @@ function assessSourceSufficiency({
   claims,
   targetIssue,
   hasCombineTarget,
+  developmentMaterial,
+  approvedArtifactType,
 }) {
   const reasons = [];
   const missingElements = [];
@@ -544,6 +646,15 @@ function assessSourceSufficiency({
     missingElements.push('merge into named destination before standalone development');
   }
 
+  const hasDevelopmentMaterial = hasDraftableDevelopmentMaterial(
+    developmentMaterial,
+    approvedArtifactType,
+  );
+  if (!hasDevelopmentMaterial) {
+    reasons.push('Approved material does not yet support the required drafting functions');
+    missingElements.push(`approved source-grounded development material for ${approvedArtifactType}`);
+  }
+
   const speculationDraftingRisk =
     claims.speculation.length > 0 &&
     claims.verifiedObservations.length === 0 &&
@@ -562,6 +673,7 @@ function assessSourceSufficiency({
     substanceScore < threshold.ready ||
     speculationDraftingRisk ||
     hasCombineTarget
+    || !hasDevelopmentMaterial
   ) {
     status = 'partial';
   }
@@ -575,6 +687,7 @@ function assessSourceSufficiency({
     hasClearClaim,
     tensionInvented: tension.invented,
     speculationDraftingRisk,
+    hasDevelopmentMaterial,
   };
 }
 
@@ -1098,6 +1211,7 @@ function buildPacket({
   approvedArtifactType,
   prototypeNote,
   targetRef,
+  developmentMaterial,
 }) {
   const workingTitle = deriveWorkingTitle(issueMeta, recommendation);
   const centralTension = deriveCentralTension(claims, recommendation, sourceSufficiency);
@@ -1121,6 +1235,7 @@ function buildPacket({
     verifiedObservations: claims.verifiedObservations,
     inferences: claims.inferences,
     speculation: claims.speculation,
+    developmentMaterial,
     sourceRequirements: [],
     evidenceGaps: [],
     relatedMaterial,
@@ -1207,6 +1322,7 @@ function validatePacket(packet) {
     'verifiedObservations',
     'inferences',
     'speculation',
+    'developmentMaterial',
     'sourceRequirements',
     'evidenceGaps',
     'relatedMaterial',
@@ -1262,6 +1378,13 @@ function validatePacket(packet) {
   }
   if (packet.draftReadiness === 'ready' && packet.sourceSufficiency.status !== 'sufficient') {
     throw new Error('ready packet requires sourceSufficiency.status = sufficient');
+  }
+  if (
+    packet.draftReadiness === 'ready' &&
+    packet.approvedArtifactType === 'note' &&
+    !hasDraftableDevelopmentMaterial(packet.developmentMaterial, 'note')
+  ) {
+    throw new Error('ready note packet requires approved developmentMaterial');
   }
   if (packet.approvedArtifactType === 'prototype-note') {
     const missing = missingPrototypeGrounding(packet.prototypeNote ?? {
@@ -1371,6 +1494,11 @@ async function main() {
   }
 
   const claims = parseLabeledClaims(issueMeta.rawBody);
+  const developmentMaterial = buildDevelopmentMaterial(
+    recommendation,
+    issueMeta,
+    claims,
+  );
   const prototypeNote = approvedArtifactType === 'prototype-note'
     ? extractPrototypeNote(issueMeta.rawBody)
     : null;
@@ -1397,6 +1525,8 @@ async function main() {
     claims,
     targetIssue,
     hasCombineTarget: Boolean(targetRef),
+    developmentMaterial,
+    approvedArtifactType,
   });
   const draftReadiness = determineDraftReadiness(
     recommendation,
@@ -1461,6 +1591,7 @@ async function main() {
     approvedArtifactType,
     prototypeNote,
     targetRef,
+    developmentMaterial,
   });
 
   validatePacket(packet);

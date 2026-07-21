@@ -115,7 +115,32 @@ const EDITORIAL_WORKFLOW_PATTERNS = [
 function isEditorialWorkflowNote(text) {
   const value = String(text || '').trim();
   if (!value) return true;
-  return EDITORIAL_WORKFLOW_PATTERNS.some((pattern) => pattern.test(value));
+  return /^(?:keep|do not|don't|avoid|preserve|verify|confirm|validate|research|hold|defer|draft|develop|outline)\b/i.test(value)
+    || EDITORIAL_WORKFLOW_PATTERNS.some((pattern) => pattern.test(value));
+}
+
+function developmentItems(packet, roles = null) {
+  return (packet.developmentMaterial ?? []).filter((item) =>
+    item
+    && typeof item.content === 'string'
+    && item.content.trim()
+    && (!roles || roles.includes(item.role)));
+}
+
+function hasDraftableDevelopmentMaterial(packet) {
+  const readerFacing = developmentItems(packet).filter((item) => item.role !== 'caution');
+  return readerFacing.length >= 3
+    && readerFacing.some((item) => ['mechanism', 'distinction', 'hypothesis'].includes(item.role));
+}
+
+function isReaderFacingInquiry(text) {
+  const value = String(text ?? '').trim();
+  if (!value || isEditorialWorkflowNote(value)) return false;
+  return /\?$/.test(value)
+    || /^(?:how|what|why|when|where|which|who)\b/i.test(value)
+    || /\bwhether\b/i.test(value)
+    || /\b(?:remains?|is still) (?:unclear|unknown|unresolved)\b/i.test(value)
+    || /\b(?:open|unresolved) (?:question|inquiry) (?:is|concerns?)\b/i.test(value);
 }
 
 function readerFacingItems(items) {
@@ -202,6 +227,9 @@ function evaluateHardGate(packet, recommendation) {
   }
   if (artifactType === 'prototype-note' && !packet.prototypeNote) {
     failures.push('prototype-note packet is missing the required prototypeNote grounding object');
+  }
+  if (artifactType === 'note' && !hasDraftableDevelopmentMaterial(packet)) {
+    failures.push('ready note packet lacks sufficient approved developmentMaterial');
   }
 
   return { passed: failures.length === 0, failures, artifactType };
@@ -305,25 +333,34 @@ function paragraphize(items, prefix = '') {
 
 function buildNoteBody(packet) {
   const title = packet.workingTitle || packet.issueReference.title;
-  const opening =
-    packet.verifiedObservations[0] ||
-    packet.unresolvedQuestions[0] ||
-    packet.readerQuestion;
+  const usableMaterial = developmentItems(packet).filter((item) =>
+    item.role !== 'caution' && !isEditorialWorkflowNote(item.content));
+  const openingItem = usableMaterial.find((item) =>
+    ['distinction', 'framing', 'hypothesis'].includes(item.role)) ?? usableMaterial[0];
+  const opening = openingItem.content;
   const why =
     packet.centralTension ||
     packet.readerQuestion ||
-    'The distinction may matter for how teams train and adapt in AI-supported work.';
-  const interpretationInferences = dedupeAgainst(packet.inferences, why);
-  const interpretationParts = [
-    ...interpretationInferences.map((item) => item),
-    ...(packet.speculation.length > 0
-      ? ['**Speculation (not verified):**', ...packet.speculation.map((item) => item)]
-      : []),
-  ];
+    usableMaterial.find((item) => item !== openingItem)?.content;
+  const examples = usableMaterial.filter((item) => item.role === 'example');
+  const interpretationItems = usableMaterial.filter((item) =>
+    ['mechanism', 'distinction', 'framing', 'hypothesis'].includes(item.role)
+    && item !== openingItem
+    && normalizeText(item.content) !== normalizeText(why));
+  const interpretationParts = interpretationItems.map((item) =>
+    item.evidencePosture === 'speculation'
+      ? `**Provisional hypothesis (speculation, not verified):** ${item.content}`
+      : item.content);
   const { readerFacing, editorialWorkflowNotes } = partitionPacketGaps(packet);
-  const openQuestion =
-    readerFacingItems(packet.unresolvedQuestions).join('\n\n') ||
-    readerFacingItems(packet.evidenceGaps).join('\n\n');
+  const questionCandidates = [
+    ...usableMaterial.filter((item) => item.role === 'question').map((item) => item.content),
+    ...readerFacingItems(packet.unresolvedQuestions),
+    ...readerFacingItems(packet.evidenceGaps),
+    packet.readerQuestion,
+  ].filter(isReaderFacingInquiry);
+  const openQuestion = questionCandidates.find((item) =>
+    normalizeText(item) !== normalizeText(opening)
+    && normalizeText(item) !== normalizeText(why));
 
   const markdownParts = [
     `# ${title}`,
@@ -336,7 +373,7 @@ function buildNoteBody(packet) {
     '',
   ];
 
-  if (interpretationInferences.length > 0 || packet.speculation.length > 0) {
+  if (interpretationItems.length > 0) {
     markdownParts.push(
       '## Current interpretation',
       '',
@@ -345,26 +382,39 @@ function buildNoteBody(packet) {
     );
   }
 
+  if (examples.length > 0) {
+    markdownParts.push('## Concrete example', '', paragraphize(examples.map((item) => item.content)), '');
+  }
+
   if (openQuestion) {
     markdownParts.push('## Open question', '', openQuestion, '');
   }
 
   const sections = ['title', 'opening observation or question', 'why it may matter'];
-  if (interpretationInferences.length > 0 || packet.speculation.length > 0) {
+  if (interpretationItems.length > 0) {
     sections.push('current interpretation');
   }
+  if (examples.length > 0) sections.push('concrete example');
   if (openQuestion) sections.push('open question');
+
+  const usedItems = [
+    openingItem,
+    ...usableMaterial.filter((item) => normalizeText(item.content) === normalizeText(why)),
+    ...interpretationItems,
+    ...examples,
+    ...usableMaterial.filter((item) => item.content === openQuestion),
+  ].filter(Boolean);
+  const cautions = developmentItems(packet, ['caution']).map((item) => item.content);
 
   return {
     sections,
     markdown: markdownParts.join('\n'),
-    claimsUsed: [
-      ...packet.verifiedObservations,
-      ...packet.inferences,
-    ],
-    speculationIncluded: [...packet.speculation],
+    claimsUsed: [...new Set(usedItems.map((item) => item.content))],
+    speculationIncluded: [...new Set(usedItems
+      .filter((item) => item.evidencePosture === 'speculation')
+      .map((item) => item.content))],
     readerFacingGapsPreserved: readerFacing,
-    editorialWorkflowNotesOmitted: editorialWorkflowNotes,
+    editorialWorkflowNotesOmitted: [...editorialWorkflowNotes, ...cautions],
     blockedContentOmitted: [
       ...(packet.sourceRequirements ?? []),
       ...(packet.combinationPlan ? ['combination plan material'] : []),
@@ -524,6 +574,7 @@ function allowedClaimCorpus(packet, relatedTexts = []) {
     ...packet.speculation,
     ...packet.unresolvedQuestions,
     ...packet.evidenceGaps,
+    ...(packet.developmentMaterial ?? []).map((item) => item.content),
     ...(packet.relatedMaterial ?? []).map((item) => `${item.reference} ${item.note ?? ''}`),
     packet.prototypeNote?.designProblem,
     packet.prototypeNote?.interactionChoice,

@@ -211,6 +211,22 @@ try {
       expectedReadiness: 'ready',
     },
     {
+      name: 'developed-conceptual-note',
+      issue: 'issue-developed-conceptual-note.md',
+      recommendation: 'recommendation-developed-conceptual-note.json',
+      issueNumber: 9115,
+      expectedCode: 0,
+      expectedReadiness: 'ready',
+    },
+    {
+      name: 'development-material-missing',
+      issue: 'issue-development-material-missing.md',
+      recommendation: 'recommendation-development-material-missing.json',
+      issueNumber: 9116,
+      expectedCode: 2,
+      expectedReadiness: 'insufficient-material',
+    },
+    {
       name: 'verification-reviewed-action',
       issue: 'issue-verification-concepts.md',
       recommendation: 'recommendation-verification-reviewed-action.json',
@@ -387,6 +403,10 @@ try {
         'sufficient',
         'Conceptual verification language must not downgrade source sufficiency',
       );
+      assert.ok(
+        casePacket.developmentMaterial.length >= 3,
+        'Conceptual source material must remain draftable without becoming verified evidence',
+      );
       assert.equal(
         casePacket.evidenceGaps.some((item) =>
           /verify|verification|quotation|primary sources/i.test(item)),
@@ -413,6 +433,24 @@ try {
         casePacket.relatedMaterial.length,
         'Conceptual verification packet must retain unique stable relationships',
       );
+    }
+    if (fixture.name === 'developed-conceptual-note') {
+      assert.deepEqual(casePacket.verifiedObservations, []);
+      assert.ok(casePacket.developmentMaterial.some((item) => item.role === 'mechanism'));
+      assert.equal(
+        casePacket.developmentMaterial.filter((item) => item.role === 'example').length,
+        2,
+      );
+      assert.ok(casePacket.developmentMaterial.some((item) => item.role === 'hypothesis'));
+      assert.ok(casePacket.developmentMaterial.some((item) => item.role === 'caution'));
+      assert.ok(casePacket.developmentMaterial.every((item) =>
+        ['source', 'reviewed-recommendation', 'both'].includes(item.provenance)));
+    }
+    if (fixture.name === 'development-material-missing') {
+      assert.equal(casePacket.sourceSufficiency.status, 'partial');
+      assert.equal(Object.hasOwn(casePacket, 'researchPlan'), false);
+      assert.ok(casePacket.sourceSufficiency.missingElements.some((item) =>
+        /approved source-grounded development material/.test(item)));
     }
     if (fixture.name === 'verification-reviewed-action') {
       assert.deepEqual(

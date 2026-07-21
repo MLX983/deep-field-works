@@ -20,6 +20,7 @@ Refuses to draft unless **all** are true:
 | `blockingCondition` | absent / null |
 | `sourceRequirements` | empty |
 | Artifact type | `note`, `field-report`, or `prototype-note` only |
+| Standalone note grounding | At least three usable `developmentMaterial` items, including an explanatory role |
 
 On refusal: clear blocking message, no article prose, exit code `2`.
 
@@ -101,7 +102,15 @@ Deterministic template assembly from packet fields only:
 - verified observations
 - approved inferences
 - explicitly marked speculation
+- approved `developmentMaterial` for standalone conceptual notes
 - related material references (metadata only unless `--related-dir` loaded)
+
+For conceptual notes, `developmentMaterial` is the primary source of opening,
+mechanism, examples, provisional hypotheses, and unresolved inquiry. Items with
+the `caution` role constrain modality and omissions but are never copied into
+draft prose. The drafting report's `claimsUsed` records any approved grounding
+actually rendered; it is not limited to verified factual claims. Legacy ready
+note packets without sufficient development material are conservatively blocked.
 
 Does **not** invent sources, quotes, statistics, company facts, implementation details, or examples absent from the packet.
 

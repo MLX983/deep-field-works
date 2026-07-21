@@ -89,7 +89,13 @@ for (const fixture of cases) {
   const forbiddenRevision = fixture.forbiddenRevisionIncludes
     ? result.revisionInstructions.every((instruction) => !instruction.includes(fixture.forbiddenRevisionIncludes))
     : true;
-  const passed = result.verdict === fixture.expectedVerdict && expectedRisk && forbiddenRevision;
+  const expectedRevision = fixture.expectedRevisionIncludes
+    ? result.revisionInstructions.some((instruction) => instruction.includes(fixture.expectedRevisionIncludes))
+    : true;
+  const passed = result.verdict === fixture.expectedVerdict
+    && expectedRisk
+    && forbiddenRevision
+    && expectedRevision;
   console.log(`${passed ? 'PASS' : 'FAIL'} ${fixture.name}: expected ${fixture.expectedVerdict}, received ${result.verdict}`);
   if (!passed) {
     failures += 1;

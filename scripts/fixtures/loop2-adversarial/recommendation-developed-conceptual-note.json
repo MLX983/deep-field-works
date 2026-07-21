@@ -1,0 +1,12 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9115,
+  "disposition": "develop independently",
+  "suggestedArtifact": "note",
+  "primaryDomain": "Human-Machine Workflows",
+  "themeOrCluster": "context quality and articulated judgment",
+  "rationale": "The floor-versus-ceiling distinction is grounded by the source's mechanism, concrete examples, and provisional claim about unequal leverage.",
+  "nextAction": "Draft a bounded note using the source's concrete examples while preserving the open question.",
+  "uncertaintyOrReviewFlag": "Keep this as a provisional lens, not an observed hierarchy.",
+  "humanApprovalStatus": "approved"
+}

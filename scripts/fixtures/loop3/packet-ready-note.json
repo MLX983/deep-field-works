@@ -18,6 +18,26 @@
     "The boundary between delegated routine and required judgment can shift faster than the team's review habits."
   ],
   "speculation": [],
+  "developmentMaterial": [
+    {
+      "content": "The boundary between delegated routine and required judgment can shift faster than the team's review habits.",
+      "role": "distinction",
+      "evidencePosture": "inference",
+      "provenance": "source"
+    },
+    {
+      "content": "Teams sometimes delegate routine coordination to automated assistants before they have a shared rule for when a human must re-enter the loop.",
+      "role": "mechanism",
+      "evidencePosture": "inference",
+      "provenance": "source"
+    },
+    {
+      "content": "What lightweight signal would tell a team that a delegated workflow has crossed from assistance into decision authority?",
+      "role": "question",
+      "evidencePosture": "inference",
+      "provenance": "source"
+    }
+  ],
   "sourceRequirements": [],
   "evidenceGaps": [],
   "relatedMaterial": [],
