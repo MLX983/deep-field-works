@@ -112,6 +112,14 @@ draft prose. The drafting report's `claimsUsed` records any approved grounding
 actually rendered; it is not limited to verified factual claims. Legacy ready
 note packets without sufficient development material are conservatively blocked.
 
+Reviewed-recommendation material is filtered at sentence and bounded clause
+boundaries before drafting: conceptual rationale may remain, while explicit
+artifact-selection and workflow rationale is recorded with omitted editorial
+notes. Opening and section candidates are compared conservatively after
+punctuation and whitespace normalization; exact or near-exact duplicates are
+rendered once, and a redundant section is omitted when no distinct explanatory
+item exists.
+
 Does **not** invent sources, quotes, statistics, company facts, implementation details, or examples absent from the packet.
 
 `relatedPieces` accepts only explicitly approved stable content slugs or repository-relative content identifiers. Temporary paths, intake/cache filenames, local absolute paths, raw issue-body paths, and GitHub issue references are rejected. When no stable related piece is approved, the runner emits `relatedPieces: []`.
@@ -127,6 +135,12 @@ Post-generation checks:
 - unresolved questions and evidence gaps preserved
 - no silent satisfaction of `sourceRequirements`
 - no unsupported named entities, statistics, or quotations
+
+Straight and curly double-quoted spans are normalized only for quote style and
+whitespace, then require exact containment in reader-facing packet grounding.
+The original issue, related material, and optional related-directory text do
+not expand this quotation allowlist. An unapproved quotation reports the exact
+offending span.
 
 Validation failure → draft preserved under `failed/`, run marked failed, exit `1`.
 

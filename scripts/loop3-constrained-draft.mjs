@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { sha256Bytes } from './lib/content-fingerprint.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -119,6 +120,103 @@ function isEditorialWorkflowNote(text) {
     || EDITORIAL_WORKFLOW_PATTERNS.some((pattern) => pattern.test(value));
 }
 
+const REVIEWED_PROCESS_SENTENCE_PATTERNS = [
+  /\brelated (?:dfw )?material\b/i,
+  /\b(?:standalone|bounded) (?:conceptual )?(?:note|draft|artifact)\b.*\b(?:appropriate|suitable|viable|authorized)\b/i,
+  /\b(?:combine|merge)(?:-first)?\b.*\b(?:target|choice|decision|material)\b/i,
+  /\b(?:draft readiness|source sufficiency|workflow state|human review)\b/i,
+  /\b(?:should|can|may) be (?:drafted|developed|published)\b/i,
+  /\b(?:approved|ready) for (?:drafting|development|publication|human review)\b/i,
+];
+
+function isReviewedProcessSentence(text) {
+  return REVIEWED_PROCESS_SENTENCE_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function sentenceParts(text) {
+  return String(text ?? '').match(/[^.!?]+(?:[.!?]+(?=\s|$)|$)/g) ?? [];
+}
+
+function filterReviewedRationale(content) {
+  const readerFacing = [];
+  const omitted = [];
+  for (const rawSentence of sentenceParts(content)) {
+    const sentence = rawSentence.trim();
+    if (!sentence) continue;
+    const sourceFraming = sentence.match(
+      /^(?:the )?source (?:makes|presents|contains|offers)\b[^:]*:\s*(.+)$/i,
+    );
+    let candidate = sourceFraming?.[1]?.trim() ?? sentence;
+    const mixedClause = candidate.match(/^(.+?),\s+(?:so|therefore)\s+(.+)$/i);
+    if (
+      mixedClause
+      && !isReviewedProcessSentence(mixedClause[1])
+      && isReviewedProcessSentence(mixedClause[2])
+    ) {
+      const conceptualClause = mixedClause[1].trim().replace(/[,:;]\s*$/, '');
+      readerFacing.push(
+        /[.!?]$/.test(conceptualClause) ? conceptualClause : `${conceptualClause}.`,
+      );
+      omitted.push(candidate.slice(mixedClause[1].length).replace(/^,\s*/, '').trim());
+      continue;
+    }
+    if (isReviewedProcessSentence(candidate)) {
+      omitted.push(sentence);
+      continue;
+    }
+    if (sourceFraming && candidate) {
+      candidate = `${candidate[0].toUpperCase()}${candidate.slice(1)}`;
+    }
+    readerFacing.push(candidate);
+  }
+  return { content: readerFacing.join(' ').trim(), omitted };
+}
+
+function prepareDevelopmentMaterial(packet) {
+  const readerFacing = [];
+  const workflowNotes = [];
+  for (const item of developmentItems(packet)) {
+    if (item.role === 'caution' || isEditorialWorkflowNote(item.content)) {
+      workflowNotes.push(item.content);
+      continue;
+    }
+    if (item.provenance === 'reviewed-recommendation') {
+      const filtered = filterReviewedRationale(item.content);
+      workflowNotes.push(...filtered.omitted);
+      if (!filtered.content) continue;
+      readerFacing.push({ ...item, content: filtered.content, packetContent: item.content });
+      continue;
+    }
+    readerFacing.push({ ...item, packetContent: item.content });
+  }
+  return { readerFacing, workflowNotes };
+}
+
+function readerFacingCentralTension(packet) {
+  const reviewedItem = developmentItems(packet).find((item) =>
+    item.provenance === 'reviewed-recommendation'
+    && normalizeText(item.content) === normalizeText(packet.centralTension));
+  return reviewedItem
+    ? filterReviewedRationale(reviewedItem.content).content
+    : packet.centralTension;
+}
+
+function comparisonText(text) {
+  return String(text ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function isSameSectionContent(left, right) {
+  const a = comparisonText(left);
+  const b = comparisonText(right);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const shorter = a.length <= b.length ? a : b;
+  const longer = a.length > b.length ? a : b;
+  return shorter.length >= 80
+    && longer.includes(shorter)
+    && shorter.length / longer.length >= 0.9;
+}
+
 function developmentItems(packet, roles = null) {
   return (packet.developmentMaterial ?? []).filter((item) =>
     item
@@ -128,7 +226,7 @@ function developmentItems(packet, roles = null) {
 }
 
 function hasDraftableDevelopmentMaterial(packet) {
-  const readerFacing = developmentItems(packet).filter((item) => item.role !== 'caution');
+  const readerFacing = prepareDevelopmentMaterial(packet).readerFacing;
   return readerFacing.length >= 3
     && readerFacing.some((item) => ['mechanism', 'distinction', 'hypothesis'].includes(item.role));
 }
@@ -257,7 +355,7 @@ function isStableRelatedPieceReference(reference) {
 
 function substantiveDescription(packet, artifactType) {
   const candidates = [
-    packet.centralTension,
+    readerFacingCentralTension(packet),
     ...(packet.inferences ?? []),
     ...(packet.verifiedObservations ?? []),
   ].filter(Boolean);
@@ -333,20 +431,26 @@ function paragraphize(items, prefix = '') {
 
 function buildNoteBody(packet) {
   const title = packet.workingTitle || packet.issueReference.title;
-  const usableMaterial = developmentItems(packet).filter((item) =>
-    item.role !== 'caution' && !isEditorialWorkflowNote(item.content));
-  const openingItem = usableMaterial.find((item) =>
-    ['distinction', 'framing', 'hypothesis'].includes(item.role)) ?? usableMaterial[0];
+  const prepared = prepareDevelopmentMaterial(packet);
+  const usableMaterial = prepared.readerFacing;
+  let why = readerFacingCentralTension(packet)
+    || packet.readerQuestion;
+  const explanatoryItems = usableMaterial.filter((item) =>
+    ['mechanism', 'distinction', 'framing', 'hypothesis'].includes(item.role));
+  const distinctOpeningItems = explanatoryItems.filter((item) =>
+    !isSameSectionContent(item.content, why));
+  const openingItem = distinctOpeningItems.find((item) => item.evidencePosture !== 'speculation')
+    ?? distinctOpeningItems[0]
+    ?? explanatoryItems[0]
+    ?? usableMaterial[0];
   const opening = openingItem.content;
-  const why =
-    packet.centralTension ||
-    packet.readerQuestion ||
-    usableMaterial.find((item) => item !== openingItem)?.content;
-  const examples = usableMaterial.filter((item) => item.role === 'example');
+  if (isSameSectionContent(opening, why)) why = '';
+  const examples = usableMaterial.filter((item) =>
+    item.role === 'example' && item !== openingItem);
   const interpretationItems = usableMaterial.filter((item) =>
     ['mechanism', 'distinction', 'framing', 'hypothesis'].includes(item.role)
     && item !== openingItem
-    && normalizeText(item.content) !== normalizeText(why));
+    && !isSameSectionContent(item.content, why));
   const interpretationParts = interpretationItems.map((item) =>
     item.evidencePosture === 'speculation'
       ? `**Provisional hypothesis (speculation, not verified):** ${item.content}`
@@ -367,11 +471,11 @@ function buildNoteBody(packet) {
     '',
     opening,
     '',
-    '## Why it may matter',
-    '',
-    why,
-    '',
   ];
+
+  if (why) {
+    markdownParts.push('## Why it may matter', '', why, '');
+  }
 
   if (interpretationItems.length > 0) {
     markdownParts.push(
@@ -390,7 +494,8 @@ function buildNoteBody(packet) {
     markdownParts.push('## Open question', '', openQuestion, '');
   }
 
-  const sections = ['title', 'opening observation or question', 'why it may matter'];
+  const sections = ['title', 'opening observation or question'];
+  if (why) sections.push('why it may matter');
   if (interpretationItems.length > 0) {
     sections.push('current interpretation');
   }
@@ -399,22 +504,22 @@ function buildNoteBody(packet) {
 
   const usedItems = [
     openingItem,
-    ...usableMaterial.filter((item) => normalizeText(item.content) === normalizeText(why)),
+    ...usableMaterial.filter((item) => why && isSameSectionContent(item.content, why)),
     ...interpretationItems,
     ...examples,
     ...usableMaterial.filter((item) => item.content === openQuestion),
   ].filter(Boolean);
-  const cautions = developmentItems(packet, ['caution']).map((item) => item.content);
-
   return {
     sections,
     markdown: markdownParts.join('\n'),
-    claimsUsed: [...new Set(usedItems.map((item) => item.content))],
+    claimsUsed: [...new Set(usedItems.map((item) => item.packetContent))],
     speculationIncluded: [...new Set(usedItems
       .filter((item) => item.evidencePosture === 'speculation')
-      .map((item) => item.content))],
+      .map((item) => item.packetContent))],
     readerFacingGapsPreserved: readerFacing,
-    editorialWorkflowNotesOmitted: [...editorialWorkflowNotes, ...cautions],
+    editorialWorkflowNotesOmitted: [
+      ...new Set([...editorialWorkflowNotes, ...prepared.workflowNotes]),
+    ],
     blockedContentOmitted: [
       ...(packet.sourceRequirements ?? []),
       ...(packet.combinationPlan ? ['combination plan material'] : []),
@@ -586,6 +691,38 @@ function allowedClaimCorpus(packet, relatedTexts = []) {
   return chunks.filter(Boolean).map(normalizeText);
 }
 
+function normalizeQuotation(value) {
+  return String(value ?? '')
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function quotationGroundingCorpus(packet) {
+  const prepared = prepareDevelopmentMaterial(packet);
+  return [
+    packet.workingTitle,
+    readerFacingCentralTension(packet),
+    packet.readerQuestion,
+    ...packet.verifiedObservations,
+    ...packet.inferences,
+    ...packet.speculation,
+    ...readerFacingItems(packet.unresolvedQuestions),
+    ...readerFacingItems(packet.evidenceGaps),
+    ...prepared.readerFacing.map((item) => item.content),
+    packet.prototypeNote?.designProblem,
+    packet.prototypeNote?.interactionChoice,
+    ...(packet.prototypeNote?.interactionGroups ?? []).flatMap((group) => [group.title, ...group.items]),
+    ...(packet.prototypeNote?.designPrinciples ?? []),
+    packet.prototypeNote?.currentState,
+  ].filter(Boolean).map(normalizeQuotation);
+}
+
+function quotedSpans(value) {
+  return [...String(value ?? '').matchAll(/"[^"]+"|“[^”]+”/gs)]
+    .map((match) => match[0]);
+}
+
 function sentenceSplit(body) {
   return body
     .split(/\n+/)
@@ -608,7 +745,7 @@ function overlapsCorpus(sentence, corpus) {
   return hits / tokens.length >= 0.55;
 }
 
-function validateDraftContent(draftMarkdown, packet, relatedTexts = []) {
+export function validateDraftContent(draftMarkdown, packet, relatedTexts = []) {
   const errors = [];
   const warnings = [];
   const body = draftMarkdown.split('---').slice(2).join('---').trim();
@@ -642,8 +779,14 @@ function validateDraftContent(draftMarkdown, packet, relatedTexts = []) {
   if (/\d+%/.test(body)) {
     errors.push('Draft contains statistics not present in the packet');
   }
-  if (/“[^”]+”|"[^"]{8,}"/.test(body)) {
-    errors.push('Draft contains quotations not present in the packet');
+  const quoteCorpus = quotationGroundingCorpus(packet);
+  for (const quotation of quotedSpans(body)) {
+    const normalizedQuotation = normalizeQuotation(quotation);
+    if (!quoteCorpus.some((chunk) => chunk.includes(normalizedQuotation))) {
+      errors.push(
+        `Draft contains quotation not present in approved packet grounding: ${quotation}`,
+      );
+    }
   }
 
   const namedEntityPattern = /\b(?:Google|Meta|Microsoft|OpenAI|Robinhood|Tesla|Apple|ARD)\b/;
@@ -875,7 +1018,9 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
