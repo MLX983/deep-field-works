@@ -987,6 +987,23 @@ function uniqueResearchItems(items, limit = 8) {
     .slice(0, limit);
 }
 
+function withCleanTerminalPunctuation(value) {
+  let text = String(value ?? '').trim();
+  if (!text) return '';
+  text = text
+    .replace(/([.!?])[;:,]+$/, '$1')
+    .replace(/(^|[^.])\.\.$/, '$1.');
+  if (/[.!?]$/.test(text)) return text;
+  return `${text.replace(/[;:,]+$/, '')}.`;
+}
+
+function joinCleanSentences(items) {
+  return items
+    .map(withCleanTerminalPunctuation)
+    .filter(Boolean)
+    .join(' ');
+}
+
 function buildResearchPlan(recommendation, claims) {
   const reviewedRequirements = uniqueResearchItems([
     recommendation.nextAction,
@@ -996,17 +1013,9 @@ function buildResearchPlan(recommendation, claims) {
     claims.unresolvedQuestions,
   );
   const sourceClaims = uniqueResearchItems([
-    ...claims.unresolvedQuestions,
     ...claims.speculation.slice(0, 3),
-    ...claims.inferences
-      .filter((item) => /\b(?:may|might|could|appears?)\b/i.test(item))
-      .slice(0, 2),
+    ...claims.inferences.slice(0, 3),
   ]);
-  const reviewedResearchFlag = reviewFlagRequiresResearch(
-    recommendation.uncertaintyOrReviewFlag,
-  )
-    ? recommendation.uncertaintyOrReviewFlag
-    : '';
 
   let evidenceNeededForReady = NEUTRAL_RESEARCH_REQUIREMENTS;
   if (sourceRequirements.length > 0) {
@@ -1016,13 +1025,7 @@ function buildResearchPlan(recommendation, claims) {
     evidenceNeededForReady = reviewedRequirements;
   }
 
-  let claimsRequiringVerification = uniqueResearchItems([
-    reviewedResearchFlag,
-    ...reviewedRequirements,
-  ]);
-  if (claimsRequiringVerification.length === 0) {
-    claimsRequiringVerification = sourceClaims;
-  }
+  let claimsRequiringVerification = sourceClaims;
   if (claimsRequiringVerification.length === 0) {
     claimsRequiringVerification = [NEUTRAL_RESEARCH_CLAIM];
   }
@@ -1041,13 +1044,13 @@ function buildBlockingCondition(packet, recommendation) {
     const claims = packet.researchPlan?.claimsRequiringVerification ?? [];
     const evidence = (packet.researchPlan?.evidenceNeededForReady ?? [])
       .filter((item) => !claims.includes(item));
-    return [
+    return joinCleanSentences([
       'Loop 2 stopped before drafting because source verification is required.',
-      `Claims requiring verification: ${claims.join('; ') || 'see sourceRequirements'}`,
+      `Claims requiring verification: ${joinCleanSentences(claims) || 'see sourceRequirements'}`,
       evidence.length > 0
-        ? `Evidence needed for ready: ${evidence.join('; ')}`
+        ? `Evidence needed for ready: ${joinCleanSentences(evidence)}`
         : '',
-    ].filter(Boolean).join(' ');
+    ]);
   }
 
   if (draftReadiness === 'combine-first') {
@@ -1306,8 +1309,8 @@ function buildSummaryMarkdown(packet) {
   if (packet.researchPlan) {
     lines.push(
       '## Research plan',
-      `- **Claims requiring verification:** ${packet.researchPlan.claimsRequiringVerification.join('; ')}`,
-      `- **Evidence needed for ready:** ${packet.researchPlan.evidenceNeededForReady.join('; ')}`,
+      `- **Claims requiring verification:** ${joinCleanSentences(packet.researchPlan.claimsRequiringVerification)}`,
+      `- **Evidence needed for ready:** ${joinCleanSentences(packet.researchPlan.evidenceNeededForReady)}`,
       '',
     );
   }

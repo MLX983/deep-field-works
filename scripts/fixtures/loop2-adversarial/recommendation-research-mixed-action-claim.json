@@ -1,0 +1,11 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9102,
+  "disposition": "research before development",
+  "suggestedArtifact": "seed",
+  "primaryDomain": "Human-Machine Workflows",
+  "themeOrCluster": "agent discovery and governance",
+  "rationale": "The reviewed action combines a research instruction with a proposition that should not be copied wholesale into the claims array.",
+  "nextAction": "Verify the cited announcement before drafting; the standard currently exposes discovery metadata without authorizing access.",
+  "humanApprovalStatus": "approved"
+}

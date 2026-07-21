@@ -243,6 +243,14 @@ try {
       expectedReadiness: 'research-required',
     },
     {
+      name: 'research-mixed-action-claim',
+      issue: 'issue-unverified-external.md',
+      recommendation: 'recommendation-research-mixed-action-claim.json',
+      issueNumber: 9102,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
       name: 'research-reviewed-precedence',
       issue: 'issue-research-reviewed-precedence.md',
       recommendation: 'recommendation-research-reviewed-precedence.json',
@@ -253,13 +261,20 @@ try {
   ];
 
   for (const fixture of nonPrototypeCases) {
+    const recommendationPath = path.join(
+      adversarialFixtureRoot,
+      fixture.recommendation,
+    );
+    const caseRecommendation = JSON.parse(
+      await fs.readFile(recommendationPath, 'utf8'),
+    );
     const caseOut = path.join(tempRoot, `non-prototype-${fixture.name}`);
     const caseRun = await runNode([
       runnerPath,
       '--issue',
       path.join(adversarialFixtureRoot, fixture.issue),
       '--recommendation',
-      path.join(adversarialFixtureRoot, fixture.recommendation),
+      recommendationPath,
       '--out-dir',
       caseOut,
     ]);
@@ -274,6 +289,10 @@ try {
         path.join(caseOut, `loop2-${fixture.issueNumber}-packet.json`),
         'utf8',
       ),
+    );
+    const caseSummary = await fs.readFile(
+      path.join(caseOut, `loop2-${fixture.issueNumber}-summary.md`),
+      'utf8',
     );
     assert.equal(
       casePacket.draftReadiness,
@@ -317,6 +336,12 @@ try {
         casePacket.evidenceGaps.some((item) =>
           /standard authorizes/i.test(item)),
         'Grounded protocol and authorization language must remain available',
+      );
+      assert.ok(
+        casePacket.researchPlan.claimsRequiringVerification.includes(
+          'Agents could discover more tools than organizations intend to expose.',
+        ),
+        'An explicitly labeled unsupported source claim must remain a claim',
       );
     }
     if (fixture.name === 'research-legitimacy') {
@@ -366,6 +391,12 @@ try {
         false,
         'Neutral fallback guidance must not assume a topic',
       );
+      assert.ok(
+        casePacket.blockingCondition.includes(
+          'Verify the source’s factual claims and cited evidence.',
+        ),
+        'Unpunctuated fallback requirements must receive clean terminal punctuation',
+      );
     }
     if (fixture.name === 'research-source-question') {
       assert.deepEqual(
@@ -379,6 +410,26 @@ try {
         casePacket.sourceRequirements.includes('Hold this seed for research.'),
         false,
         'A non-specific reviewed action must not displace source-grounded guidance',
+      );
+    }
+    if (fixture.name === 'research-mixed-action-claim') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [caseRecommendation.nextAction],
+        'A mixed reviewed sentence must remain available as a research requirement',
+      );
+      assert.equal(
+        casePacket.researchPlan.claimsRequiringVerification.includes(
+          caseRecommendation.nextAction,
+        ),
+        false,
+        'A mixed imperative sentence must not be copied wholesale into claims',
+      );
+      assert.ok(
+        casePacket.researchPlan.claimsRequiringVerification.includes(
+          'Agents could discover more tools than organizations intend to expose.',
+        ),
+        'Structurally extracted source claims must survive beside a mixed action',
       );
     }
     if (fixture.name === 'research-reviewed-precedence') {
@@ -408,6 +459,33 @@ try {
         new Set(casePacket.sourceRequirements).size,
         casePacket.sourceRequirements.length,
         `${fixture.name}: source requirements must be deduplicated`,
+      );
+      for (const reviewedAction of [
+        caseRecommendation.nextAction,
+        caseRecommendation.uncertaintyOrReviewFlag,
+      ].filter((item) => casePacket.sourceRequirements.includes(item))) {
+        assert.equal(
+          casePacket.researchPlan.claimsRequiringVerification.includes(
+            reviewedAction,
+          ),
+          false,
+          `${fixture.name}: reviewed actions must not become claims`,
+        );
+      }
+      assert.equal(
+        /\.;|\?;|!;|\.\.|;;/.test(casePacket.blockingCondition),
+        false,
+        `${fixture.name}: blocker must not contain malformed punctuation boundaries`,
+      );
+      assert.match(
+        casePacket.blockingCondition,
+        /[.!?]$/,
+        `${fixture.name}: blocker must end with terminal punctuation`,
+      );
+      assert.equal(
+        /\.;|\?;|!;|\.\.|;;/.test(caseSummary),
+        false,
+        `${fixture.name}: generated summary must not contain malformed research punctuation`,
       );
       for (const item of [
         ...casePacket.researchPlan.claimsRequiringVerification,
