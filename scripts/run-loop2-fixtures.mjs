@@ -203,6 +203,30 @@ try {
       expectedReadiness: 'ready',
     },
     {
+      name: 'verification-concepts',
+      issue: 'issue-verification-concepts.md',
+      recommendation: 'recommendation-verification-concepts.json',
+      issueNumber: 9113,
+      expectedCode: 0,
+      expectedReadiness: 'ready',
+    },
+    {
+      name: 'verification-reviewed-action',
+      issue: 'issue-verification-concepts.md',
+      recommendation: 'recommendation-verification-reviewed-action.json',
+      issueNumber: 9113,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
+      name: 'verification-mixed-external',
+      issue: 'issue-verification-mixed-external.md',
+      recommendation: 'recommendation-verification-mixed-external.json',
+      issueNumber: 9114,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
       name: 'thin-body',
       issue: 'issue-thin-body.md',
       recommendation: 'recommendation-thin-body.json',
@@ -342,6 +366,93 @@ try {
           'Agents could discover more tools than organizations intend to expose.',
         ),
         'An explicitly labeled unsupported source claim must remain a claim',
+      );
+    }
+    if (fixture.name === 'verification-concepts') {
+      assert.equal(casePacket.approvedArtifactType, 'note');
+      assert.equal(casePacket.primaryDomain, 'Cognitive Infrastructure');
+      assert.equal(
+        casePacket.theme,
+        'context inequality and judgment legibility',
+      );
+      assert.deepEqual(casePacket.verifiedObservations, []);
+      assert.deepEqual(casePacket.inferences, []);
+      assert.deepEqual(casePacket.speculation, []);
+      assert.deepEqual(casePacket.sourceRequirements, []);
+      assert.equal(Object.hasOwn(casePacket, 'researchPlan'), false);
+      assert.equal(Object.hasOwn(casePacket, 'blockingCondition'), false);
+      assert.equal(Object.hasOwn(casePacket, 'combinationPlan'), false);
+      assert.equal(
+        casePacket.sourceSufficiency.status,
+        'sufficient',
+        'Conceptual verification language must not downgrade source sufficiency',
+      );
+      assert.equal(
+        casePacket.evidenceGaps.some((item) =>
+          /verify|verification|quotation|primary sources/i.test(item)),
+        false,
+        'Conceptual verification language must not create a research evidence gap',
+      );
+      assert.equal(
+        casePacket.relatedMaterial.some((item) => item.reference === '#9113'),
+        false,
+        'The active conceptual source must not relate to itself',
+      );
+      assert.deepEqual(
+        casePacket.relatedMaterial
+          .filter((item) => item.role === 'related-theme')
+          .map((item) => item.reference),
+        [
+          'src/content/field-notes/skills-half-life.md',
+          'src/content/articles/my-ai-rules.md',
+        ],
+        'Reviewed material must remain related rather than becoming a combine target',
+      );
+      assert.equal(
+        new Set(casePacket.relatedMaterial.map((item) => item.reference)).size,
+        casePacket.relatedMaterial.length,
+        'Conceptual verification packet must retain unique stable relationships',
+      );
+    }
+    if (fixture.name === 'verification-reviewed-action') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [caseRecommendation.nextAction],
+        'An explicit reviewed research action must remain authoritative',
+      );
+      assert.equal(
+        casePacket.researchPlan.evidenceNeededForReady.includes(
+          caseRecommendation.nextAction,
+        ),
+        true,
+        'Reviewed source-specific guidance must enter the research plan',
+      );
+    }
+    if (fixture.name === 'verification-mixed-external') {
+      assert.deepEqual(
+        casePacket.sourceRequirements,
+        [
+          'Has the cited Northstar Report methodology and dataset been checked?',
+        ],
+        'The explicit unresolved citation must ground the research requirement',
+      );
+      assert.ok(
+        casePacket.researchPlan.claimsRequiringVerification.includes(
+          'The Northstar Report found a forty percent increase in delegated decisions.',
+        ),
+        'The named unresolved external claim must remain available for verification',
+      );
+      assert.equal(
+        /who can verify sources|verification affects trust/i.test(
+          JSON.stringify({
+            sourceRequirements: casePacket.sourceRequirements,
+            evidenceGaps: casePacket.evidenceGaps,
+            researchPlan: casePacket.researchPlan,
+            blockingCondition: casePacket.blockingCondition,
+          }),
+        ),
+        false,
+        'Conceptual verification language must not be serialized as a research task',
       );
     }
     if (fixture.name === 'research-legitimacy') {

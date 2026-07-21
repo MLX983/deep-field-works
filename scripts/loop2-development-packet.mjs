@@ -61,7 +61,6 @@ const UNVERIFIED_EXTERNAL_PATTERNS = [
   /\b(?:announced|announcement|reported|according to|the article|press release)\b/i,
   /\b(?:standard|protocol|specification|whitepaper)\b/i,
   /\b(?:ard|agentic resource discovery)\b/i,
-  /\bverify\b/i,
 ];
 
 const REVIEW_FLAG_RESEARCH_PATTERNS = [
@@ -611,7 +610,10 @@ function determineDraftReadiness(recommendation, sufficiency) {
 
   if (sufficiency.unverifiedExternal.length > 0) return 'research-required';
 
-  if (reviewFlagRequiresResearch(recommendation.uncertaintyOrReviewFlag)) {
+  if (
+    reviewFlagRequiresResearch(recommendation.nextAction) ||
+    reviewFlagRequiresResearch(recommendation.uncertaintyOrReviewFlag)
+  ) {
     return 'research-required';
   }
 

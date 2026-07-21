@@ -151,9 +151,10 @@ Loop 2 does **not** map disposition directly to `draftReadiness`. Disposition is
 - No source verification blocker
 - No drafting path that would require invented support
 
-Review flags trigger `research-required` only when they explicitly require
-research, verification, validation, evidence gathering, sourcing, citations,
-factual support, or fact-checking. A standalone keyword is not enough.
+Reviewed next actions and review flags trigger `research-required` only when
+they explicitly require research, verification, validation, evidence gathering,
+sourcing, citations, factual support, or fact-checking. A standalone keyword or
+conceptual discussion of verification is not enough.
 
 Current-state cautions remain compatible with `ready` when the source is
 otherwise sufficient. In particular, a review flag does not block merely
