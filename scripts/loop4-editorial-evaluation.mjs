@@ -88,6 +88,14 @@ function overlap(value, corpus) {
   return itemTokens.filter((token) => corpusTokens.has(token)).length / itemTokens.length >= 0.55;
 }
 
+function extractDoubleQuotedSpans(value) {
+  return String(value ?? '').match(/"[^"]{8,}"|“[^“”\r\n]+”/g) ?? [];
+}
+
+function normalizeDoubleQuotedSpan(value) {
+  return String(value ?? '').replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim();
+}
+
 function parseScalar(raw) {
   const value = raw.trim();
   if (value === 'true') return true;
@@ -258,8 +266,14 @@ function unsupportedClaims(body, packet) {
   for (const entity of named) {
     if (!normalize(allowed).includes(normalize(entity))) errors.push(`Unsupported named entity: ${entity}`);
   }
-  for (const match of body.match(/\b(?:19|20)\d{2}\b|\b\d+(?:\.\d+)?%\b|[“”][^“”]+|"[^"]{8,}"/g) ?? []) {
+  for (const match of body.match(/\b(?:19|20)\d{2}\b|\b\d+(?:\.\d+)?%\b/g) ?? []) {
     if (!allowed.includes(match)) errors.push(`Unsupported date, statistic, or quotation: ${match.slice(0, 100)}`);
+  }
+  const normalizedAllowed = normalizeDoubleQuotedSpan(allowed);
+  for (const match of extractDoubleQuotedSpans(body)) {
+    if (!normalizedAllowed.includes(normalizeDoubleQuotedSpan(match))) {
+      errors.push(`Unsupported date, statistic, or quotation: ${match.slice(0, 100)}`);
+    }
   }
   return unique(errors);
 }

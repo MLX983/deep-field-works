@@ -1,0 +1,87 @@
+[
+  {
+    "name": "multiple-approved-curly-quotations",
+    "issueNumber": 9420,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "quoteParagraph": "The team calls the first boundary “better,” the second “learn the tool,” the third “normal drift,” and the fourth “meaningful risk.”",
+    "groundingParagraph": "The team calls the first boundary \"better,\" the second \"learn the tool,\" the third \"normal drift,\" and the fourth \"meaningful risk.\""
+  },
+  {
+    "name": "closing-mark-before-later-opening",
+    "issueNumber": 9421,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "forbiddenBlockingIncludes": ["” Later"],
+    "quoteParagraph": "The first label is “routine.” Later, the second label is “judgment.”",
+    "groundingParagraph": "The first label is \"routine.\" Later, the second label is \"judgment.\""
+  },
+  {
+    "name": "adjacent-approved-curly-quotations",
+    "issueNumber": 9422,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "forbiddenBlockingIncludes": ["routine”“judgment"],
+    "quoteParagraph": "The review uses “routine”“judgment” as adjacent labels.",
+    "groundingParagraph": "The review uses \"routine\"\"judgment\" as adjacent labels."
+  },
+  {
+    "name": "multiline-approved-curly-quotations",
+    "issueNumber": 9423,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "quoteParagraph": "The first line calls collection “routine.”\n\nThe later line calls prioritization “judgment.”",
+    "groundingParagraph": "The first line calls collection \"routine.\"\n\nThe later line calls prioritization \"judgment.\""
+  },
+  {
+    "name": "approved-straight-quotation",
+    "issueNumber": 9424,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "quoteParagraph": "The team calls the handoff \"review boundary\" during planning.",
+    "groundingParagraph": "The team calls the handoff “review boundary” during planning."
+  },
+  {
+    "name": "mixed-approved-quotation-styles",
+    "issueNumber": 9425,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "quoteParagraph": "The team calls collection \"routine work\" and prioritization “judgment work.”",
+    "groundingParagraph": "The team calls collection “routine work” and prioritization \"judgment work.\""
+  },
+  {
+    "name": "unapproved-curly-quotation",
+    "issueNumber": 9426,
+    "expectedVerdict": "HOLD",
+    "expectedUnsupportedQuotationCount": 1,
+    "expectedBlockingIncludes": ["Unsupported date, statistic, or quotation: “secret override”"],
+    "quoteParagraph": "The team calls the handoff “secret override” during review.",
+    "groundingParagraph": "The team calls the handoff a review boundary during review."
+  },
+  {
+    "name": "unapproved-straight-quotation",
+    "issueNumber": 9427,
+    "expectedVerdict": "HOLD",
+    "expectedUnsupportedQuotationCount": 1,
+    "expectedBlockingIncludes": ["Unsupported date, statistic, or quotation: \"secret override\""],
+    "quoteParagraph": "The team calls the handoff \"secret override\" during review.",
+    "groundingParagraph": "The team calls the handoff a review boundary during review."
+  },
+  {
+    "name": "unmatched-closing-curly-mark",
+    "issueNumber": 9428,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "quoteParagraph": "The team records a stray closing mark ” after the review boundary.",
+    "groundingParagraph": "The team records a stray closing mark ” after the review boundary."
+  },
+  {
+    "name": "unmatched-opening-curly-mark",
+    "issueNumber": 9429,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "expectedUnsupportedQuotationCount": 0,
+    "forbiddenBlockingIncludes": ["later sections"],
+    "quoteParagraph": "The team records an unmatched opening “without treating later sections as quoted.",
+    "groundingParagraph": "The team records an unmatched opening “without treating later sections as quoted."
+  }
+]
