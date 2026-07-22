@@ -18,6 +18,14 @@ marks on the same line. Quote style and whitespace are normalized only for exact
 containment in approved packet grounding. Unmatched curly marks are ignored as
 incomplete quotations; they cannot open a cross-line span.
 
+Reader-facing visibility checks compare central tension, unresolved questions,
+and evidence gaps only after removing sentence or clause units that exactly
+match, after conservative normalization, entries in the Loop 3 report's
+`editorialWorkflowNotesOmitted`. Genuine questions remain required. When only
+an evidence boundary remains, explicit provisional or unverified framing may
+satisfy it. Reports without omission metadata retain their prior comparison
+inputs.
+
 First-class artifact criteria currently cover `note`, `field-report`, and
 `prototype-note`. Prototype notes use the canonical 300–800 word range and
 must include the design problem, interaction choice, grouped control surface,

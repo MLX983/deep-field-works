@@ -1,0 +1,119 @@
+[
+  {
+    "name": "mixed-central-tension-filtered",
+    "issueNumber": 9430,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "forbiddenRevisionIncludes": "central tension",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment. This should remain a bounded standalone note rather than combine with related material.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "unresolvedQuestions": [],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": ["This should remain a bounded standalone note rather than combine with related material."]
+  },
+  {
+    "name": "conceptual-clause-only-draft",
+    "issueNumber": 9431,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "forbiddenRevisionIncludes": "central tension",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment, so this should remain a bounded standalone note.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "unresolvedQuestions": [],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": ["so this should remain a bounded standalone note."]
+  },
+  {
+    "name": "actual-conceptual-tension-omitted",
+    "issueNumber": 9432,
+    "expectedVerdict": "REVISE",
+    "expectedRevisionIncludes": "central tension",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment. This should remain a bounded standalone note.",
+    "bodyTension": "Teams still need a visible review boundary for delegated work.",
+    "unresolvedQuestions": [],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": ["This should remain a bounded standalone note."]
+  },
+  {
+    "name": "workflow-caution-only-omitted",
+    "issueNumber": 9433,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "forbiddenRevisionIncludes": "unresolved question or evidence boundary",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "provisionality": "This remains a provisional interpretation rather than an observed hierarchy.",
+    "unresolvedQuestions": ["Keep this as a provisional lens, not an observed hierarchy."],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": ["Keep this as a provisional lens, not an observed hierarchy."]
+  },
+  {
+    "name": "genuine-unresolved-question-required",
+    "issueNumber": 9434,
+    "expectedVerdict": "REVISE",
+    "expectedRevisionIncludes": "unresolved question or evidence boundary",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "unresolvedQuestions": ["Which forms of context remain durable when the underlying model changes?"],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": []
+  },
+  {
+    "name": "mixed-workflow-caution-and-real-question",
+    "issueNumber": 9435,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "forbiddenRevisionIncludes": "unresolved question or evidence boundary",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "readerQuestion": "Which forms of context remain durable when the underlying model changes?",
+    "ending": "Which forms of context remain durable when the underlying model changes?",
+    "unresolvedQuestions": [
+      "Keep this as a provisional lens, not an observed hierarchy.",
+      "Which forms of context remain durable when the underlying model changes?"
+    ],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": ["Keep this as a provisional lens, not an observed hierarchy."]
+  },
+  {
+    "name": "visible-provisionality-satisfies-boundary",
+    "issueNumber": 9436,
+    "expectedVerdict": "PASS_TO_HUMAN",
+    "forbiddenRevisionIncludes": "unresolved question or evidence boundary",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "provisionality": "This remains a provisional hypothesis (speculation, not verified).",
+    "unresolvedQuestions": [],
+    "evidenceGaps": ["This remains unverified."],
+    "editorialWorkflowNotesOmitted": []
+  },
+  {
+    "name": "legacy-report-without-omission-metadata",
+    "issueNumber": 9437,
+    "expectedVerdict": "REVISE",
+    "expectedRevisionIncludes": "central tension",
+    "centralTension": "Shared access can coexist with unequal leverage. This should remain a bounded standalone note and should not combine with related material.",
+    "bodyTension": "Shared access can coexist with unequal leverage.",
+    "unresolvedQuestions": [],
+    "evidenceGaps": []
+  },
+  {
+    "name": "empty-omitted-notes-array",
+    "issueNumber": 9438,
+    "expectedVerdict": "REVISE",
+    "expectedRevisionIncludes": "central tension",
+    "centralTension": "Shared access can coexist with unequal leverage. This should remain a bounded standalone note and should not combine with related material.",
+    "bodyTension": "Shared access can coexist with unequal leverage.",
+    "unresolvedQuestions": [],
+    "evidenceGaps": [],
+    "editorialWorkflowNotesOmitted": []
+  },
+  {
+    "name": "substantive-evidence-gap-still-required",
+    "issueNumber": 9439,
+    "expectedVerdict": "REVISE",
+    "expectedRevisionIncludes": "unresolved question or evidence boundary",
+    "centralTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "bodyTension": "Shared access can coexist with unequal leverage created by articulated judgment.",
+    "provisionality": "This remains a provisional hypothesis (speculation, not verified).",
+    "unresolvedQuestions": [],
+    "evidenceGaps": ["A source is still required for the adoption-rate claim."],
+    "editorialWorkflowNotesOmitted": []
+  }
+]

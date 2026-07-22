@@ -77,6 +77,22 @@ function normalize(value) {
   return String(value ?? '').toLowerCase().replace(/[“”"'’]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
+function comparisonUnits(value) {
+  return String(value ?? '')
+    .split(/\n+|(?<=[.!?])\s+|,\s+(?=(?:so|therefore)\b)/i)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function readerFacingComparisonText(value, omittedNotes) {
+  const omittedUnits = new Set(
+    (omittedNotes ?? []).flatMap(comparisonUnits).map(normalize).filter(Boolean),
+  );
+  return comparisonUnits(value)
+    .filter((item) => !omittedUnits.has(normalize(item)))
+    .join(' ');
+}
+
 function tokens(value) {
   return new Set((normalize(value).match(/[a-z0-9]{4,}/g) ?? []));
 }
@@ -192,6 +208,11 @@ function isFunctionalInquiry(value) {
     || /\bwhether\b/i.test(text)
     || /\b(?:remains?|is still) (?:unclear|unknown|unresolved)\b/i.test(text)
     || /\b(?:open|unresolved) (?:question|inquiry) (?:is|concerns?)\b/i.test(text);
+}
+
+function hasVisibleEvidenceBoundary(value) {
+  return /\b(?:provisional(?:ly)?|hypothes(?:is|es)|unverified|not verified|evidence (?:is |remains )?(?:incomplete|limited|uncertain))\b/i
+    .test(String(value ?? ''));
 }
 
 function nearDuplicate(left, right) {
@@ -327,12 +348,16 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
   if (unsupported.length) blockingProblems.push(...unsupported);
   else strengths.push('No unsupported factual claims were detected against the approved packet.');
 
-  const corpus = `${packet.readerQuestion ?? ''} ${packet.centralTension ?? ''}`;
+  const omittedWorkflowNotes = Array.isArray(report.editorialWorkflowNotesOmitted)
+    ? report.editorialWorkflowNotesOmitted
+    : [];
+  const readerFacingTension = readerFacingComparisonText(packet.centralTension, omittedWorkflowNotes);
+  const corpus = `${packet.readerQuestion ?? ''} ${readerFacingTension}`;
   const questionVisible = Boolean(packet.readerQuestion && overlap(packet.readerQuestion, body));
-  const tensionVisible = Boolean(packet.centralTension && overlap(packet.centralTension, body));
+  const tensionVisible = Boolean(readerFacingTension && overlap(readerFacingTension, body));
   if (questionVisible) strengths.push('The central question remains visible.');
-  if (!tensionVisible) revisions.push('State the packet’s central tension directly without broadening the claim.');
-  else strengths.push('The central distinction is preserved.');
+  if (readerFacingTension && !tensionVisible) revisions.push('State the packet’s central tension directly without broadening the claim.');
+  else if (readerFacingTension) strengths.push('The central distinction is preserved.');
 
   const [min, max] = TARGETS[type] ?? [0, Infinity];
   const words = wordCount(body);
@@ -390,8 +415,15 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
     if (!/speculation\s*\(not verified\)|\bspeculat(?:ion|ive)\b/i.test(body)) revisions.push('Restore an explicit speculation label for the packet’s provisional claim.');
     else strengths.push('Speculation remains explicitly marked as unverified.');
   }
-  const unresolved = [...(packet.unresolvedQuestions ?? []), ...(packet.evidenceGaps ?? [])].filter(Boolean);
-  if (unresolved.length && !unresolved.some((item) => overlap(item, body))) revisions.push('Restore one packet-backed unresolved question or evidence boundary in the ending.');
+  const unresolved = [...(packet.unresolvedQuestions ?? []), ...(packet.evidenceGaps ?? [])]
+    .map((item) => readerFacingComparisonText(item, omittedWorkflowNotes))
+    .filter(Boolean);
+  const hasReaderFacingInquiry = unresolved.some(isFunctionalInquiry);
+  const permitsEquivalentEvidenceBoundary = unresolved.length > 0
+    && unresolved.every((item) => !isFunctionalInquiry(item) && hasVisibleEvidenceBoundary(item));
+  const unresolvedVisible = unresolved.some((item) => overlap(item, body))
+    || (!hasReaderFacingInquiry && permitsEquivalentEvidenceBoundary && hasVisibleEvidenceBoundary(body));
+  if (unresolved.length && !unresolvedVisible) revisions.push('Restore one packet-backed unresolved question or evidence boundary in the ending.');
   else if (unresolved.length) strengths.push('The ending preserves unresolved uncertainty.');
 
   const description = String(meta.description ?? '');

@@ -8,9 +8,11 @@ import { sha256Bytes } from './lib/content-fingerprint.mjs';
 const root = process.cwd();
 const fixturePath = path.join(root, 'scripts/fixtures/loop4/cases.json');
 const quotationFixturePath = path.join(root, 'scripts/fixtures/loop4/quotation-cases.json');
+const visibilityFixturePath = path.join(root, 'scripts/fixtures/loop4/visibility-cases.json');
 const baseOut = process.argv[2] || '/tmp/dfw-loop4-fixtures';
 const baseCases = JSON.parse(await fs.readFile(fixturePath, 'utf8'));
 const quotationCases = JSON.parse(await fs.readFile(quotationFixturePath, 'utf8'));
+const visibilityCases = JSON.parse(await fs.readFile(visibilityFixturePath, 'utf8'));
 const quotationBase = {
   approvedArtifactType: 'note',
   reportArtifactType: 'note',
@@ -45,6 +47,37 @@ A useful rule can attach to the action: collecting information remains routine, 
 ## Open question
 
 Where should a quotation boundary stop?`;
+const visibilityBase = {
+  approvedArtifactType: 'note',
+  reportArtifactType: 'note',
+  draftArtifactType: 'note',
+  title: 'Reader-facing visibility follows approved omissions',
+  description: 'Shared access can coexist with unequal leverage created by articulated judgment.',
+  readerQuestion: 'Which decisions still require human judgment?',
+  inferences: ['A reader-facing comparison should not restore workflow-only clauses.'],
+  speculation: [],
+};
+const visibilityBody = (fixture) => `# Reader-facing visibility follows approved omissions
+
+${fixture.bodyTension}
+
+${fixture.provisionality ?? ''}
+
+## Why it may matter
+
+A project team may use an assistant to gather updates, group blockers, and prepare a status note. The work changes when the assistant ranks one blocker above another because that ordering directs attention and can affect the plan.
+
+The distinction matters because collection and recommendation need different review boundaries. A team can delegate routine gathering without also delegating the authority to decide what deserves action.
+
+## Current interpretation
+
+A reader-facing comparison should not restore workflow-only clauses. A useful rule can attach to the action: collecting information remains routine, while changing priority, commitment, authority, or risk returns to an accountable person.
+
+Different consequences may require different boundaries, so the interpretation remains provisional.
+
+## Open question
+
+${fixture.ending ?? visibilityBase.readerQuestion}`;
 const cases = [
   ...baseCases,
   ...quotationCases.map((fixture) => ({
@@ -61,6 +94,21 @@ const cases = [
       quotationBase.readerQuestion,
     ],
     body: quotationBody(fixture.quoteParagraph),
+  })),
+  ...visibilityCases.map((fixture) => ({
+    ...visibilityBase,
+    ...fixture,
+    verifiedObservations: [
+      fixture.bodyTension,
+      fixture.provisionality,
+      'A project team may use an assistant to gather updates, group blockers, and prepare a status note. The work changes when the assistant ranks one blocker above another because that ordering directs attention and can affect the plan.',
+      'The distinction matters because collection and recommendation need different review boundaries. A team can delegate routine gathering without also delegating the authority to decide what deserves action.',
+      'A reader-facing comparison should not restore workflow-only clauses.',
+      'A useful rule can attach to the action: collecting information remains routine, while changing priority, commitment, authority, or risk returns to an accountable person.',
+      'Different consequences may require different boundaries, so the interpretation remains provisional.',
+      fixture.ending ?? visibilityBase.readerQuestion,
+    ].filter(Boolean),
+    body: visibilityBody(fixture),
   })),
 ];
 let failures = 0;
@@ -114,6 +162,9 @@ for (const fixture of cases) {
     sourceIssueSha256: sha256Bytes(Buffer.from(`sanitized issue ${fixture.issueNumber}\n`)),
     sourceRecommendationSha256: sha256Bytes(Buffer.from(`sanitized recommendation ${fixture.issueNumber}\n`)),
     generatedDraftSha256: sha256Bytes(draftBytes),
+    ...(Object.hasOwn(fixture, 'editorialWorkflowNotesOmitted')
+      ? { editorialWorkflowNotesOmitted: fixture.editorialWorkflowNotesOmitted }
+      : {}),
   };
   const packetPath = path.join(dir, 'packet.json');
   const reportPath = path.join(dir, 'draft-report.json');
