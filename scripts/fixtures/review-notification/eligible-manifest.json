@@ -1,0 +1,42 @@
+{
+  "contractVersion": "loop3-5-orchestration-manifest.v1",
+  "issueReference": {
+    "number": 9901,
+    "title": "Synthetic notification review fixture",
+    "url": "https://example.invalid/issues/9901"
+  },
+  "startedAt": "2026-07-22T18:00:00.000Z",
+  "completedAt": "2026-07-22T18:05:00.000Z",
+  "finalWorkflowStatus": "READY_FOR_HUMAN_EDITORIAL_REVIEW",
+  "stageExecutionSummary": [
+    {
+      "stage": "loop4",
+      "startedAt": "2026-07-22T18:04:00.000Z",
+      "completedAt": "2026-07-22T18:05:00.000Z",
+      "exitCode": 0,
+      "outcome": "completed",
+      "stdoutPath": "/tmp/dfw-synthetic-review/loop4/loop4-stdout.log",
+      "stderrPath": "/tmp/dfw-synthetic-review/loop4/loop4-stderr.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "stage": "loop3",
+      "kind": "draft",
+      "path": "/tmp/dfw-synthetic-review/loop3/loop3-9901-draft.md",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "stage": "loop4",
+      "kind": "evaluation",
+      "path": "/tmp/dfw-synthetic-review/loop4/loop4-9901-evaluation.json",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "stoppedAtStage": "loop4",
+  "stopReason": "Synthetic Loop 4 evaluation passed the fixture to human editorial review.",
+  "humanInputRequests": [],
+  "warnings": [
+    "Synthetic warning for notification rendering only."
+  ]
+}

@@ -22,6 +22,8 @@
     "loop:orchestrate": "node scripts/orchestrate-loops-3-5.mjs",
     "loop:orchestrate:fixtures": "node scripts/run-orchestration-fixtures.mjs",
     "loop:human-input:fixtures": "node scripts/run-loop5-human-input-fixtures.mjs",
+    "notify:review": "node scripts/notify-review.mjs",
+    "notify:review:fixtures": "node scripts/run-review-notification-fixtures.mjs",
     "preview": "astro preview",
     "review:drafts": "astro dev --open /review-drafts",
     "astro": "astro"
