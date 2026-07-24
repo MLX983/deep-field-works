@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/backlog-loop1-review-envelope.v1.schema.json",
+  "title": "backlog-loop1-review-envelope.v1",
+  "description": "Human approval envelope binding an existing Loop 1 reviewed recommendation to one immutable source and processor workspace.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueNumber",
+    "sourceContentSha256",
+    "processingCommitSha",
+    "workspacePath",
+    "loop1ResultSha256",
+    "recommendation"
+  ],
+  "properties": {
+    "contractVersion": { "const": "backlog-loop1-review-envelope.v1" },
+    "issueNumber": { "type": "integer", "minimum": 1 },
+    "sourceContentSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "processingCommitSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "workspacePath": { "type": "string", "minLength": 1 },
+    "loop1ResultSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "recommendation": {
+      "$ref": "loop1-reviewed-recommendation.v1.schema.json"
+    }
+  }
+}

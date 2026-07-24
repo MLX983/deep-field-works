@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/backlog-batch-manifest.v1.schema.json",
+  "title": "backlog-batch-manifest.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "runId",
+    "mode",
+    "sourceRepository",
+    "processingCommitSha",
+    "startedAt",
+    "completedAt",
+    "limit",
+    "stateDirectory",
+    "workRoot",
+    "sourceSnapshotPath",
+    "selected",
+    "skipped",
+    "results",
+    "summary"
+  ],
+  "properties": {
+    "contractVersion": { "const": "backlog-batch-manifest.v1" },
+    "runId": { "type": "string" },
+    "mode": { "enum": ["dry-run", "execute"] },
+    "sourceRepository": { "type": "string" },
+    "processingCommitSha": { "type": "string" },
+    "startedAt": { "type": "string" },
+    "completedAt": { "type": "string" },
+    "limit": { "type": "integer", "minimum": 1 },
+    "stateDirectory": { "type": "string" },
+    "workRoot": { "type": "string" },
+    "sourceSnapshotPath": { "type": "string" },
+    "selected": { "type": "array" },
+    "skipped": { "type": "array" },
+    "results": { "type": "array" },
+    "summary": {
+      "type": "object",
+      "required": ["processed", "skipped", "processingStates", "skipReasons"],
+      "properties": {
+        "processed": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 },
+        "processingStates": { "type": "object" },
+        "skipReasons": { "type": "object" }
+      }
+    }
+  }
+}

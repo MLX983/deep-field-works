@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/backlog-source-snapshot.v1.schema.json",
+  "title": "backlog-source-snapshot.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "sourceRepository", "fetchedAt", "issueCount", "issues"],
+  "properties": {
+    "contractVersion": { "const": "backlog-source-snapshot.v1" },
+    "sourceRepository": { "type": "string", "minLength": 3 },
+    "fetchedAt": { "type": "string", "format": "date-time" },
+    "issueCount": { "type": "integer", "minimum": 0 },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["number", "title", "url", "state", "createdAt", "updatedAt", "body", "sourceContentSha256"],
+        "properties": {
+          "number": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "state": { "const": "open" },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" },
+          "body": { "type": "string" },
+          "sourceContentSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    }
+  }
+}

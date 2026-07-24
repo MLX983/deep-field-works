@@ -150,21 +150,25 @@ items require investigation before they can be planned.
 ### DFW-BL-005 — Add a manually invoked bounded backlog processor
 
 - **Category:** automation, workflow, safety
-- **Status:** proposed
+- **Status:** in progress
 - **Priority:** medium
 - **Discovered during:** bounded real-backlog pilots
 - **Problem or observation:** Backlog issues are currently selected and run
   one at a time through manual commands.
-- **Current safeguard:** Manual selection, isolated `/tmp` workspaces, explicit
-  approval boundaries, and stage-specific stop conditions keep scope bounded.
+- **Current safeguard:** The implemented command requires an explicit limit,
+  isolates issue and run workspaces, uses fingerprint-bound Loop 1 approval
+  envelopes, preserves stable nondraft stops, and defaults notification to dry
+  run. It has no scheduler, GitHub mutation, or publication path.
 - **Desired improvement:** Add a manually invoked processor that preserves
   bounded scope and all existing governance stops. Investigate durable state,
   source fingerprints, strict limits, retries, concurrency claims,
   stale-claim recovery, resumability, terminal statuses, prioritization,
   cost/throughput controls, and review-capacity limits as parts of this parent
   item.
-- **Reason deferred:** The pilot set must establish safe operating behavior
-  before batch mechanics are planned.
+- **Reason deferred:** The initial bounded implementation and fixture suite are
+  complete. Status remains in progress until operational validation has
+  established repeat-run behavior against the real backlog and the approval
+  resume path has been exercised under normal editorial operation.
 - **Dependencies or prerequisites:** Define states including awaiting Loop 1
   review, combine-first, governance stop, waiting for human, retriable failure,
   terminal failure, completed notification, and changed source. Define an
@@ -174,7 +178,9 @@ items require investigation before they can be planned.
   respects cost and review-capacity limits, and performs no publication or
   issue mutation.
 - **Relevant references:** issue #12, #6, and #28 pilot artifacts; Loop 3–5
-  orchestration manifest contract
+  orchestration manifest contract; `scripts/backlog-process.mjs`;
+  `scripts/backlog-process.README.md`; `backlog-*.v1` contracts;
+  `npm run backlog:process:fixtures`
 
 ### DFW-BL-006 — Add automatic intake triggering after bounded processing is proven
 
@@ -345,12 +351,15 @@ items require investigation before they can be planned.
 - **Category:** developer experience, technical debt
 - **Status:** proposed
 - **Priority:** low
-- **Discovered during:** issue #16 and issue #12 Loop 1 operations
+- **Discovered during:** issue #16 and issue #12 Loop 1 operations; DFW-BL-005
+  bounded-processor validation
 - **Problem or observation:** A sandboxed Loop 1 command could not initialize
   the existing Codex state database; the unchanged command succeeded with
   approved access.
 - **Current safeguard:** Failure occurs before a proposal or partial workflow
-  result is produced, and an approved rerun is explicit.
+  result is produced, and an approved rerun is explicit. The bounded processor
+  records this as a retriable per-issue failure, releases the claim, preserves
+  the failed workspace, and can retry without stopping later selected issues.
 - **Desired improvement:** Determine whether workflow commands can avoid
   implicit Codex-local state dependencies or clearly document required access.
 - **Reason deferred:** Approved reruns are reliable and the failure is
@@ -359,7 +368,8 @@ items require investigation before they can be planned.
   require Codex state and which can remain sandbox-local.
 - **Validation criteria:** The command either runs within documented
   permissions or fails with a precise preflight message before model work.
-- **Relevant references:** issue #16 pilot; issue #12 regression rerun logs
+- **Relevant references:** issue #16 pilot; issue #12 regression rerun logs;
+  DFW-BL-005 operational validation workspace
 
 ### DFW-BL-014 — Preserve human-input request provenance
 
