@@ -87,7 +87,14 @@ for (const fixture of cases) {
   const passed =
     result?.overallStatus === fixture.expectedStatus &&
     (fixture.expectedExit ?? 0) === (run.status ?? 1) &&
-    prototypePreserved;
+    prototypePreserved &&
+    (result?.humanInputRequests ?? []).every((request) =>
+      request.includes(`Issue #${fixture.issueNumber}`)
+      && fixture.instructions.some((instruction) => request.includes(instruction))
+      && (
+        fixture.instructions.some((instruction) => /tool-specific skill|skill decaying/i.test(instruction))
+        || !/tool-specific skill|durable judgment skill|skill that decayed/i.test(request)
+      ));
   console.log(`${passed ? 'PASS' : 'FAIL'} ${fixture.name}: expected ${fixture.expectedStatus}, received ${result?.overallStatus ?? 'NO_REPORT'}`);
   if (!passed) { failures += 1; console.log(run.stdout); console.error(run.stderr); if (result) console.log(JSON.stringify(result, null, 2)); }
 }

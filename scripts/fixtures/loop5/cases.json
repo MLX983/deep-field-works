@@ -127,5 +127,19 @@
       "currentState": "This is a proposed screen."
     },
     "body": "# A visible authority control\n\nIn today's rapidly changing world, AI unlocks new possibilities. Delegated authority needs a visible control boundary.\n\n## The design problem\n\nDelegated authority needs a visible control boundary.\n\n## The interaction choice\n\nThe screen groups knowledge, access, and action rules.\n\n## How the control surface is grouped\n\n### Actions\n\n- Actions can be allowed, blocked, or returned for approval.\n\n## Why it matters\n\nThe boundary stays visible.\n\n## Current state\n\nThis is a proposed screen.\n\n## Remaining questions\n\nCan delegated authority remain visible?"
+  },
+  {
+    "name": "missing-request-grounding",
+    "issueNumber": 9510,
+    "expectedStatus": "BLOCKED",
+    "expectedExit": 2,
+    "verdict": "REVISE",
+    "instructions": [""],
+    "title": "Grounding must be explicit",
+    "description": "A note whose revision request lacks an active instruction.",
+    "readerQuestion": "What instruction is active?",
+    "centralTension": "A request without an active instruction cannot be safely emitted.",
+    "approvedMaterial": ["A request without an active instruction cannot be safely emitted.", "What instruction is active?"],
+    "body": "# Grounding must be explicit\n\nA request without an active instruction cannot be safely emitted.\n\n## Why it may matter\n\nUngrounded requests can cross issue boundaries.\n\n## Current interpretation\n\nThe active evaluation must supply the instruction.\n\n## Open question\n\nWhat instruction is active?"
   }
 ]

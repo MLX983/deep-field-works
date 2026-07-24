@@ -122,6 +122,10 @@ function gateProblems(packet, report, evaluation, draftPath, meta) {
   if (evaluation.verdict !== 'REVISE') problems.push(`Loop 5 requires verdict REVISE; received ${evaluation.verdict ?? 'missing'}.`);
   if ((evaluation.blockingProblems ?? []).length) problems.push('Loop 4 evaluation contains blocking problems.');
   if (!Array.isArray(evaluation.revisionInstructions) || evaluation.revisionInstructions.length < 1 || evaluation.revisionInstructions.length > 5) problems.push('Loop 4 evaluation must contain 1–5 revision instructions.');
+  else if (evaluation.revisionInstructions.some((item) =>
+    typeof item !== 'string' || !item.trim())) {
+    problems.push('Loop 4 revision instructions must be non-empty strings.');
+  }
   if (report.contractVersion !== 'loop3-drafting-report.v1' || report.validationStatus !== 'passed') problems.push('Loop 3 drafting report did not pass.');
   const issue = packet.issueReference?.number;
   if (issue !== report.sourcePacketReference?.issueNumber || issue !== evaluation.issueAndDraftReference?.issueNumber) problems.push('Packet, Loop 3 report, and Loop 4 evaluation issue references do not match.');
@@ -220,14 +224,30 @@ function validateRevision(source, revised, packet, classifications, applied, hum
   return unique(errors);
 }
 
-function humanRequest(classification) {
-  const text = normalize(classification.instruction);
-  if (/\b(?:concrete|workplace|training|company|personal) example\b/.test(text)) {
-    return 'Provide one real, sourceable workplace or training example: identify the tool-specific skill that decayed, the more durable judgment skill that remained useful, and enough context to state it without inventing facts.';
+function humanRequest(classification, packet) {
+  return `Issue #${packet.issueReference.number} requires human editorial input for this active Loop 4 instruction: ${classification.instruction}`;
+}
+
+function validateHumanRequestGrounding(requests, classifications, packet, evaluation) {
+  const errors = [];
+  if (requests.length !== classifications.length) {
+    errors.push('Loop 5 human-input request count does not match the active human-input instructions.');
+    return errors;
   }
-  if (/\bchoose between\b/.test(text)) return `Choose the intended interpretation for: ${classification.instruction}`;
-  if (/\b(?:verify|source)\b/.test(text)) return `Provide the verified source material required by: ${classification.instruction}`;
-  return `Clarify or supply the missing human input required by: ${classification.instruction}`;
+  for (let index = 0; index < classifications.length; index += 1) {
+    const instruction = classifications[index].instruction;
+    const request = requests[index];
+    if (!(evaluation.revisionInstructions ?? []).includes(instruction)) {
+      errors.push(`Human-input request is not grounded in the active Loop 4 evaluation: ${instruction}`);
+    }
+    if (
+      !request.includes(`Issue #${packet.issueReference.number}`)
+      || !request.includes(instruction)
+    ) {
+      errors.push(`Human-input request does not preserve its issue and instruction provenance: ${instruction}`);
+    }
+  }
+  return errors;
 }
 
 function validateHumanInput(input, inputPath, packet, classifications) {
@@ -359,7 +379,17 @@ async function main() {
   const humanMatch = humanInput ? classifications.find((item) => item.classification === 'HUMAN_INPUT_REQUIRED' && item.instruction === humanInput.requestedFor) : null;
   const human = classifications.filter((item) => item.classification === 'HUMAN_INPUT_REQUIRED' && item !== humanMatch);
   const auto = classifications.filter((item) => item.classification === 'AUTO_APPLY');
-  result.humanInputRequests = unique(human.map(humanRequest));
+  result.humanInputRequests = human.map((item) => humanRequest(item, packet));
+  const requestGroundingErrors = validateHumanRequestGrounding(
+    result.humanInputRequests,
+    human,
+    packet,
+    evaluation,
+  );
+  if (requestGroundingErrors.length) {
+    result.humanInputRequests = [];
+    result.warnings.push(...requestGroundingErrors);
+  }
   let revisedBody = source.body;
   if (humanMatch) {
     const inserted = insertHumanExample(revisedBody, humanInput.content);
@@ -406,6 +436,7 @@ async function main() {
   else if (result.instructionsApplied.length && human.length) result.overallStatus = 'PARTIALLY_REVISED_WAITING_FOR_HUMAN';
   else if (result.instructionsApplied.length && result.instructionsNotApplied.length === 0) result.overallStatus = 'REVISED';
   else result.overallStatus = 'BLOCKED';
+  if (requestGroundingErrors.length) result.overallStatus = 'BLOCKED';
   const revised = { frontmatter: source.frontmatter, body: revisedBody };
   const validationErrors = validateRevision(source, revised, packet, classifications, result.instructionsApplied, humanInput?.content ?? '');
   if (validationErrors.length) { result.overallStatus = 'BLOCKED'; result.warnings.push(...validationErrors); }

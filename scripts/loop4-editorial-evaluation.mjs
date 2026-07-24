@@ -10,7 +10,7 @@ const CONTRACT = 'loop4-editorial-evaluation.v1';
 const VERDICTS = new Set(['PASS_TO_HUMAN', 'REVISE', 'HOLD']);
 const TARGETS = { note: [200, 600], 'field-report': [500, 1200], 'prototype-note': [300, 800] };
 const REQUIRED_SECTIONS = {
-  note: [['why it may matter'], ['current interpretation'], ['open question']],
+  note: [['why it may matter'], ['current interpretation']],
   'field-report': [['the signal'], ['why it may matter'], ['the deeper tension'], ['what to watch next']],
   'prototype-note': [
     ['the design problem'],
@@ -327,11 +327,21 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
   if (wrongType.length) blockingProblems.push(...wrongType);
   revisions.push(...metadata.filter((item) => !wrongType.includes(item)).map((item) => `Correct metadata: ${item}`));
 
+  const approvedInquiries = [
+    packet.readerQuestion,
+    ...(packet.unresolvedQuestions ?? []),
+    ...(packet.developmentMaterial ?? [])
+      .filter((item) => item?.role === 'question')
+      .map((item) => item.content),
+  ].filter(isFunctionalInquiry);
   const structure = REQUIRED_SECTIONS[type];
   if (!structure) blockingProblems.push(`Unsupported or wrong artifact type: ${type || 'missing'}.`);
   else {
+    const requiredSections = type === 'note' && approvedInquiries.length > 0
+      ? [...structure, ['open question']]
+      : structure;
     const draftHeadings = headings(body);
-    for (const alternatives of structure) {
+    for (const alternatives of requiredSections) {
       if (!alternatives.some((required) => draftHeadings.includes(required))) revisions.push(`Add the missing “${alternatives[0]}” section and give it only that section's required function.`);
     }
     if (type === 'note' && draftHeadings.includes('open question')) {
@@ -353,7 +363,7 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
     : [];
   const readerFacingTension = readerFacingComparisonText(packet.centralTension, omittedWorkflowNotes);
   const corpus = `${packet.readerQuestion ?? ''} ${readerFacingTension}`;
-  const questionVisible = Boolean(packet.readerQuestion && overlap(packet.readerQuestion, body));
+  const questionVisible = approvedInquiries.some((inquiry) => overlap(inquiry, body));
   const tensionVisible = Boolean(readerFacingTension && overlap(readerFacingTension, body));
   if (questionVisible) strengths.push('The central question remains visible.');
   if (readerFacingTension && !tensionVisible) revisions.push('State the packet’s central tension directly without broadening the claim.');
@@ -394,9 +404,9 @@ function evaluate(packet, report, draftPath, markdown, fingerprints) {
     risks.push(`Body length is ${words} words, above the ${min}–${max} target for ${type}.`);
   } else strengths.push(`Body length (${words} words) fits the ${type} target.`);
 
-  if (!questionVisible && tensionVisible && !exampleVisible) {
+  if (approvedInquiries.length > 0 && !questionVisible && tensionVisible && !exampleVisible) {
     revisions.push('Recheck whether the opening creates enough tension after the example is added; revise only if the central question remains unclear.');
-  } else if (!questionVisible) {
+  } else if (approvedInquiries.length > 0 && !questionVisible) {
     revisions.push('State the packet’s reader question or its direct equivalent near the opening.');
   }
 

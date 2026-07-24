@@ -153,14 +153,91 @@ function extractIssueMetadata(body) {
   const intakeHeading = body.match(/^# Intake:\s*(.*)$/m);
   const rawBodyMatch = body.match(/### Body\s+([\s\S]*?)(?:\n---\n|$)/);
   const rawBody = (rawBodyMatch?.[1] ?? '').trim();
+  const contentBody = stripStructuralIntakePrelude(rawBody);
 
   return {
     number: Number(field('Number') || issueHeading?.[1] || 0),
     title: field('Title') || issueHeading?.[2] || intakeHeading?.[1] || '',
     url: field('URL'),
     rawBody,
-    bodyExcerpt: rawBody.replace(/\s+/g, ' ').slice(0, 1200),
+    contentBody,
+    bodyExcerpt: contentBody.replace(/\s+/g, ' ').slice(0, 1200),
   };
+}
+
+const INTAKE_STRUCTURAL_FIELDS = new Set([
+  'title',
+  'description',
+  'pubdate',
+  'updateddate',
+  'draft',
+  'documenttype',
+  'theme',
+  'status',
+  'sourcenote',
+  'domainpath',
+  'relatedconcepts',
+  'relatedpieces',
+  'canonical',
+  'source',
+  'email id',
+  'from',
+  'to',
+  'received',
+  'original subject',
+  'subject',
+]);
+
+function structuralFieldName(line) {
+  const match = line.match(/^([A-Za-z][A-Za-z0-9 _-]*):(?:\s.*)?$/);
+  return match?.[1].trim().toLowerCase() ?? '';
+}
+
+function isStructuralPreludeContinuation(line) {
+  const value = line.trim();
+  return (
+    !value
+    || /^[-*]\s+/.test(value)
+    || /^["“][^"”]+["”],?$/.test(value)
+    || /^\[[^\]]*\]$/.test(value)
+    || /^(?:true|false|null|\d{4}-\d{2}-\d{2})$/i.test(value)
+  );
+}
+
+function stripStructuralIntakePrelude(rawBody) {
+  const lines = String(rawBody ?? '').split(/\r?\n/);
+  let index = 0;
+  while (index < lines.length && !lines[index].trim()) index += 1;
+
+  if (lines[index]?.trim() === '---') {
+    const closing = lines.findIndex(
+      (line, candidate) => candidate > index && line.trim() === '---',
+    );
+    if (closing > index) index = closing + 1;
+  }
+
+  let foundStructuralField = false;
+  let lastWasStructuralField = false;
+  for (; index < lines.length; index += 1) {
+    const line = lines[index];
+    const trimmed = line.trim();
+    if (/^(?:```|~~~|>)/.test(trimmed)) break;
+
+    const fieldName = structuralFieldName(trimmed);
+    if (INTAKE_STRUCTURAL_FIELDS.has(fieldName)) {
+      foundStructuralField = true;
+      lastWasStructuralField = true;
+      continue;
+    }
+    if (foundStructuralField && isStructuralPreludeContinuation(line)) {
+      if (trimmed) lastWasStructuralField = false;
+      continue;
+    }
+    if (!trimmed && (foundStructuralField || lastWasStructuralField)) continue;
+    break;
+  }
+
+  return lines.slice(index).join('\n').trim();
 }
 
 function canonicalArtifactType(value) {
@@ -344,12 +421,39 @@ function parseLabeledClaims(rawBody) {
     }
   }
 
+  for (const paragraph of normalizeParagraphBlocks(rawBody)) {
+    for (const sentence of paragraph.match(/[^.!?]+(?:[.!?]+(?=\s|$)|$)/g) ?? []) {
+      const text = sentence.replace(/^#{1,6}\s+/, '').trim();
+      const isUnlabeledSourceInquiry =
+        /^(?:how|what|why|when|where|which|who)\b.*\?$/i.test(text)
+        || /^the open question is whether\b/i.test(text);
+      if (
+        isUnlabeledSourceInquiry
+        && !/^open question:/i.test(text)
+        && !isWorkflowDirective(text)
+        && !isExcludedParagraph(text)
+      ) {
+        unresolvedQuestions.push(text);
+      }
+    }
+  }
+
   return {
     verifiedObservations: [...new Set(verifiedObservations)].slice(0, 8),
     inferences: [...new Set(inferences)].slice(0, 8),
     speculation: [...new Set(speculation)].slice(0, 8),
     unresolvedQuestions: [...new Set(unresolvedQuestions)].slice(0, 10),
   };
+}
+
+function isSupportedInquiry(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return false;
+  return /\?$/.test(text)
+    || /^(?:how|what|why|when|where|which|who)\b/i.test(text)
+    || /\bwhether\b/i.test(text)
+    || /\b(?:remains?|is still) (?:unclear|unknown|unresolved)\b/i.test(text)
+    || /\b(?:open|unresolved) (?:question|inquiry) (?:is|concerns?)\b/i.test(text);
 }
 
 function isExcludedParagraph(text) {
@@ -474,7 +578,7 @@ function buildDevelopmentMaterial(recommendation, issueMeta, claims) {
     add(question, 'question', 'source', 'inference');
   }
 
-  const paragraphs = extractSubstantiveParagraphs(issueMeta.rawBody)
+  const paragraphs = extractSubstantiveParagraphs(issueMeta.contentBody)
     .filter((paragraph) => !isWorkflowDirective(paragraph));
   const scopeTokens = new Set(tokenize([
     recommendation.rationale,
@@ -525,7 +629,7 @@ function buildCarryForwardMaterial(recommendation, issueMeta, claims) {
   for (const inference of claims.inferences) {
     if (!isExcludedParagraph(inference)) items.push(inference);
   }
-  for (const paragraph of extractSubstantiveParagraphs(issueMeta.rawBody)) {
+  for (const paragraph of extractSubstantiveParagraphs(issueMeta.contentBody)) {
     items.push(paragraph);
   }
   if (recommendation.rationale) items.push(recommendation.rationale);
@@ -605,11 +709,11 @@ function assessSourceSufficiency({
 }) {
   const reasons = [];
   const missingElements = [];
-  const substantiveParagraphs = extractSubstantiveParagraphs(issueMeta.rawBody);
-  const rawBody = issueMeta.rawBody.replace(/\s+/g, ' ').trim();
+  const substantiveParagraphs = extractSubstantiveParagraphs(issueMeta.contentBody);
+  const rawBody = issueMeta.contentBody.replace(/\s+/g, ' ').trim();
   const threshold = artifactThreshold(recommendation.suggestedArtifact);
-  const substanceScore = computeSubstanceScore(claims, substantiveParagraphs, issueMeta.rawBody);
-  const unverifiedExternal = detectUnverifiedExternalDeps(issueMeta.rawBody, claims);
+  const substanceScore = computeSubstanceScore(claims, substantiveParagraphs, issueMeta.contentBody);
+  const unverifiedExternal = detectUnverifiedExternalDeps(issueMeta.contentBody, claims);
   const tension = centralTensionFromSource(claims);
 
   const hasClearClaim =
@@ -771,14 +875,21 @@ function deriveCentralTension(claims, recommendation, sufficiency) {
   return recommendation.rationale || '';
 }
 
-function deriveReaderQuestion(issueMeta, recommendation, draftReadiness) {
+function deriveReaderQuestion(issueMeta, recommendation, draftReadiness, claims, developmentMaterial) {
   if (draftReadiness === 'combine-first') {
     return `How should material from issue #${issueMeta.number} support an existing cluster without becoming a standalone artifact?`;
   }
   if (draftReadiness === 'research-required') {
     return 'What must be verified before this signal can support a field report or larger artifact?';
   }
-  return `What should a reader understand about ${deriveWorkingTitle(issueMeta, recommendation)} within ${recommendation.primaryDomain}?`;
+  const candidates = [
+    ...(claims.unresolvedQuestions ?? []),
+    ...(developmentMaterial ?? [])
+      .filter((item) => item.role === 'question')
+      .map((item) => item.content),
+  ];
+  return candidates.find((item) =>
+    isSupportedInquiry(item) && !isWorkflowDirective(item)) ?? '';
 }
 
 function parseExactIssueReference(reference) {
@@ -1215,7 +1326,13 @@ function buildPacket({
 }) {
   const workingTitle = deriveWorkingTitle(issueMeta, recommendation);
   const centralTension = deriveCentralTension(claims, recommendation, sourceSufficiency);
-  const readerQuestion = deriveReaderQuestion(issueMeta, recommendation, draftReadiness);
+  const readerQuestion = deriveReaderQuestion(
+    issueMeta,
+    recommendation,
+    draftReadiness,
+    claims,
+    developmentMaterial,
+  );
 
   const packet = {
     contractVersion: 'loop2-development-packet.v1',
@@ -1493,14 +1610,14 @@ async function main() {
     );
   }
 
-  const claims = parseLabeledClaims(issueMeta.rawBody);
+  const claims = parseLabeledClaims(issueMeta.contentBody);
   const developmentMaterial = buildDevelopmentMaterial(
     recommendation,
     issueMeta,
     claims,
   );
   const prototypeNote = approvedArtifactType === 'prototype-note'
-    ? extractPrototypeNote(issueMeta.rawBody)
+    ? extractPrototypeNote(issueMeta.contentBody)
     : null;
   if (prototypeNote) {
     const missing = missingPrototypeGrounding(prototypeNote);
@@ -1534,7 +1651,7 @@ async function main() {
   );
 
   const queryParts = [
-    { text: issueMeta.rawBody, weight: 5 },
+    { text: issueMeta.contentBody, weight: 5 },
     { text: recommendation.themeOrCluster, weight: 4 },
     { text: recommendation.rationale, weight: 3 },
     { text: recommendation.primaryDomain, weight: 2 },

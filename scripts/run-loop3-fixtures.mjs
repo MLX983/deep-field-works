@@ -355,7 +355,11 @@ try {
     path.join(conceptualLoop4, 'loop4-9115-evaluation.json'),
     'utf8',
   ));
-  assert.equal(conceptualEvaluation.verdict, 'REVISE');
+  assert.equal(
+    conceptualEvaluation.verdict,
+    'PASS_TO_HUMAN',
+    'A supported source inquiry preserved in the ending must not trigger the former tautological reader-question revision',
+  );
   assert.equal(conceptualEvaluation.revisionInstructions.some((item) =>
     /Open question/.test(item)), false);
   console.log('PASS developed-conceptual-note: production Loop 2 → Loop 3 → Loop 4 path');
