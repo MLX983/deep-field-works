@@ -43,6 +43,12 @@ npm run backlog:process -- \
   --work-root /tmp/dfw-backlog-work
 ```
 
+When an operator has approved one specific backlog item, `--issue-number N`
+restricts selection and execution to that open issue while direct acquisition
+still records the complete source response. This prevents an earlier eligible
+record from being processed during an explicitly targeted resume or
+changed-source reprocessing operation.
+
 GitHub access is read-only and uses:
 
 ```bash
@@ -192,6 +198,9 @@ issue claims before a new lock is acquired.
 If the source fingerprint changes after a stable result, the default remains a
 safe skip. `--reprocess-changed` creates a new workspace and preserves the
 prior result in registry history. It never overwrites the earlier artifacts.
+For a changed record already awaiting review, the flag must be paired with
+`--issue-number N`; without explicit reprocessing it continues to reserve
+review capacity.
 
 Per-issue stage failures are recorded and do not stop later selected issues.
 Malformed registry state or failure to acquire the global registry lock stops

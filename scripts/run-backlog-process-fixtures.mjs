@@ -1227,6 +1227,57 @@ test("55 changed awaiting review still reserves batch capacity", async () => {
   );
 });
 
+test("56 explicit issue target excludes earlier eligible issues", async () => {
+  const setup = options("issue-target", [issue(1), issue(2), issue(3)], {
+    mode: "dry-run",
+    limit: 1,
+    issueNumber: 2,
+  });
+  const result = await processBacklog(setup.value, mockDeps());
+  assert.deepEqual(
+    result.batch.selected.map((item) => item.issueNumber),
+    [2],
+  );
+  assert.equal(result.batch.targetIssueNumber, 2);
+  assert.equal(result.batch.skipped.length, 0);
+});
+
+test("57 targeted changed awaiting issue reprocesses into new history", async () => {
+  const setup = options("targeted-awaiting-reprocess", [issue(1), issue(2)]);
+  await firstPass(setup);
+  const registryBefore = readRegistry(setup);
+  const priorIssue1 = structuredClone(registryBefore.issues["1"]);
+  const priorIssue2 = structuredClone(registryBefore.issues["2"]);
+  writeJson(setup.snapshotPath, {
+    issues: [issue(1), issue(2, "Issue 2", "Changed body")],
+  });
+  const result = await processBacklog(
+    {
+      ...setup.value,
+      limit: 1,
+      issueNumber: 2,
+      reprocessChanged: true,
+    },
+    mockDeps(),
+  );
+  const registryAfter = readRegistry(setup);
+  const refreshed = registryAfter.issues["2"];
+  assert.deepEqual(registryAfter.issues["1"], priorIssue1);
+  assert.equal(result.batch.results[0].issueNumber, 2);
+  assert.equal(refreshed.processingStatus, "awaiting-loop1-review");
+  assert.notEqual(refreshed.workspacePath, priorIssue2.workspacePath);
+  assert.notEqual(
+    refreshed.sourceContentSha256,
+    priorIssue2.sourceContentSha256,
+  );
+  assert.equal(refreshed.priorResults.length, 1);
+  assert.equal(
+    refreshed.priorResults[0].workspacePath,
+    priorIssue2.workspacePath,
+  );
+  assert.equal(refreshed.attemptHistory.length, 2);
+});
+
 let failed = 0;
 for (const fixture of tests) {
   try {

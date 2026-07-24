@@ -9,6 +9,7 @@ function usage() {
 
 Options:
   --source-snapshot PATH           Use an immutable local issue snapshot instead of GitHub.
+  --issue-number N                 Restrict selection and execution to one issue.
   --reviewed-recommendation PATH   Resume one awaiting issue with a bound approval envelope.
   --reprocess-changed              Reprocess a completed issue whose source changed.
   --recover-stale-claims           Recover claims older than the configured timeout.
@@ -33,6 +34,7 @@ function parseArgs(argv) {
     ["--state-dir", "stateDir"],
     ["--work-root", "workRoot"],
     ["--source-snapshot", "sourceSnapshot"],
+    ["--issue-number", "issueNumber"],
     ["--reviewed-recommendation", "reviewedRecommendation"],
     ["--claim-timeout-minutes", "claimTimeoutMinutes"],
   ]);
@@ -65,6 +67,9 @@ function parseArgs(argv) {
     }
   }
   options.limit = Number(options.limit);
+  if (options.issueNumber !== undefined) {
+    options.issueNumber = Number(options.issueNumber);
+  }
   options.claimTimeoutMinutes = Number(options.claimTimeoutMinutes);
   for (const required of [
     "mode",

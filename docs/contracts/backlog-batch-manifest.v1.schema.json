@@ -30,6 +30,7 @@
     "startedAt": { "type": "string" },
     "completedAt": { "type": "string" },
     "limit": { "type": "integer", "minimum": 1 },
+    "targetIssueNumber": { "type": ["integer", "null"], "minimum": 1 },
     "stateDirectory": { "type": "string" },
     "workRoot": { "type": "string" },
     "sourceSnapshotPath": { "type": "string" },

@@ -464,7 +464,8 @@ function selectCandidates({
         record.sourceContentSha256 !== issue.sourceContentSha256;
       if (
         record.processingStatus === "awaiting-loop1-review" &&
-        !hasReviewEnvelope(issue.number)
+        !hasReviewEnvelope(issue.number) &&
+        !(changed && reprocessChanged)
       ) {
         const consumesCapacity = capacityUsed < limit;
         if (consumesCapacity) capacityUsed += 1;
@@ -1191,6 +1192,12 @@ export async function processBacklog(options, deps = {}) {
   if (!Number.isInteger(options.limit) || options.limit < 1) {
     throw new Error("--limit must be a positive integer.");
   }
+  if (
+    options.issueNumber !== undefined &&
+    (!Number.isInteger(options.issueNumber) || options.issueNumber < 1)
+  ) {
+    throw new Error("--issue-number must be a positive integer.");
+  }
   if (!options.sourceRepository || !options.repoPath) {
     throw new Error("--source-repo and --repo-path are required.");
   }
@@ -1229,6 +1236,17 @@ export async function processBacklog(options, deps = {}) {
   );
   try {
     const source = loadSource(options, deps, timestamp);
+    const scopedIssues =
+      options.issueNumber === undefined
+        ? source.issues
+        : source.issues.filter(
+            (issue) => issue.number === options.issueNumber,
+          );
+    if (options.issueNumber !== undefined && scopedIssues.length !== 1) {
+      throw new Error(
+        `Issue #${options.issueNumber} is not present in the acquired open-issue source.`,
+      );
+    }
     const sourcePath =
       options.mode === "dry-run"
         ? join(dryRunRoot, "source-snapshot.json")
@@ -1242,6 +1260,15 @@ export async function processBacklog(options, deps = {}) {
     const reviewEnvelope = options.reviewedRecommendation
       ? readJson(options.reviewedRecommendation)
       : null;
+    if (
+      reviewEnvelope &&
+      options.issueNumber !== undefined &&
+      Number(reviewEnvelope.issueNumber) !== options.issueNumber
+    ) {
+      throw new Error(
+        "Reviewed recommendation rejected: envelope issue does not match --issue-number.",
+      );
+    }
     if (reviewEnvelope) {
       const reviewRecord =
         registry.issues[String(Number(reviewEnvelope.issueNumber))];
@@ -1266,7 +1293,7 @@ export async function processBacklog(options, deps = {}) {
       }
     }
     const selection = selectCandidates({
-      issues: source.issues,
+      issues: scopedIssues,
       registry,
       stateDir: registryStateDir,
       timestamp,
@@ -1287,6 +1314,7 @@ export async function processBacklog(options, deps = {}) {
       startedAt: timestamp,
       completedAt: null,
       limit: options.limit,
+      targetIssueNumber: options.issueNumber ?? null,
       stateDirectory: registryStateDir,
       workRoot,
       sourceSnapshotPath: sourcePath,
