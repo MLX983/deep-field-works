@@ -1190,6 +1190,43 @@ test("54 dry-run reads existing capacity state without mutating it", async () =>
   assert.equal(readFileSync(registryPath, "utf8"), registryBefore);
 });
 
+test("55 changed awaiting review still reserves batch capacity", async () => {
+  const setup = options("changed-awaiting-capacity", [
+    issue(1),
+    issue(2),
+    issue(3),
+  ], {
+    limit: 1,
+  });
+  await firstPass(setup);
+  const changedIssues = [
+    issue(1, "Issue 1", "Changed body"),
+    issue(2),
+    issue(3),
+  ];
+  writeJson(setup.snapshotPath, { issues: changedIssues });
+  const dryRun = await processBacklog(
+    { ...setup.value, mode: "dry-run", limit: 2 },
+    mockDeps(),
+  );
+  assert.deepEqual(
+    dryRun.batch.selected.map((item) => item.issueNumber),
+    [2],
+  );
+  const awaiting = dryRun.batch.skipped.find(
+    (item) => item.issueNumber === 1,
+  );
+  assert.equal(awaiting.reason, "awaiting-loop1-review");
+  assert.equal(awaiting.consumesCapacity, true);
+  assert.equal(awaiting.sourceChanged, true);
+  assert.equal(typeof awaiting.previousFingerprint, "string");
+  assert.equal(typeof awaiting.currentFingerprint, "string");
+  assert.equal(
+    dryRun.batch.skipped.find((item) => item.issueNumber === 3).reason,
+    "batch-limit",
+  );
+});
+
 let failed = 0;
 for (const fixture of tests) {
   try {

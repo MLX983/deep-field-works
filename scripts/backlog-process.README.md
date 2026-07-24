@@ -65,6 +65,9 @@ The earliest issue waiting for Loop 1 review reserves one batch slot. This
 prevents a repeated command from walking past an unresolved review boundary
 and accumulating additional unreviewed work. With `--limit 1`, the same command
 remains stable until that issue receives a matching approval envelope.
+The reservation remains in force when direct acquisition detects that the
+awaiting issue's source fingerprint changed; the manifest reports both
+fingerprints, and the issue still requires explicit human resolution.
 
 The processor skips:
 

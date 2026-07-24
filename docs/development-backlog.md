@@ -150,7 +150,7 @@ items require investigation before they can be planned.
 ### DFW-BL-005 — Add a manually invoked bounded backlog processor
 
 - **Category:** automation, workflow, safety
-- **Status:** in progress
+- **Status:** completed
 - **Priority:** medium
 - **Discovered during:** bounded real-backlog pilots
 - **Problem or observation:** Backlog issues are currently selected and run
@@ -158,20 +158,17 @@ items require investigation before they can be planned.
 - **Current safeguard:** The implemented command requires an explicit limit,
   isolates issue and run workspaces, uses fingerprint-bound Loop 1 approval
   envelopes, records original and resume processor commits separately,
-  preserves stable nondraft stops, and defaults notification to dry run. It
-  has no scheduler, GitHub mutation, or publication path.
-- **Desired improvement:** Add a manually invoked processor that preserves
-  bounded scope and all existing governance stops. Investigate durable state,
-  source fingerprints, strict limits, retries, concurrency claims,
-  stale-claim recovery, resumability, terminal statuses, prioritization,
-  cost/throughput controls, and review-capacity limits as parts of this parent
-  item.
-- **Reason deferred:** The bounded implementation, dual-commit resume fix,
-  issue #1 nondraft resume, idempotent replay, and review-capacity validation
-  are complete. Status remains in progress because the required direct
-  read-only GitHub acquisition validation could not run in the current
-  environment: the `gh` executable is not installed, so authentication and
-  repeated direct dry-runs remain unverified.
+  preserves stable nondraft stops, keeps awaiting-review capacity reserved
+  across source changes, and defaults notification to dry run. It has no
+  scheduler, GitHub mutation, or publication path.
+- **Desired improvement:** Completed: add a manually invoked processor that
+  preserves bounded scope, durable provenance, concurrency safety, retry
+  boundaries, strict limits, review capacity, and all existing governance
+  stops.
+- **Reason deferred:** No longer deferred. The bounded implementation,
+  dual-commit resume fix, issue #1 nondraft resume, idempotent replay,
+  review-capacity behavior, and repeated direct read-only GitHub dry-runs are
+  validated. Retained as implementation and regression history.
 - **Dependencies or prerequisites:** Define states including awaiting Loop 1
   review, combine-first, governance stop, waiting for human, retriable failure,
   terminal failure, completed notification, and changed source. Define an
@@ -179,7 +176,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** A bounded dry run processes only its explicit
   selection, isolates each issue, resumes safely from recorded boundaries,
   respects cost and review-capacity limits, and performs no publication or
-  issue mutation.
+  issue mutation. Direct acquisition produces deterministic repeated plans
+  from the same live backlog state.
 - **Relevant references:** issue #12, #6, and #28 pilot artifacts; Loop 3–5
   orchestration manifest contract; `scripts/backlog-process.mjs`;
   `scripts/backlog-process.README.md`; `backlog-registry.v2` and

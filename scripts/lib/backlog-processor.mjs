@@ -462,6 +462,26 @@ function selectCandidates({
     if (record) {
       const changed =
         record.sourceContentSha256 !== issue.sourceContentSha256;
+      if (
+        record.processingStatus === "awaiting-loop1-review" &&
+        !hasReviewEnvelope(issue.number)
+      ) {
+        const consumesCapacity = capacityUsed < limit;
+        if (consumesCapacity) capacityUsed += 1;
+        skipped.push({
+          issue,
+          reason: "awaiting-loop1-review",
+          consumesCapacity,
+          ...(changed
+            ? {
+                sourceChanged: true,
+                previousFingerprint: record.sourceContentSha256,
+                currentFingerprint: issue.sourceContentSha256,
+              }
+            : {}),
+        });
+        continue;
+      }
       if (changed && !reprocessChanged) {
         skipped.push({
           issue,
@@ -480,20 +500,6 @@ function selectCandidates({
       }
       if (!changed && record.processingStatus === "failed-terminal") {
         skipped.push({ issue, reason: "failed-terminal" });
-        continue;
-      }
-      if (
-        !changed &&
-        record.processingStatus === "awaiting-loop1-review" &&
-        !hasReviewEnvelope(issue.number)
-      ) {
-        const consumesCapacity = capacityUsed < limit;
-        if (consumesCapacity) capacityUsed += 1;
-        skipped.push({
-          issue,
-          reason: "awaiting-loop1-review",
-          consumesCapacity,
-        });
         continue;
       }
     }
