@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -22,6 +23,7 @@ import {
 const REPO = process.cwd();
 const SOURCE_REPO = "MLX983/dfw-intake";
 const COMMIT = "1111111111111111111111111111111111111111";
+const RESUME_COMMIT = "2222222222222222222222222222222222222222";
 const FIXED_NOW = "2026-07-23T12:00:00.000Z";
 const tests = [];
 
@@ -72,7 +74,7 @@ function writeJson(path, value) {
 
 function readRegistry(setup) {
   return JSON.parse(
-    readFileSync(join(setup.value.stateDir, "registry.v1.json"), "utf8"),
+    readFileSync(join(setup.value.stateDir, "registry.v2.json"), "utf8"),
   );
 }
 
@@ -160,13 +162,20 @@ async function firstPass(setup, deps = mockDeps()) {
   return processBacklog(setup.value, deps);
 }
 
-function makeEnvelope(setup, issueNumber, disposition, mutate = () => {}) {
+function makeEnvelope(
+  setup,
+  issueNumber,
+  disposition,
+  mutate = () => {},
+  resumeProcessingCommitSha = COMMIT,
+) {
   const record = readRegistry(setup).issues[String(issueNumber)];
   const envelope = {
     contractVersion: CONTRACTS.reviewEnvelope,
     issueNumber,
     sourceContentSha256: record.sourceContentSha256,
-    processingCommitSha: record.processingCommitSha,
+    sourceProcessingCommitSha: record.sourceProcessingCommitSha,
+    resumeProcessingCommitSha,
     workspacePath: record.workspacePath,
     loop1ResultSha256: record.loop1ResultSha256,
     recommendation: recommendation(issueNumber, disposition),
@@ -184,7 +193,13 @@ async function resume(
   mutate = () => {},
   deps = mockDeps(),
 ) {
-  const path = makeEnvelope(setup, issueNumber, disposition, mutate);
+  const path = makeEnvelope(
+    setup,
+    issueNumber,
+    disposition,
+    mutate,
+    deps.processingCommitSha,
+  );
   return processBacklog(
     { ...setup.value, reviewedRecommendation: path },
     deps,
@@ -238,7 +253,7 @@ test("05 review packet binds source, workspace, commit, and Loop 1 artifact", as
   const packet = JSON.parse(readFileSync(record.reviewPacketPath, "utf8"));
   assert.equal(packet.sourceContentSha256, record.sourceContentSha256);
   assert.equal(packet.workspacePath, record.workspacePath);
-  assert.equal(packet.processingCommitSha, COMMIT);
+  assert.equal(packet.sourceProcessingCommitSha, COMMIT);
   assert.equal(packet.loop1ResultSha256, record.loop1ResultSha256);
 });
 
@@ -268,7 +283,8 @@ test("06 valid approval resumes at Loop 2 without rerunning Loop 1", async () =>
 for (const [index, field, mutate] of [
   ["07", "source fingerprint", (value) => (value.sourceContentSha256 = "f".repeat(64))],
   ["08", "workspace", (value) => (value.workspacePath = "/tmp/wrong")],
-  ["09", "processing commit", (value) => (value.processingCommitSha = "f".repeat(40))],
+  ["09", "source processing commit", (value) => (value.sourceProcessingCommitSha = "f".repeat(40))],
+  ["09b", "resume processing commit", (value) => (value.resumeProcessingCommitSha = "f".repeat(40))],
   ["10", "Loop 1 artifact", (value) => (value.loop1ResultSha256 = "f".repeat(64))],
 ]) {
   test(`${index} approval with wrong ${field} is rejected`, async () => {
@@ -675,13 +691,28 @@ test("35 contracts validate and implementation contains no mutation or scheduler
   );
   const registrySchema = JSON.parse(
     readFileSync(
-      join(REPO, "docs/contracts/backlog-registry.v1.schema.json"),
+      join(REPO, "docs/contracts/backlog-registry.v2.schema.json"),
       "utf8",
     ),
   );
   const batchSchema = JSON.parse(
     readFileSync(
       join(REPO, "docs/contracts/backlog-batch-manifest.v1.schema.json"),
+      "utf8",
+    ),
+  );
+  const envelopeSchema = JSON.parse(
+    readFileSync(
+      join(
+        REPO,
+        "docs/contracts/backlog-loop1-review-envelope.v2.schema.json",
+      ),
+      "utf8",
+    ),
+  );
+  const recommendationSchema = JSON.parse(
+    readFileSync(
+      join(REPO, "docs/contracts/loop1-reviewed-recommendation.v1.schema.json"),
       "utf8",
     ),
   );
@@ -693,6 +724,12 @@ test("35 contracts validate and implementation contains no mutation or scheduler
   );
   assert.equal(ajv.compile(registrySchema)(readRegistry(setup)), true);
   assert.equal(ajv.compile(batchSchema)(result.batch), true);
+  ajv.addSchema(recommendationSchema);
+  const envelopePath = makeEnvelope(setup, 1, "develop independently");
+  assert.equal(
+    ajv.compile(envelopeSchema)(JSON.parse(readFileSync(envelopePath, "utf8"))),
+    true,
+  );
   const implementation = [
     readFileSync(join(REPO, "scripts/backlog-process.mjs"), "utf8"),
     readFileSync(
@@ -765,7 +802,7 @@ test("38 terminal process failure is not silently retried", async () => {
 
 test("39 concurrent global registry lock stops another run", async () => {
   const setup = options("global-lock", [issue(1)]);
-  atomicWriteJson(join(setup.value.stateDir, "registry.v1.lock"), {
+  atomicWriteJson(join(setup.value.stateDir, "registry.v2.lock"), {
     runId: "active-run",
     claimedAt: FIXED_NOW,
   });
@@ -902,7 +939,7 @@ test("47 stale global lock requires and honors explicit recovery", async () => {
   const setup = options("stale-global", [issue(1)], {
     recoverStaleClaims: true,
   });
-  atomicWriteJson(join(setup.value.stateDir, "registry.v1.lock"), {
+  atomicWriteJson(join(setup.value.stateDir, "registry.v2.lock"), {
     runId: "abandoned-run",
     claimedAt: "2026-07-20T00:00:00.000Z",
   });
@@ -923,7 +960,8 @@ test("48 approval without an awaiting registry record is rejected", async () => 
     contractVersion: CONTRACTS.reviewEnvelope,
     issueNumber: 1,
     sourceContentSha256: "a".repeat(64),
-    processingCommitSha: COMMIT,
+    sourceProcessingCommitSha: COMMIT,
+    resumeProcessingCommitSha: COMMIT,
     workspacePath: join(setup.directory, "missing"),
     loop1ResultSha256: "b".repeat(64),
     recommendation: recommendation(1),
@@ -936,6 +974,220 @@ test("48 approval without an awaiting registry record is rejected", async () => 
       ),
     /no matching issue is awaiting Loop 1 review/,
   );
+});
+
+test("49 resume accepts distinct correctly bound source and resume commits", async () => {
+  const setup = options("dual-commit", [issue(1)]);
+  await firstPass(
+    setup,
+    mockDeps({ processingCommitSha: COMMIT }),
+  );
+  let loop1Calls = 0;
+  const result = await resume(
+    setup,
+    1,
+    "not for publication",
+    () => {},
+    mockDeps({
+      processingCommitSha: RESUME_COMMIT,
+      runLoop1: async () => {
+        loop1Calls += 1;
+        throw new Error("completed Loop 1 must not rerun");
+      },
+    }),
+  );
+  const record = readRegistry(setup).issues["1"];
+  assert.equal(loop1Calls, 0);
+  assert.equal(
+    result.batch.results[0].processingStatus,
+    "completed-other-nondraft-stop",
+  );
+  assert.equal(record.sourceProcessingCommitSha, COMMIT);
+  assert.equal(record.resumeProcessingCommitSha, RESUME_COMMIT);
+  assert.equal(
+    record.attemptHistory.at(-1).processorCommitSha,
+    RESUME_COMMIT,
+  );
+});
+
+test("50 legacy v1 review envelope fails safely", async () => {
+  const setup = options("legacy-envelope", [issue(1)]);
+  await firstPass(setup);
+  const record = readRegistry(setup).issues["1"];
+  const path = join(setup.directory, "legacy-envelope.json");
+  writeJson(path, {
+    contractVersion: "backlog-loop1-review-envelope.v1",
+    issueNumber: 1,
+    sourceContentSha256: record.sourceContentSha256,
+    processingCommitSha: record.sourceProcessingCommitSha,
+    workspacePath: record.workspacePath,
+    loop1ResultSha256: record.loop1ResultSha256,
+    recommendation: recommendation(1),
+  });
+  const result = await processBacklog(
+    { ...setup.value, reviewedRecommendation: path },
+    mockDeps(),
+  );
+  assert.equal(
+    result.batch.results[0].processingStatus,
+    "awaiting-loop1-review",
+  );
+  assert.equal(
+    result.batch.results[0].failureCategory,
+    "review-envelope-invalid",
+  );
+});
+
+test("51 legacy v1 registry migrates without losing original commit", async () => {
+  const setup = options("legacy-registry", [issue(1)]);
+  await firstPass(setup);
+  const registryV2 = readRegistry(setup);
+  const recordV2 = registryV2.issues["1"];
+  const registryV1 = structuredClone(registryV2);
+  registryV1.contractVersion = "backlog-registry.v1";
+  delete registryV1.migrationHistory;
+  for (const record of Object.values(registryV1.issues)) {
+    record.stateRecordVersion = 1;
+    record.processingCommitSha = record.sourceProcessingCommitSha;
+    delete record.sourceProcessingCommitSha;
+    delete record.resumeProcessingCommitSha;
+  }
+  const v1Path = join(setup.value.stateDir, "registry.v1.json");
+  const v2Path = join(setup.value.stateDir, "registry.v2.json");
+  writeJson(v1Path, registryV1);
+  unlinkSync(v2Path);
+
+  const envelopePath = join(setup.directory, "migration-envelope.json");
+  writeJson(envelopePath, {
+    contractVersion: CONTRACTS.reviewEnvelope,
+    issueNumber: 1,
+    sourceContentSha256: recordV2.sourceContentSha256,
+    sourceProcessingCommitSha: COMMIT,
+    resumeProcessingCommitSha: RESUME_COMMIT,
+    workspacePath: recordV2.workspacePath,
+    loop1ResultSha256: recordV2.loop1ResultSha256,
+    recommendation: recommendation(1, "not for publication"),
+  });
+  const result = await processBacklog(
+    {
+      ...setup.value,
+      reviewedRecommendation: envelopePath,
+    },
+    mockDeps({ processingCommitSha: RESUME_COMMIT }),
+  );
+  const migrated = readRegistry(setup);
+  assert.equal(
+    result.batch.results[0].processingStatus,
+    "completed-other-nondraft-stop",
+  );
+  assert.equal(migrated.contractVersion, "backlog-registry.v2");
+  assert.equal(migrated.issues["1"].sourceProcessingCommitSha, COMMIT);
+  assert.equal(
+    migrated.issues["1"].resumeProcessingCommitSha,
+    RESUME_COMMIT,
+  );
+  assert.equal(
+    migrated.migrationHistory[0].fromContractVersion,
+    "backlog-registry.v1",
+  );
+  assert.equal(existsSync(v1Path), true);
+});
+
+test("52 outer envelope issue-number mismatch is rejected", async () => {
+  const setup = options("outer-issue-mismatch", [issue(1)]);
+  await firstPass(setup);
+  const path = makeEnvelope(
+    setup,
+    1,
+    "develop independently",
+    (value) => {
+      value.issueNumber = 2;
+    },
+  );
+  await assert.rejects(
+    () =>
+      processBacklog(
+        { ...setup.value, reviewedRecommendation: path },
+        mockDeps(),
+      ),
+    /no matching issue is awaiting Loop 1 review/,
+  );
+});
+
+test("53 completed resume replay validates and performs no upstream work", async () => {
+  const setup = options("completed-resume-replay", [issue(1)]);
+  await firstPass(setup);
+  const envelopePath = makeEnvelope(
+    setup,
+    1,
+    "not for publication",
+  );
+  await processBacklog(
+    { ...setup.value, reviewedRecommendation: envelopePath },
+    mockDeps(),
+  );
+  const registryPath = join(setup.value.stateDir, "registry.v2.json");
+  const registryBefore = readFileSync(registryPath, "utf8");
+  let upstreamCalls = 0;
+  const replay = await processBacklog(
+    { ...setup.value, reviewedRecommendation: envelopePath },
+    mockDeps({
+      runLoop1: async () => {
+        upstreamCalls += 1;
+        throw new Error("Loop 1 must not rerun");
+      },
+      runLoop2: async () => {
+        upstreamCalls += 1;
+        throw new Error("Loop 2 must not rerun");
+      },
+      runOrchestration: async () => {
+        upstreamCalls += 1;
+        throw new Error("orchestration must not rerun");
+      },
+      notifyReview: async () => {
+        upstreamCalls += 1;
+        throw new Error("notification must not rerun");
+      },
+    }),
+  );
+  assert.equal(upstreamCalls, 0);
+  assert.equal(replay.batch.results.length, 0);
+  assert.equal(replay.batch.skipped[0].reason, "unchanged-completed");
+  assert.equal(readFileSync(registryPath, "utf8"), registryBefore);
+});
+
+test("54 dry-run reads existing capacity state without mutating it", async () => {
+  const setup = options("dry-existing-state", [issue(1), issue(2)], {
+    limit: 1,
+  });
+  await firstPass(setup);
+  const registryPath = join(setup.value.stateDir, "registry.v2.json");
+  const registryBefore = readFileSync(registryPath, "utf8");
+  const dryRun = await processBacklog(
+    { ...setup.value, mode: "dry-run" },
+    mockDeps(),
+  );
+  assert.equal(dryRun.batch.selected.length, 0);
+  assert.deepEqual(
+    dryRun.batch.skipped.map(({ issueNumber, reason, consumesCapacity }) => ({
+      issueNumber,
+      reason,
+      consumesCapacity,
+    })),
+    [
+      {
+        issueNumber: 1,
+        reason: "awaiting-loop1-review",
+        consumesCapacity: true,
+      },
+      {
+        issueNumber: 2,
+        reason: "batch-limit",
+        consumesCapacity: undefined,
+      },
+    ],
+  );
+  assert.equal(readFileSync(registryPath, "utf8"), registryBefore);
 });
 
 let failed = 0;

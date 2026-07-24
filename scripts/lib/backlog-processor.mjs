@@ -16,6 +16,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
+import { isDeepStrictEqual } from "node:util";
 import {
   ELIGIBLE_STATUSES as NOTIFICATION_ELIGIBLE,
   notifyReview as existingNotifier,
@@ -23,10 +24,10 @@ import {
 
 export const CONTRACTS = Object.freeze({
   source: "backlog-source-snapshot.v1",
-  registry: "backlog-registry.v1",
+  registry: "backlog-registry.v2",
   batch: "backlog-batch-manifest.v1",
-  reviewEnvelope: "backlog-loop1-review-envelope.v1",
-  reviewPacket: "backlog-loop1-review-packet.v1",
+  reviewEnvelope: "backlog-loop1-review-envelope.v2",
+  reviewPacket: "backlog-loop1-review-packet.v2",
 });
 
 export const PROCESSING_STATES = Object.freeze([
@@ -230,18 +231,53 @@ function emptyRegistry(sourceRepository, timestamp) {
     sourceRepository,
     createdAt: timestamp,
     updatedAt: timestamp,
+    migrationHistory: [],
     issues: {},
   };
 }
 
 function registryPath(stateDir) {
+  return join(stateDir, "registry.v2.json");
+}
+
+function legacyRegistryPath(stateDir) {
   return join(stateDir, "registry.v1.json");
 }
 
 function loadRegistry(stateDir, sourceRepository, timestamp) {
   const path = registryPath(stateDir);
-  if (!existsSync(path)) return emptyRegistry(sourceRepository, timestamp);
-  const registry = readJson(path);
+  const legacyPath = legacyRegistryPath(stateDir);
+  if (!existsSync(path) && !existsSync(legacyPath)) {
+    return emptyRegistry(sourceRepository, timestamp);
+  }
+  const registry = readJson(existsSync(path) ? path : legacyPath);
+  if (registry.contractVersion === "backlog-registry.v1") {
+    if (
+      registry.sourceRepository !== sourceRepository ||
+      typeof registry.issues !== "object"
+    ) {
+      throw new Error(
+        "Registry invariant failed: incompatible legacy registry contract.",
+      );
+    }
+    for (const record of Object.values(registry.issues)) {
+      record.stateRecordVersion = 2;
+      record.sourceProcessingCommitSha = record.processingCommitSha;
+      record.resumeProcessingCommitSha = null;
+      delete record.processingCommitSha;
+    }
+    registry.contractVersion = CONTRACTS.registry;
+    registry.migrationHistory = [
+      ...(registry.migrationHistory || []),
+      {
+        fromContractVersion: "backlog-registry.v1",
+        toContractVersion: CONTRACTS.registry,
+        migratedAt: timestamp,
+        sourcePath: legacyPath,
+      },
+    ];
+    return registry;
+  }
   if (
     registry.contractVersion !== CONTRACTS.registry ||
     registry.sourceRepository !== sourceRepository ||
@@ -259,7 +295,7 @@ function acquireGlobalLock(
   timeoutMinutes,
   recoverStaleClaims,
 ) {
-  const path = join(stateDir, "registry.v1.lock");
+  const path = join(stateDir, "registry.v2.lock");
   if (existsSync(path) && recoverStaleClaims) {
     let existing;
     try {
@@ -490,11 +526,15 @@ function makeRecord(issue, previous, context) {
           workspacePath: previous.workspacePath ?? null,
           artifactPaths: previous.artifactPaths ?? [],
           completedAt: previous.completedAt ?? null,
+          sourceProcessingCommitSha:
+            previous.sourceProcessingCommitSha ?? null,
+          resumeProcessingCommitSha:
+            previous.resumeProcessingCommitSha ?? null,
         },
       ]
     : [];
   return {
-    stateRecordVersion: 1,
+    stateRecordVersion: 2,
     issueNumber: issue.number,
     issueTitle: issue.title,
     issueUrl: issue.url,
@@ -513,7 +553,8 @@ function makeRecord(issue, previous, context) {
     attemptCount: (previous?.attemptCount || 0) + 1,
     attemptHistory: previous?.attemptHistory || [],
     latestAttemptTimestamp: context.timestamp,
-    processingCommitSha: context.processingCommitSha,
+    sourceProcessingCommitSha: context.processingCommitSha,
+    resumeProcessingCommitSha: null,
     failureCategory: null,
     failureMessage: null,
     claimOwner: context.runId,
@@ -537,6 +578,10 @@ function finishAttempt(record, status, timestamp) {
     currentOrFinalStage: record.currentOrFinalStage,
     failureCategory: record.failureCategory,
     failureMessage: record.failureMessage,
+    processorCommitSha:
+      record.resumeProcessingCommitSha ||
+      record.sourceProcessingCommitSha ||
+      null,
   });
 }
 
@@ -748,14 +793,17 @@ function validateReviewEnvelope(envelope, context) {
   ) {
     failures.push("workspacePath");
   }
-  if (envelope.processingCommitSha !== context.record.processingCommitSha) {
-    failures.push("processingCommitSha");
+  if (
+    envelope.sourceProcessingCommitSha !==
+    context.record.sourceProcessingCommitSha
+  ) {
+    failures.push("sourceProcessingCommitSha");
   }
   if (
     context.currentProcessingCommitSha &&
-    envelope.processingCommitSha !== context.currentProcessingCommitSha
+    envelope.resumeProcessingCommitSha !== context.currentProcessingCommitSha
   ) {
-    failures.push("currentProcessingCommitSha");
+    failures.push("resumeProcessingCommitSha");
   }
   if (envelope.loop1ResultSha256 !== context.record.loop1ResultSha256) {
     failures.push("loop1ResultSha256");
@@ -797,6 +845,26 @@ function validateReviewEnvelope(envelope, context) {
   return recommendation;
 }
 
+function validateCompletedReviewReplay(envelope, context) {
+  const recommendation = validateReviewEnvelope(envelope, context);
+  const savedRecommendationPath = join(
+    context.record.workspacePath,
+    "loop1",
+    "reviewed-recommendation.json",
+  );
+  if (
+    !existsSync(savedRecommendationPath) ||
+    !isDeepStrictEqual(readJson(savedRecommendationPath), recommendation)
+  ) {
+    throw new StageError(
+      "review-envelope-invalid",
+      "Review envelope rejected: recommendation does not match the completed review.",
+      false,
+    );
+  }
+  return recommendation;
+}
+
 function writeReviewPacket(context, resultPath) {
   const packetPath = join(context.loop1Dir, "review-packet.json");
   const packet = {
@@ -805,13 +873,13 @@ function writeReviewPacket(context, resultPath) {
     issueNumber: context.issue.number,
     issueTitle: context.issue.title,
     sourceContentSha256: context.issue.sourceContentSha256,
-    processingCommitSha: context.processingCommitSha,
+    sourceProcessingCommitSha: context.processingCommitSha,
     workspacePath: context.workspace,
     loop1ResultPath: resultPath,
     loop1ResultSha256: sha256(readFileSync(resultPath)),
     approvalRequired: true,
     nextCommand:
-      "Rerun backlog:process with --reviewed-recommendation pointing to a matching backlog-loop1-review-envelope.v1 file.",
+      "Rerun backlog:process with --reviewed-recommendation pointing to a matching backlog-loop1-review-envelope.v2 file.",
   };
   atomicWriteJson(packetPath, packet);
   return { packetPath, packet };
@@ -862,6 +930,8 @@ function resultFromRecord(record) {
     issueNumber: record.issueNumber,
     title: record.issueTitle,
     sourceContentSha256: record.sourceContentSha256,
+    sourceProcessingCommitSha: record.sourceProcessingCommitSha,
+    resumeProcessingCommitSha: record.resumeProcessingCommitSha,
     processingStatus: record.processingStatus,
     currentOrFinalStage: record.currentOrFinalStage,
     finalWorkflowStatus: record.finalWorkflowStatus,
@@ -935,6 +1005,7 @@ async function processClaimedIssue(context) {
         record,
         currentProcessingCommitSha: context.processingCommitSha,
       });
+      record.resumeProcessingCommitSha = context.processingCommitSha;
       recommendationPath = join(
         record.workspacePath,
         "loop1",
@@ -1132,6 +1203,10 @@ export async function processBacklog(options, deps = {}) {
   const stateDir = resolve(
     options.mode === "dry-run" ? join(dryRunRoot, "state") : options.stateDir,
   );
+  const registryStateDir =
+    options.mode === "dry-run" && options.stateDir
+      ? resolve(options.stateDir)
+      : stateDir;
   const workRoot = resolve(
     options.mode === "dry-run" ? join(dryRunRoot, "work") : options.workRoot,
   );
@@ -1154,7 +1229,7 @@ export async function processBacklog(options, deps = {}) {
         : join(workRoot, "runs", runId, "source-snapshot.json");
     atomicWriteJson(sourcePath, source);
     const registry = loadRegistry(
-      stateDir,
+      registryStateDir,
       options.sourceRepository,
       timestamp,
     );
@@ -1164,7 +1239,21 @@ export async function processBacklog(options, deps = {}) {
     if (reviewEnvelope) {
       const reviewRecord =
         registry.issues[String(Number(reviewEnvelope.issueNumber))];
-      if (!reviewRecord || reviewRecord.processingStatus !== "awaiting-loop1-review") {
+      const reviewIssue = source.issues.find(
+        (issue) => issue.number === Number(reviewEnvelope.issueNumber),
+      );
+      if (!reviewRecord || !reviewIssue) {
+        throw new Error(
+          "Reviewed recommendation rejected: no matching issue is awaiting Loop 1 review in this registry.",
+        );
+      }
+      if (COMPLETE_STATES.has(reviewRecord.processingStatus)) {
+        validateCompletedReviewReplay(reviewEnvelope, {
+          issue: reviewIssue,
+          record: reviewRecord,
+          currentProcessingCommitSha: processingCommitSha,
+        });
+      } else if (reviewRecord.processingStatus !== "awaiting-loop1-review") {
         throw new Error(
           "Reviewed recommendation rejected: no matching issue is awaiting Loop 1 review in this registry.",
         );
@@ -1173,7 +1262,7 @@ export async function processBacklog(options, deps = {}) {
     const selection = selectCandidates({
       issues: source.issues,
       registry,
-      stateDir,
+      stateDir: registryStateDir,
       timestamp,
       limit: options.limit,
       timeoutMinutes: options.claimTimeoutMinutes || 120,
@@ -1192,7 +1281,7 @@ export async function processBacklog(options, deps = {}) {
       startedAt: timestamp,
       completedAt: null,
       limit: options.limit,
-      stateDirectory: stateDir,
+      stateDirectory: registryStateDir,
       workRoot,
       sourceSnapshotPath: sourcePath,
       selected: selection.selected.map(({ issue, changed }) => ({
@@ -1289,6 +1378,7 @@ export async function processBacklog(options, deps = {}) {
             record.claimTimestamp = now(deps);
             record.latestAttemptTimestamp = now(deps);
             record.attemptCount += 1;
+            record.resumeProcessingCommitSha = processingCommitSha;
           }
           if (!reviewResume && !notificationResume) {
             record.processingStatus = "claimed";
@@ -1314,7 +1404,9 @@ export async function processBacklog(options, deps = {}) {
           releaseIssueClaim(claim.path);
         }
       }
-      persistRegistry(stateDir, registry, now(deps));
+      if (selection.selected.length > 0) {
+        persistRegistry(stateDir, registry, now(deps));
+      }
     }
 
     batch.completedAt = now(deps);

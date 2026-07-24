@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/backlog-registry.v2.schema.json",
+  "title": "backlog-registry.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "sourceRepository", "createdAt", "updatedAt", "issues"],
+  "properties": {
+    "contractVersion": { "const": "backlog-registry.v2" },
+    "sourceRepository": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "migrationHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fromContractVersion", "toContractVersion", "migratedAt", "sourcePath"],
+        "properties": {
+          "fromContractVersion": { "type": "string" },
+          "toContractVersion": { "const": "backlog-registry.v2" },
+          "migratedAt": { "type": "string", "format": "date-time" },
+          "sourcePath": { "type": "string" }
+        }
+      }
+    },
+    "issues": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/issueRecord" }
+    }
+  },
+  "$defs": {
+    "issueRecord": {
+      "type": "object",
+      "required": [
+        "stateRecordVersion",
+        "issueNumber",
+        "issueTitle",
+        "issueUrl",
+        "sourceContentSha256",
+        "fetchedAt",
+        "processingStatus",
+        "currentOrFinalStage",
+        "workspacePath",
+        "artifactPaths",
+        "notificationEligibility",
+        "notificationStatus",
+        "attemptCount",
+        "attemptHistory",
+        "latestAttemptTimestamp",
+        "sourceProcessingCommitSha",
+        "resumeProcessingCommitSha"
+      ],
+      "properties": {
+        "stateRecordVersion": { "const": 2 },
+        "issueNumber": { "type": "integer", "minimum": 1 },
+        "issueTitle": { "type": "string" },
+        "issueUrl": { "type": "string" },
+        "sourceContentSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "fetchedAt": { "type": "string" },
+        "processingStatus": {
+          "enum": [
+            "pending",
+            "claimed",
+            "awaiting-loop1-review",
+            "completed-waiting-for-human",
+            "completed-combine-first",
+            "completed-governance-stop",
+            "completed-other-nondraft-stop",
+            "failed-retriable",
+            "failed-terminal"
+          ]
+        },
+        "currentOrFinalStage": { "type": "string" },
+        "finalWorkflowStatus": { "type": ["string", "null"] },
+        "disposition": { "type": ["string", "null"] },
+        "combineTarget": { "type": ["string", "null"] },
+        "workspacePath": { "type": "string" },
+        "artifactPaths": { "type": "array", "items": { "type": "string" } },
+        "notificationEligibility": { "type": "boolean" },
+        "notificationKey": { "type": ["string", "null"] },
+        "notificationStatus": { "type": "string" },
+        "attemptCount": { "type": "integer", "minimum": 1 },
+        "attemptHistory": { "type": "array" },
+        "latestAttemptTimestamp": { "type": "string" },
+        "sourceProcessingCommitSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "resumeProcessingCommitSha": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "failureCategory": { "type": ["string", "null"] },
+        "failureMessage": { "type": ["string", "null"] },
+        "claimOwner": { "type": "string" },
+        "claimTimestamp": { "type": "string" },
+        "completedAt": { "type": ["string", "null"] },
+        "priorResults": { "type": "array" }
+      }
+    }
+  }
+}

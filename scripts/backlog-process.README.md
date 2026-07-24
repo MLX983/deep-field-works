@@ -26,7 +26,10 @@ npm run backlog:process -- \
 ```
 
 The supplied state and work paths are deliberately not created or modified in
-dry-run mode. The command prints the temporary manifest and summary paths.
+dry-run mode. When the supplied state path already contains a registry or
+claims, the dry-run reads them so its selection reflects current capacity,
+while all reports and locks remain temporary. The command prints the temporary
+manifest and summary paths.
 
 Execute mode claims and processes no more than the explicit limit:
 
@@ -86,7 +89,7 @@ The workspace contains:
 - `loop1/review-packet.json`, which binds the source fingerprint, processing
   commit, workspace, and Loop 1 artifact fingerprint.
 
-A human reviewer creates a `backlog-loop1-review-envelope.v1` document whose
+A human reviewer creates a `backlog-loop1-review-envelope.v2` document whose
 `recommendation` is a valid, approved
 `loop1-reviewed-recommendation.v1`. Resume with:
 
@@ -101,10 +104,28 @@ npm run backlog:process -- \
   --reviewed-recommendation /absolute/path/to/review-envelope.json
 ```
 
-The issue number, source fingerprint, workspace, processing commit, and Loop 1
-result fingerprint must all match the recorded run. A mismatch leaves the
-issue at the review boundary with `review-envelope-invalid`. The processor does
-not infer approval and cannot use an envelope for a different issue or run.
+The issue number, source fingerprint, workspace, original processing commit,
+current resume-processing commit, and Loop 1 result fingerprint must all
+match. The original commit records where the workspace and Loop 1 result came
+from; the resume commit records which processor version validated and
+continued the run. They may differ, but neither is optional or arbitrary. A
+mismatch leaves the issue at the review boundary with
+`review-envelope-invalid`. The processor does not infer approval and cannot
+use an envelope for a different issue or run.
+
+Repeating a completed resume with the same envelope is a validated no-op. The
+processor rechecks every binding, including the current resume commit and the
+saved reviewed recommendation, then reports the issue as
+`unchanged-completed` without rerunning any loop. A changed or incomplete
+envelope is still rejected.
+
+Legacy `backlog-loop1-review-envelope.v1` files are rejected; regenerate the
+envelope from the saved review packet and current processor commit. A
+`backlog-registry.v1` file is migrated explicitly in memory to
+`backlog-registry.v2`, preserving its original `processingCommitSha` as
+`sourceProcessingCommitSha`. The first durable write creates
+`registry.v2.json`; the original v1 registry remains untouched as migration
+evidence.
 
 ## Workflow outcomes
 
@@ -140,7 +161,7 @@ authoritative for duplicate suppression.
 The private mode-0600 registry lives at:
 
 ```text
-<state-dir>/registry.v1.json
+<state-dir>/registry.v2.json
 ```
 
 It records source and processing fingerprints, current or final state,

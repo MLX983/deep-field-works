@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/backlog-loop1-review-envelope.v2.schema.json",
+  "title": "backlog-loop1-review-envelope.v2",
+  "description": "Human approval envelope binding an approved Loop 1 recommendation to immutable source artifacts and to both the original and resuming processor commits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "issueNumber",
+    "sourceContentSha256",
+    "sourceProcessingCommitSha",
+    "resumeProcessingCommitSha",
+    "workspacePath",
+    "loop1ResultSha256",
+    "recommendation"
+  ],
+  "properties": {
+    "contractVersion": { "const": "backlog-loop1-review-envelope.v2" },
+    "issueNumber": { "type": "integer", "minimum": 1 },
+    "sourceContentSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceProcessingCommitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "Commit recorded when the issue workspace and Loop 1 result were created."
+    },
+    "resumeProcessingCommitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "Current processor commit authorized to validate and resume the saved state."
+    },
+    "workspacePath": { "type": "string", "minLength": 1 },
+    "loop1ResultSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "recommendation": {
+      "$ref": "loop1-reviewed-recommendation.v1.schema.json"
+    }
+  }
+}

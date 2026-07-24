@@ -157,18 +157,21 @@ items require investigation before they can be planned.
   one at a time through manual commands.
 - **Current safeguard:** The implemented command requires an explicit limit,
   isolates issue and run workspaces, uses fingerprint-bound Loop 1 approval
-  envelopes, preserves stable nondraft stops, and defaults notification to dry
-  run. It has no scheduler, GitHub mutation, or publication path.
+  envelopes, records original and resume processor commits separately,
+  preserves stable nondraft stops, and defaults notification to dry run. It
+  has no scheduler, GitHub mutation, or publication path.
 - **Desired improvement:** Add a manually invoked processor that preserves
   bounded scope and all existing governance stops. Investigate durable state,
   source fingerprints, strict limits, retries, concurrency claims,
   stale-claim recovery, resumability, terminal statuses, prioritization,
   cost/throughput controls, and review-capacity limits as parts of this parent
   item.
-- **Reason deferred:** The initial bounded implementation and fixture suite are
-  complete. Status remains in progress until operational validation has
-  established repeat-run behavior against the real backlog and the approval
-  resume path has been exercised under normal editorial operation.
+- **Reason deferred:** The bounded implementation, dual-commit resume fix,
+  issue #1 nondraft resume, idempotent replay, and review-capacity validation
+  are complete. Status remains in progress because the required direct
+  read-only GitHub acquisition validation could not run in the current
+  environment: the `gh` executable is not installed, so authentication and
+  repeated direct dry-runs remain unverified.
 - **Dependencies or prerequisites:** Define states including awaiting Loop 1
   review, combine-first, governance stop, waiting for human, retriable failure,
   terminal failure, completed notification, and changed source. Define an
@@ -179,7 +182,8 @@ items require investigation before they can be planned.
   issue mutation.
 - **Relevant references:** issue #12, #6, and #28 pilot artifacts; Loop 3–5
   orchestration manifest contract; `scripts/backlog-process.mjs`;
-  `scripts/backlog-process.README.md`; `backlog-*.v1` contracts;
+  `scripts/backlog-process.README.md`; `backlog-registry.v2` and
+  `backlog-loop1-review-envelope.v2` contracts;
   `npm run backlog:process:fixtures`
 
 ### DFW-BL-006 — Add automatic intake triggering after bounded processing is proven
