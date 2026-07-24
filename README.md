@@ -40,6 +40,7 @@ public/
 Start here:
 
 * AGENTS.md
+* docs/development-backlog.md
 * docs/editorial-guidelines.md
 * docs/content-types.md
 * docs/workflows/publishing-workflow.md
