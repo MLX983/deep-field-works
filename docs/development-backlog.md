@@ -85,7 +85,11 @@ items require investigation before they can be planned.
   canonical guidance corrected the primary domain to Institutions in
   Transition and the theme to the existing organizational-redesign cluster.
   Issue #5 required the same correction from a provisional multidomain
-  enterprise-workflow classification.
+  enterprise-workflow classification. For issue #6, direct canonical review
+  established the closed artifact set and corrected the administrative
+  classification from a provisional multidomain assignment and ad hoc
+  `archive navigation` theme to Media, Memory, and Meaning with the existing
+  `publishing-systems` theme.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -114,7 +118,10 @@ items require investigation before they can be planned.
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
   adjacency but no defensible cluster anchor or combine target. For issue #4,
   retrieval missed `skills-half-life.md` and `context-inequality.md`, then
-  elevated broad adjacency with issue #3 into a combine recommendation.
+  elevated broad adjacency with issue #3 into a combine recommendation. For
+  issue #6, self-source and thematic corpus pieces dominated the ranking while
+  the canonical artifact, status, evidence-level, and navigation definitions
+  that governed the decision were absent.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -274,7 +281,10 @@ items require investigation before they can be planned.
   JSON after interpreting the Loop 1 proposal and evaluator. The contract
   requires `humanApprovalStatus: approved`, but the operational boundary
   between automated recommendation and human approval is not yet a complete
-  workflow.
+  workflow. Issue #6 also showed why the boundary must expose source and
+  retrieval limitations: transport metadata influenced matched terms, and a
+  truncated working excerpt produced a false question about missing source
+  material even though the full source artifact was available.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -289,7 +299,8 @@ items require investigation before they can be planned.
   unambiguous review state, records no fabricated approval, and resumes only
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
-  3 approval gates; issue #6, #12, and #28 pilot artifacts
+  3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
+  trace and complete source artifact
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -464,7 +475,11 @@ items require investigation before they can be planned.
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
   evaluator correction. For issue #5, the provisional stage elevated a single
-  uncited architecture proposal to a checkpoint and assigned two domains.
+  uncited architecture proposal to a checkpoint and assigned two domains. For
+  issue #6, the provisional stage assigned two domains and an ad hoc archive
+  navigation theme to a structural governance proposal; canonical review
+  instead supplied one contract-required administrative domain and the
+  existing `publishing-systems` theme without authorizing content development.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -654,6 +669,44 @@ items require investigation before they can be planned.
   continue to pass the named cases.
 - **Relevant references:** commits `3190a17`, `0a74f8a`, `0747899`,
   `4b03fe5`, `e3b4132`, `ff9a55b`, `cc267fc`, and `d309019`
+
+### DFW-BL-026 — Preserve complete-source awareness in Loop 1
+
+- **Category:** workflow, retrieval, editorial quality
+- **Status:** proposed
+- **Priority:** medium
+- **Discovered during:** bounded backlog operation, issue #6
+- **Problem or observation:** The complete issue #6 source was saved in the
+  isolated workspace, but Loop 1 analyzed only a 4,000-character active-body
+  excerpt. The excerpt ended inside the proposed pattern list, causing Loop 1
+  to ask what content followed even though that content was present in the
+  stored source. Silent excerpt truncation can create false uncertainty,
+  incomplete summaries, and incorrect editorial recommendations.
+- **Current safeguard:** The complete source artifact and content fingerprint
+  are preserved for human review. In issue #6, direct inspection corrected the
+  false missing-content inference before an approval envelope was created.
+- **Desired improvement:** Make truncation explicit in the review packet and
+  preserve complete-source awareness. Use the full source when provider limits
+  permit, or use deterministic chunking that allows analysis to account for
+  all source content. Never infer that material is missing merely because a
+  working excerpt ends.
+- **Reason deferred:** The governance stop remained safe, and changing source
+  preparation or provider input strategy requires bounded design and
+  regression testing.
+- **Dependencies or prerequisites:** Document provider input constraints,
+  define deterministic chunking and recombination behavior, and preserve
+  source fingerprints and complete-source provenance across all chunks.
+- **Validation criteria:**
+  - A long-source fixture includes material after the first 4,000 characters.
+  - Loop 1 either analyzes the complete source or explicitly reports its
+    bounded chunk coverage.
+  - The result does not claim content is missing when it exists later in the
+    stored source.
+  - Summaries and recommendations incorporate materially relevant later
+    sections.
+  - Short-source behavior and existing Loop 1 fixtures do not regress.
+- **Relevant references:** dfw-intake issue #6; issue #6 complete source,
+  Loop 1 trace, and review packet; `scripts/loop1-intake-understanding.mjs`
 
 ## Maintenance rules
 
