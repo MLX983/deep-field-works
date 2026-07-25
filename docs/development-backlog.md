@@ -75,10 +75,13 @@ items require investigation before they can be planned.
 - **Category:** governance, retrieval
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** governance-boundary pilot, issue #6
+- **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
+  operation, issue #3
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
-  rather than `content-schema.md` or `domain-structure.md`.
+  rather than `content-schema.md` or `domain-structure.md`. For issue #3,
+  retrieval missed the canonical documents that materially improved the
+  domain and cluster classification during human review.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -91,7 +94,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issue #6;
+- **Relevant references:** dfw-intake issues #3 and #6;
+  `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`
 
@@ -100,10 +104,11 @@ items require investigation before they can be planned.
 - **Category:** retrieval
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** real-backlog pilots, issues #16 and #28
+- **Discovered during:** real-backlog pilots, issues #3, #16, and #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
-  above “Storage Is Not Memory.”
+  above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
+  adjacency but no defensible cluster anchor or combine target.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -115,8 +120,8 @@ items require investigation before they can be planned.
   distinguishes an anchor from ordinary adjacency.
 - **Validation criteria:** Representative anchor fixtures rank above loose
   adjacency without reducing direct-duplicate recall.
-- **Relevant references:** issue #28 Loop 1 trace; issue #6 Loop 1 trace;
-  “Storage Is Not Memory”
+- **Relevant references:** issue #3 Loop 1 trace; issue #28 Loop 1 trace;
+  issue #6 Loop 1 trace; “Storage Is Not Memory”
 
 ### DFW-BL-004 — Improve abstract but structurally valid drafts
 
