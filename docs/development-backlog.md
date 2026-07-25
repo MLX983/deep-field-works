@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3 and #4
+  operation, issues #3, #4, and #5
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -84,6 +84,8 @@ items require investigation before they can be planned.
   domain and cluster classification during human review. For issue #4,
   canonical guidance corrected the primary domain to Institutions in
   Transition and the theme to the existing organizational-redesign cluster.
+  Issue #5 required the same correction from a provisional multidomain
+  enterprise-workflow classification.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -96,7 +98,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issues #3, #4, and #6;
+- **Relevant references:** dfw-intake issues #3, #4, #5, and #6;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`
@@ -457,11 +459,12 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #6, #12, and #28 pilots
+- **Discovered during:** issue #5, #6, #12, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
-  evaluator correction.
+  evaluator correction. For issue #5, the provisional stage elevated a single
+  uncited architecture proposal to a checkpoint and assigned two domains.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -473,7 +476,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #6, #12, and #28 Loop 1 traces
+- **Relevant references:** issue #5, #6, #12, and #28 Loop 1 traces
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -483,7 +486,9 @@ items require investigation before they can be planned.
 - **Discovered during:** intake and Loop 2 pilots
 - **Problem or observation:** Conceptual or normative statements can resemble
   empirical claims and create unnecessary research requirements or overstate
-  evidence.
+  evidence. Issue #5 mixed a proposed enterprise control architecture with
+  plausible institutional inferences and unsupported legal, regulatory,
+  technical-necessity, and enterprise-prevalence claims.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -496,8 +501,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
-- **Relevant references:** commits `1331234`, `d309019`, `e3b4132`; Loop 2
-  evidence-posture fixtures
+- **Relevant references:** issue #5 Loop 1 trace; commits `1331234`, `d309019`,
+  `e3b4132`; Loop 2 evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
 
@@ -525,10 +530,12 @@ items require investigation before they can be planned.
 - **Category:** governance, workflow
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #16 and #28 combine-first pilots
+- **Discovered during:** issue #5, #16, and #28 combine-first pilots
 - **Problem or observation:** The pipeline identifies a target and prohibits
   standalone drafting, but does not carry the distinct contribution into the
-  target material.
+  target material. Issue #5 adds a substantial proposed control layer for
+  non-human actors to issue #8 while requiring that the target remain
+  unmodified until a separate human-approved merge process exists.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -540,7 +547,7 @@ items require investigation before they can be planned.
   a decision about retained review artifacts.
 - **Validation criteria:** A dry-run proposal identifies only distinct material
   and cannot modify the target or source without explicit approval.
-- **Relevant references:** issue #16 and #28 combination packets;
+- **Relevant references:** issue #5, #16, and #28 combination packets;
   `loop2-development-packet.v1`
 
 ### DFW-BL-021 — Define intake GitHub issue lifecycle and status handling
