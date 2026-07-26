@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, #5, #7, and #8
+  operation, issues #3, #4, #5, #7, #8, and #9
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -96,7 +96,10 @@ items require investigation before they can be planned.
   canonical artifact thresholds distinguished a prospective field-report
   structure from the material's present maturity as a research seed, while
   canonical domain guidance confirmed Institutions in Transition and the
-  existing `organizational-redesign` theme.
+  existing `organizational-redesign` theme. For issue #9, canonical checkpoint,
+  project-log, content-strategy, and publishing guidance corrected a proposed
+  recurring series from checkpoint and project-log classifications to a
+  private governance seed with no authorized cadence.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -109,7 +112,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, and #8;
+- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, and #9;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -119,7 +122,8 @@ items require investigation before they can be planned.
 - **Category:** retrieval
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** real-backlog pilots, issues #3, #4, #8, #16, and #28
+- **Discovered during:** real-backlog pilots, issues #3, #4, #8, #9, #16, and
+  #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
@@ -136,7 +140,11 @@ items require investigation before they can be planned.
   combine-first carry-forward packet or evidence cautions, omitted canonical
   artifact thresholds and several stronger contextual sources, and elevated
   issue #9's longitudinal cadence proposal into a combine recommendation even
-  though issue #8 is the initial cluster anchor.
+  though issue #8 is the initial cluster anchor. For issue #9, retrieval again
+  surfaced issues #8 and #5 only as raw intake, omitted their approved
+  dispositions and relationship constraints, and missed the canonical
+  checkpoint, project-log, and publishing-workflow guidance that governed the
+  decision.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -150,7 +158,7 @@ items require investigation before they can be planned.
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
-  issue #8 Loop 1 trace and review packet;
+  issue #8 and issue #9 Loop 1 traces and review packets;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
   “The Archive Becomes Part of the Work”
 
@@ -308,6 +316,9 @@ items require investigation before they can be planned.
   its self-source using timestamp, UUID, sender, email, URL, and transport
   terms; shared metadata also contributed to the apparent strength of nearby
   issue #9 and had to be separated from the substantive cluster relationship.
+  Issue #9 repeated the same pattern: transport fields and sender metadata
+  influenced self-source ranking and overlap with issue #8, while human review
+  had to distinguish that noise from the real cadence relationship.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -323,7 +334,8 @@ items require investigation before they can be planned.
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
-  trace and complete source artifact; issue #7 and issue #8 Loop 1 traces
+  trace and complete source artifact; issue #7, issue #8, and issue #9 Loop 1
+  traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -493,7 +505,7 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #5, #6, #8, #12, and #28 pilots
+- **Discovered during:** issue #5, #6, #8, #9, #12, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -509,7 +521,10 @@ items require investigation before they can be planned.
   issue #8, the provisional `field-report` label described a possible future
   form rather than current seed maturity, and the evaluator overcorrected
   toward combining the initial cluster anchor with issue #9's longitudinal
-  cadence proposal.
+  cadence proposal. For issue #9, the provisional stage inflated a monitoring
+  proposal into a checkpoint, added a second domain and an ad hoc theme, and
+  the evaluator then misclassified the private cadence-governance seed as a
+  project log and combine candidate.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -521,7 +536,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #7, #8, #12, and #28 Loop 1 traces
+- **Relevant references:** issue #5, #6, #7, #8, #9, #12, and #28 Loop 1
+  traces
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -541,6 +557,9 @@ items require investigation before they can be planned.
   hypothesis and conceptual implementation mechanisms with unsupported
   cross-company, deployment-pattern, model-capability, and enterprise-adoption
   claims that require primary-source research before field-report development.
+  Issue #9 mixed a useful longitudinal observation method with a proposed
+  calendar cadence, public-series assumptions, checkpoint and project-log
+  implications, ownership and lifecycle questions, and possible automation.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -553,8 +572,9 @@ items require investigation before they can be planned.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
-- **Relevant references:** issue #5, issue #7, and issue #8 Loop 1 traces; commits
-  `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture fixtures
+- **Relevant references:** issue #5, issue #7, issue #8, and issue #9 Loop 1
+  traces; commits `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture
+  fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
 
@@ -595,7 +615,10 @@ items require investigation before they can be planned.
   therefore required manual inspection of workflow artifacts. A future design
   should make approved carry-forward material and cautions legible to target
   processing without automatically merging or mutating the target, and it
-  must prohibit circular combine recommendations.
+  must prohibit circular combine recommendations. Issue #9 repeated the
+  downstream visibility failure: Loop 1 saw the raw issue #8 and issue #5
+  intakes but not issue #8's approved research-seed and cluster-anchor status,
+  issue #5's approved support relationship, or either packet's cautions.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -614,7 +637,7 @@ items require investigation before they can be planned.
   raw source, reviewed carry-forward material, and target state distinct.
   Circular combine recommendations are rejected.
 - **Relevant references:** issue #5, #16, and #28 combination packets;
-  issue #8 Loop 1 review; `loop2-development-packet.v1`
+  issue #8 and issue #9 Loop 1 reviews; `loop2-development-packet.v1`
 
 ### DFW-BL-021 — Define intake GitHub issue lifecycle and status handling
 
@@ -766,6 +789,56 @@ items require investigation before they can be planned.
 - **Relevant references:** dfw-intake issues #6 and #7; issue #6 and issue #7
   complete sources, Loop 1 traces, and review packets;
   `scripts/loop1-intake-understanding.mjs`
+
+### DFW-BL-027 — Govern recurring editorial series and observation cadences
+
+- **Category:** governance, workflow, editorial quality
+- **Status:** proposed
+- **Priority:** medium
+- **Discovered during:** bounded backlog operation, issue #9
+- **Problem or observation:** The processor can encounter sources proposing
+  periodic reviews, recurring notes, checkpoints, or series. Issue #9 showed
+  that a useful longitudinal observation method can be confused with
+  authorization for a scheduled public artifact, a project log, a checkpoint,
+  or an automated workflow. DFW-BL-006 covers automatic intake triggering, not
+  the broader editorial decision about whether recurrence should exist.
+- **Current safeguard:** Human review corrected issue #9 to a private seed,
+  prohibited a quarterly cadence and all recurring artifacts or automation,
+  and preserved chronology and monitoring questions without establishing a
+  series.
+- **Desired improvement:** Distinguish private observation methods from public
+  recurring artifacts. Require explicit human authorization and a
+  meaningful-change threshold; distinguish calendar-, event-, and
+  evidence-triggered review; define the owner and initiation rule; permit
+  silence when nothing meaningful changes; define lifecycle, retirement, and
+  end conditions; enforce canonical checkpoint and project-log boundaries;
+  prevent repetitive archive growth; and ensure that recurring editorial
+  proposals cannot implicitly create schedules, notifications, automation, or
+  publication. Preserve chronology without requiring periodic output.
+- **Reason deferred:** The manual governance stop is safe, and recurrence,
+  lifecycle, and publication-policy decisions require editorial design before
+  implementation.
+- **Dependencies or prerequisites:** DFW-BL-002, DFW-BL-006, DFW-BL-009,
+  canonical checkpoint and project-log guidance, and evidence from additional
+  cadence or series proposals.
+- **Validation criteria:**
+  - Fixtures distinguish private observation methods from public recurring
+    artifacts.
+  - Calendar cadence alone cannot authorize a review or publication.
+  - Event- and evidence-triggered review require an explicit meaningful-change
+    threshold and human authorization.
+  - Silence is a valid outcome when no meaningful change occurs.
+  - Owner, initiation, lifecycle, retirement, and end conditions remain
+    explicit governance requirements.
+  - Checkpoint and project-log boundaries are enforced.
+  - No recurring proposal creates scheduling, notification, automation, or
+    publication behavior implicitly.
+  - Chronology can be preserved without repetitive periodic artifacts.
+- **Relevant references:** dfw-intake issue #9; issue #9 Loop 1 trace, reviewed
+  recommendation, and Loop 2 governance-stop packet;
+  `docs/source-of-truth/content-strategy.md`;
+  `docs/source-of-truth/content-schema.md`;
+  `docs/workflows/publishing-workflow.md`; DFW-BL-006
 
 ## Maintenance rules
 
