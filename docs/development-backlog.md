@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, #5, #7, #8, and #9
+  operation, issues #3, #4, #5, #7, #8, #9, and #10
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -99,7 +99,10 @@ items require investigation before they can be planned.
   existing `organizational-redesign` theme. For issue #9, canonical checkpoint,
   project-log, content-strategy, and publishing guidance corrected a proposed
   recurring series from checkpoint and project-log classifications to a
-  private governance seed with no authorized cadence.
+  private governance seed with no authorized cadence. For issue #10, canonical
+  artifact and domain guidance corrected a provisional two-domain result while
+  preserving `essay` as the prospective form without treating that form as
+  authorization to draft.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -112,7 +115,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, and #9;
+- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, #9, and
+  #10;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -122,8 +126,8 @@ items require investigation before they can be planned.
 - **Category:** retrieval
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** real-backlog pilots, issues #3, #4, #8, #9, #16, and
-  #28
+- **Discovered during:** real-backlog pilots, issues #3, #4, #8, #9, #10,
+  #16, and #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
@@ -144,7 +148,10 @@ items require investigation before they can be planned.
   surfaced issues #8 and #5 only as raw intake, omitted their approved
   dispositions and relationship constraints, and missed the canonical
   checkpoint, project-log, and publishing-workflow guidance that governed the
-  decision.
+  decision. For issue #10, retrieval missed the existing issue-specific essay
+  development packet and contract, canonical artifact guidance, and stronger
+  contextual sources. Human review had to recover those records to preserve
+  the prospective essay boundary and its evidence gate.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -158,7 +165,9 @@ items require investigation before they can be planned.
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
-  issue #8 and issue #9 Loop 1 traces and review packets;
+  issue #8, issue #9, and issue #10 Loop 1 traces and review packets;
+  `docs/development/issue-10-essay-development-packet.json`;
+  `docs/development/issue-10-essay-contract.md`;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
   “The Archive Becomes Part of the Work”
 
@@ -318,7 +327,10 @@ items require investigation before they can be planned.
   issue #9 and had to be separated from the substantive cluster relationship.
   Issue #9 repeated the same pattern: transport fields and sender metadata
   influenced self-source ranking and overlap with issue #8, while human review
-  had to distinguish that noise from the real cadence relationship.
+  had to distinguish that noise from the real cadence relationship. Issue #10
+  again used timestamp, UUID, sender, email, URL, and transport terms in
+  ranking, while incomplete source coverage and undiscovered issue-specific
+  records materially affected the review boundary.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -334,8 +346,8 @@ items require investigation before they can be planned.
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
-  trace and complete source artifact; issue #7, issue #8, and issue #9 Loop 1
-  traces
+  trace and complete source artifact; issue #7, issue #8, issue #9, and issue
+  #10 Loop 1 traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -505,7 +517,7 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #5, #6, #8, #9, #12, and #28 pilots
+- **Discovered during:** issue #5, #6, #8, #9, #10, #12, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -524,7 +536,16 @@ items require investigation before they can be planned.
   cadence proposal. For issue #9, the provisional stage inflated a monitoring
   proposal into a checkpoint, added a second domain and an ad hoc theme, and
   the evaluator then misclassified the private cadence-governance seed as a
-  project log and combine candidate.
+  project log and combine candidate. For issue #10, the source-declared
+  `Essay` label influenced the provisional result and produced two domains;
+  the evaluator then overcorrected to `note`. Complete-source review showed
+  that the argument is structurally developed enough to preserve `essay` as
+  its prospective artifact while research still blocks drafting. Present
+  readiness and prospective form must remain separate: lowering the artifact
+  can discard intended argumentative structure, while preserving `essay` must
+  never imply draft authorization. Loop 2 retained `approvedArtifactType:
+  essay` but its generic recommended structure still said “Maintain as seed,”
+  showing that the distinction must remain consistent throughout the packet.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -536,7 +557,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #7, #8, #9, #12, and #28 Loop 1
+- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #12, and #28 Loop 1
   traces
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
@@ -560,6 +581,11 @@ items require investigation before they can be planned.
   Issue #9 mixed a useful longitudinal observation method with a proposed
   calendar cadence, public-series assumptions, checkpoint and project-log
   implications, ownership and lifecycle questions, and possible automation.
+  Issue #10 mixed a developed conceptual distinction, product observations,
+  empirical claims, predictions about user behavior and application
+  architecture, design implications, and unresolved questions. Human review
+  preserved the argument while routing the factual and predictive claims to
+  research.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -572,9 +598,9 @@ items require investigation before they can be planned.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
-- **Relevant references:** issue #5, issue #7, issue #8, and issue #9 Loop 1
-  traces; commits `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture
-  fixtures
+- **Relevant references:** issue #5, issue #7, issue #8, issue #9, and issue
+  #10 Loop 1 traces; commits `1331234`, `d309019`, `e3b4132`; Loop 2
+  evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
 
@@ -619,6 +645,11 @@ items require investigation before they can be planned.
   downstream visibility failure: Loop 1 saw the raw issue #8 and issue #5
   intakes but not issue #8's approved research-seed and cluster-anchor status,
   issue #5's approved support relationship, or either packet's cautions.
+  Issue #10 demonstrated the broader approved-context visibility problem
+  outside a combine relationship: ordinary Loop 1 retrieval missed its
+  existing issue-specific essay development packet and contract, so manual
+  inspection was required to recover the prospective artifact, distinctive
+  contribution, and evidence boundary.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -637,7 +668,10 @@ items require investigation before they can be planned.
   raw source, reviewed carry-forward material, and target state distinct.
   Circular combine recommendations are rejected.
 - **Relevant references:** issue #5, #16, and #28 combination packets;
-  issue #8 and issue #9 Loop 1 reviews; `loop2-development-packet.v1`
+  issue #8, issue #9, and issue #10 Loop 1 reviews;
+  `docs/development/issue-10-essay-development-packet.json`;
+  `docs/development/issue-10-essay-contract.md`;
+  `loop2-development-packet.v1`
 
 ### DFW-BL-021 — Define intake GitHub issue lifecycle and status handling
 
@@ -749,7 +783,7 @@ items require investigation before they can be planned.
 - **Category:** workflow, retrieval, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** bounded backlog operation, issues #6 and #7
+- **Discovered during:** bounded backlog operation, issues #6, #7, and #10
 - **Problem or observation:** The complete issue #6 source was saved in the
   isolated workspace, but Loop 1 analyzed only a 4,000-character active-body
   excerpt. The excerpt ended inside the proposed pattern list, causing Loop 1
@@ -760,12 +794,31 @@ items require investigation before they can be planned.
   item 8 and omitted harness engineering, personal corpus, and the
   author-selected final five-entry sequence. Those omissions materially
   affected source classification, relationship analysis, understanding of the
-  proposed structure, and evaluation of the author’s intended sequence.
+  proposed structure, and evaluation of the author’s intended sequence. For
+  issue #10, the complete stored source was 9,296 characters and the complete
+  active body was 8,106 characters, but the model-facing body contained only
+  the first 4,000 characters, omitting 4,106 characters. The normalized full
+  body was 7,955 characters and the normalized retrieval excerpt was 1,200
+  characters. The omitted section contained “The Interface Does Not
+  Disappear” counterpressure; the operational-interface versus
+  governance-interface distinction; authority, trust, supervision,
+  escalation, approval, memory, audit, recovery, and correction controls;
+  design implications; unresolved questions; and the author’s explicit
+  identification of the governance-interface distinction as the original
+  contribution. The incomplete input weakened the central thesis, omitted
+  counterarguments and limits, made relationship analysis incomplete, and
+  underestimated argument maturity. The evaluator reduced the artifact to a
+  note even though complete-source inspection and issue-specific records
+  supported preserving an essay boundary with research still blocking
+  drafting.
 - **Current safeguard:** The complete source artifact and content fingerprint
   are preserved for human review. In issue #6, direct inspection corrected the
   false missing-content inference before an approval envelope was created. In
   issue #7, direct inspection restored the omitted structural conclusion and
-  later entries before the reviewed disposition was approved.
+  later entries before the reviewed disposition was approved. For issue #10,
+  manual complete-source inspection plus the existing development packet and
+  essay contract restored the distinctive argument and prospective artifact
+  boundary before approval.
 - **Desired improvement:** Make truncation explicit in the review packet and
   preserve complete-source awareness. Use the full source when provider limits
   permit, or use deterministic chunking that allows analysis to account for
@@ -786,8 +839,10 @@ items require investigation before they can be planned.
   - Summaries and recommendations incorporate materially relevant later
     sections.
   - Short-source behavior and existing Loop 1 fixtures do not regress.
-- **Relevant references:** dfw-intake issues #6 and #7; issue #6 and issue #7
-  complete sources, Loop 1 traces, and review packets;
+- **Relevant references:** dfw-intake issues #6, #7, and #10; issue #6, issue
+  #7, and issue #10 complete sources, Loop 1 traces, and review packets;
+  `docs/development/issue-10-essay-development-packet.json`;
+  `docs/development/issue-10-essay-contract.md`;
   `scripts/loop1-intake-understanding.mjs`
 
 ### DFW-BL-027 — Govern recurring editorial series and observation cadences
