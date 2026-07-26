@@ -14,6 +14,7 @@ Options:
   --reprocess-changed              Reprocess a completed issue whose source changed.
   --recover-stale-claims           Recover claims older than the configured timeout.
   --claim-timeout-minutes N        Stale threshold (default: 120).
+  --stop-after-loop2               Record a ready Loop 2 packet and wait for later drafting authorization.
   --send-notifications             Permit delivery by the existing notifier.
 `;
 }
@@ -22,6 +23,7 @@ function parseArgs(argv) {
   const options = {
     mode: null,
     sendNotification: false,
+    stopAfterLoop2: false,
     reprocessChanged: false,
     recoverStaleClaims: false,
     claimTimeoutMinutes: 120,
@@ -50,6 +52,8 @@ function parseArgs(argv) {
       arg === "--send-notification"
     ) {
       options.sendNotification = true;
+    } else if (arg === "--stop-after-loop2") {
+      options.stopAfterLoop2 = true;
     } else if (arg === "--reprocess-changed") {
       options.reprocessChanged = true;
     } else if (arg === "--recover-stale-claims") {

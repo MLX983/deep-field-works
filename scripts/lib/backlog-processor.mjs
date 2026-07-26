@@ -913,7 +913,10 @@ function orchestrationStatus(manifest) {
   );
 }
 
-function recommendedAction(status) {
+function recommendedAction(status, stage) {
+  if (status === "completed-waiting-for-human" && stage === "loop2") {
+    return "Review the ready Loop 2 packet and explicitly authorize drafting on a later run.";
+  }
   return (
     {
       "awaiting-loop1-review":
@@ -951,7 +954,10 @@ function resultFromRecord(record) {
     failureMessage: record.failureMessage,
     workspacePath: record.workspacePath,
     artifactPaths: record.artifactPaths,
-    recommendedNextAction: recommendedAction(record.processingStatus),
+    recommendedNextAction: recommendedAction(
+      record.processingStatus,
+      record.currentOrFinalStage,
+    ),
   };
 }
 
@@ -1080,6 +1086,20 @@ async function processClaimedIssue(context) {
       record.currentOrFinalStage = "loop2";
       record.finalWorkflowStatus =
         packet.draftReadiness || packet.readiness || "NOT_DRAFT_READY";
+      record.completedAt = now(deps);
+      record.artifactPaths = listFiles(record.workspacePath);
+      finishAttempt(record, record.processingStatus, record.completedAt);
+      persist();
+      return;
+    }
+
+    if (options.stopAfterLoop2) {
+      record.processingStatus = "completed-waiting-for-human";
+      record.currentOrFinalStage = "loop2";
+      record.finalWorkflowStatus =
+        packet.draftReadiness || packet.readiness || "ready";
+      record.notificationEligibility = false;
+      record.notificationStatus = "not-attempted";
       record.completedAt = now(deps);
       record.artifactPaths = listFiles(record.workspacePath);
       finishAttempt(record, record.processingStatus, record.completedAt);

@@ -113,6 +113,19 @@ npm run backlog:process -- \
   --reviewed-recommendation /absolute/path/to/review-envelope.json
 ```
 
+When the approved operation authorizes Loop 2 classification but deliberately
+withholds drafting authorization, add:
+
+```text
+--stop-after-loop2
+```
+
+If Loop 2 is draft-ready, the processor records
+`completed-waiting-for-human` at stage `loop2`, preserves the ready packet, and
+does not create an orchestration directory or invoke notification. A later
+drafting run requires separate human authorization; this option does not add a
+new registry state or weaken the Loop 1 review-envelope bindings.
+
 The issue number, source fingerprint, workspace, original processing commit,
 current resume-processing commit, and Loop 1 result fingerprint must all
 match. The original commit records where the workspace and Loop 1 result came
@@ -141,8 +154,10 @@ evidence.
 After valid approval, the processor delegates to the existing commands:
 
 1. `npm run loop:packet`
-2. `npm run loop:orchestrate` only when Loop 2 is draft-ready
-3. the existing review notifier only for an eligible orchestration manifest
+2. stop at Loop 2 when `--stop-after-loop2` is explicit
+3. `npm run loop:orchestrate` only when Loop 2 is draft-ready and the explicit
+   Loop 2 stop was not requested
+4. the existing review notifier only for an eligible orchestration manifest
 
 Stable issue states are:
 

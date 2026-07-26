@@ -1278,6 +1278,95 @@ test("57 targeted changed awaiting issue reprocesses into new history", async ()
   assert.equal(refreshed.attemptHistory.length, 2);
 });
 
+test("58 explicit Loop 2 stop records ready state without drafting", async () => {
+  const setup = options("loop2-only", [issue(1)]);
+  await firstPass(setup);
+  const envelopePath = makeEnvelope(
+    setup,
+    1,
+    "develop independently",
+  );
+  let loop1Calls = 0;
+  let loop2Calls = 0;
+  let orchestrationCalls = 0;
+  let notificationCalls = 0;
+  const deps = mockDeps();
+  const result = await processBacklog(
+    {
+      ...setup.value,
+      reviewedRecommendation: envelopePath,
+      stopAfterLoop2: true,
+    },
+    {
+      ...deps,
+      runLoop1: async () => {
+        loop1Calls += 1;
+        throw new Error("Loop 1 must not rerun");
+      },
+      runLoop2: async (context) => {
+        loop2Calls += 1;
+        return deps.runLoop2(context);
+      },
+      runOrchestration: async () => {
+        orchestrationCalls += 1;
+        throw new Error("orchestration must not run");
+      },
+      notifyReview: async () => {
+        notificationCalls += 1;
+        throw new Error("notification must not run");
+      },
+    },
+  );
+  const record = readRegistry(setup).issues["1"];
+  assert.equal(loop1Calls, 0);
+  assert.equal(loop2Calls, 1);
+  assert.equal(orchestrationCalls, 0);
+  assert.equal(notificationCalls, 0);
+  assert.equal(record.processingStatus, "completed-waiting-for-human");
+  assert.equal(record.currentOrFinalStage, "loop2");
+  assert.equal(record.finalWorkflowStatus, "ready");
+  assert.equal(record.notificationEligibility, false);
+  assert.equal(record.notificationStatus, "not-attempted");
+  assert.equal(record.attemptCount, 2);
+  assert.equal(existsSync(join(record.workspacePath, "orchestration")), false);
+  assert.match(
+    result.batch.results[0].recommendedNextAction,
+    /explicitly authorize drafting/,
+  );
+});
+
+test("59 completed Loop 2 stop replays without upstream work", async () => {
+  const setup = options("loop2-only-replay", [issue(1)]);
+  await firstPass(setup);
+  const envelopePath = makeEnvelope(
+    setup,
+    1,
+    "develop independently",
+  );
+  const runOptions = {
+    ...setup.value,
+    reviewedRecommendation: envelopePath,
+    stopAfterLoop2: true,
+  };
+  await processBacklog(runOptions, mockDeps());
+  const registryPath = join(setup.value.stateDir, "registry.v2.json");
+  const registryBefore = readFileSync(registryPath, "utf8");
+  let upstreamCalls = 0;
+  const replay = await processBacklog(
+    runOptions,
+    mockDeps({
+      runLoop1: async () => (upstreamCalls += 1),
+      runLoop2: async () => (upstreamCalls += 1),
+      runOrchestration: async () => (upstreamCalls += 1),
+      notifyReview: async () => (upstreamCalls += 1),
+    }),
+  );
+  assert.equal(upstreamCalls, 0);
+  assert.equal(replay.batch.results.length, 0);
+  assert.equal(replay.batch.skipped[0].reason, "unchanged-completed");
+  assert.equal(readFileSync(registryPath, "utf8"), registryBefore);
+});
+
 let failed = 0;
 for (const fixture of tests) {
   try {
