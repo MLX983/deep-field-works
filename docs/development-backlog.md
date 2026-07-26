@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, and #5
+  operation, issues #3, #4, #5, and #7
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -89,7 +89,10 @@ items require investigation before they can be planned.
   established the closed artifact set and corrected the administrative
   classification from a provisional multidomain assignment and ad hoc
   `archive navigation` theme to Media, Memory, and Meaning with the existing
-  `publishing-systems` theme.
+  `publishing-systems` theme. For issue #7, canonical homepage, domain-page,
+  and content-strategy guidance established a legitimate orientation job but
+  changed the recommended handling from content combination to a governance
+  stop pending a choice among existing curation structures.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -102,10 +105,10 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issues #3, #4, #5, and #6;
+- **Relevant references:** dfw-intake issues #3, #4, #5, #6, and #7;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
-  `docs/source-of-truth/domain-structure.md`
+  `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
 
 ### DFW-BL-003 — Improve ranking of strong cluster anchors
 
@@ -121,7 +124,10 @@ items require investigation before they can be planned.
   elevated broad adjacency with issue #3 into a combine recommendation. For
   issue #6, self-source and thematic corpus pieces dominated the ranking while
   the canonical artifact, status, evidence-level, and navigation definitions
-  that governed the decision were absent.
+  that governed the decision were absent. For issue #7, retrieval missed the
+  implemented homepage, canonical homepage and domain-page orientation
+  guidance, the published “The Archive Becomes Part of the Work,” and backlog
+  issues #11, #12, and #29 that materially clarified the complete proposal.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -134,8 +140,9 @@ items require investigation before they can be planned.
 - **Validation criteria:** Representative anchor fixtures rank above loose
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
-  issue #28 Loop 1 trace; issue #6 Loop 1 trace; “Skills half-life”;
-  “Context inequality”; “Storage Is Not Memory”
+  issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
+  “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
+  “The Archive Becomes Part of the Work”
 
 ### DFW-BL-004 — Improve abstract but structurally valid drafts
 
@@ -284,7 +291,10 @@ items require investigation before they can be planned.
   workflow. Issue #6 also showed why the boundary must expose source and
   retrieval limitations: transport metadata influenced matched terms, and a
   truncated working excerpt produced a false question about missing source
-  material even though the full source artifact was available.
+  material even though the full source artifact was available. Issue #7
+  repeated the metadata signal: sender, timestamp, UUID, URL, and transport
+  fields contributed to the self-source match and had to be separated from
+  substantive orientation evidence during human review.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -300,7 +310,7 @@ items require investigation before they can be planned.
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
-  trace and complete source artifact
+  trace and complete source artifact; issue #7 Loop 1 trace
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -480,6 +490,9 @@ items require investigation before they can be planned.
   navigation theme to a structural governance proposal; canonical review
   instead supplied one contract-required administrative domain and the
   existing `publishing-systems` theme without authorizing content development.
+  For issue #7, the provisional stage again assigned two domains, and the
+  evaluator then overcorrected toward content combination even though no
+  single target could absorb the distinct reader-orientation decision.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -491,7 +504,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #12, and #28 Loop 1 traces
+- **Relevant references:** issue #5, #6, #7, #12, and #28 Loop 1 traces
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -503,7 +516,11 @@ items require investigation before they can be planned.
   empirical claims and create unnecessary research requirements or overstate
   evidence. Issue #5 mixed a proposed enterprise control architecture with
   plausible institutional inferences and unsupported legal, regulatory,
-  technical-necessity, and enterprise-prevalence claims.
+  technical-necessity, and enterprise-prevalence claims. Issue #7 mixed an
+  orientation-design proposal and editorial sequence with product claims,
+  instructional advice, claims about ordinary user behavior, and unsupported
+  assertions about prompting, agents, harnesses, project memory, and
+  personal-corpus advantage.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -516,8 +533,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
-- **Relevant references:** issue #5 Loop 1 trace; commits `1331234`, `d309019`,
-  `e3b4132`; Loop 2 evidence-posture fixtures
+- **Relevant references:** issue #5 and issue #7 Loop 1 traces; commits
+  `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
 
@@ -675,16 +692,23 @@ items require investigation before they can be planned.
 - **Category:** workflow, retrieval, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** bounded backlog operation, issue #6
+- **Discovered during:** bounded backlog operation, issues #6 and #7
 - **Problem or observation:** The complete issue #6 source was saved in the
   isolated workspace, but Loop 1 analyzed only a 4,000-character active-body
   excerpt. The excerpt ended inside the proposed pattern list, causing Loop 1
   to ask what content followed even though that content was present in the
   stored source. Silent excerpt truncation can create false uncertainty,
-  incomplete summaries, and incorrect editorial recommendations.
+  incomplete summaries, and incorrect editorial recommendations. For issue
+  #7, Loop 1 analyzed 4,000 of 5,769 active-body characters. It ended inside
+  item 8 and omitted harness engineering, personal corpus, and the
+  author-selected final five-entry sequence. Those omissions materially
+  affected source classification, relationship analysis, understanding of the
+  proposed structure, and evaluation of the author’s intended sequence.
 - **Current safeguard:** The complete source artifact and content fingerprint
   are preserved for human review. In issue #6, direct inspection corrected the
-  false missing-content inference before an approval envelope was created.
+  false missing-content inference before an approval envelope was created. In
+  issue #7, direct inspection restored the omitted structural conclusion and
+  later entries before the reviewed disposition was approved.
 - **Desired improvement:** Make truncation explicit in the review packet and
   preserve complete-source awareness. Use the full source when provider limits
   permit, or use deterministic chunking that allows analysis to account for
@@ -705,8 +729,9 @@ items require investigation before they can be planned.
   - Summaries and recommendations incorporate materially relevant later
     sections.
   - Short-source behavior and existing Loop 1 fixtures do not regress.
-- **Relevant references:** dfw-intake issue #6; issue #6 complete source,
-  Loop 1 trace, and review packet; `scripts/loop1-intake-understanding.mjs`
+- **Relevant references:** dfw-intake issues #6 and #7; issue #6 and issue #7
+  complete sources, Loop 1 traces, and review packets;
+  `scripts/loop1-intake-understanding.mjs`
 
 ## Maintenance rules
 
