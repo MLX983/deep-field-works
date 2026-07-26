@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, #5, #7, #8, #9, #10, #11, and #12
+  operation, issues #3, #4, #5, #7, #8, #9, #10, #11, #12, and #13
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -110,7 +110,12 @@ items require investigation before they can be planned.
   taxonomy guidance rejected the source-declared field-report label, preserved
   the existing `personal-cognitive-infrastructure` theme, required
   `canonical: false`, and bounded the material as a note without creating a
-  glossary, naming standard, or canonical harness model.
+  glossary, naming standard, or canonical harness model. For issue #13,
+  canonical field-report, domain, theme, and taxonomy guidance preserved the
+  prospective field-report boundary while keeping research as a development
+  gate, corrected the primary domain to Interfaces for Judgment, selected the
+  existing `supervision-interfaces` theme, and rejected any new
+  inference-control taxonomy, glossary, schema field, or canonical status.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -124,7 +129,7 @@ items require investigation before they can be planned.
   constraints, does not invent a type or domain, and still stops for human
   approval.
 - **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, #9,
-  #10, #11, and #12;
+  #10, #11, #12, and #13;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -135,7 +140,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** real-backlog pilots, issues #3, #4, #8, #9, #10,
-  #11, #12, #16, and #28
+  #11, #12, #13, #16, and #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
@@ -170,7 +175,13 @@ items require investigation before they can be planned.
   then elevated issues #22 and #26 largely through intake metadata and generic
   model terminology. It missed the stronger contextual relationships to
   `the-process-is-the-proof.md`, issue #29, and the approved issue #10 and
-  issue #11 boundaries.
+  issue #11 boundaries. For issue #13, retrieval again ranked the cached
+  self-source first, elevated broad weak-signal and data adjacency, and missed
+  canonical Interfaces for Judgment guidance, issue #17's approved prototype
+  context, issue #10's governance-interface boundary, issue #11's governance
+  and lineage context, issue #12's approved layer distinctions, issue #20's
+  distinct hidden-authority problem, and issue #16's disclosure-to-control
+  relationship.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -184,8 +195,8 @@ items require investigation before they can be planned.
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
-  issue #8, issue #9, issue #10, issue #11, and issue #12 Loop 1 traces and
-  review packets;
+  issue #8, issue #9, issue #10, issue #11, issue #12, and issue #13 Loop 1
+  traces and review packets;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
@@ -362,7 +373,12 @@ items require investigation before they can be planned.
   Issue #12 again ranked its self-source through email identifiers, sender,
   timestamps, URLs, and transport fields; generic model, system, field-report,
   and intake language also inflated issues #22 and #26 above stronger
-  conceptual context.
+  conceptual context. Issue #13 repeated self-source dominance through email
+  ID, sender, recipient, timestamps, URL, intake wrappers, and generic
+  inference, model, signal, and data language. Loop 2 then carried email
+  transport metadata and source-declared frontmatter into
+  `developmentMaterial`, mislabeled as inferential mechanism material rather
+  than excluding it from editorial evidence.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -377,9 +393,9 @@ items require investigation before they can be planned.
   unambiguous review state, records no fabricated approval, and resumes only
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
-  3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
+  3 approval gates; issue #6, #12, #13, and #28 pilot artifacts; issue #6 Loop 1
   trace and complete source artifact; issue #7, issue #8, issue #9, issue #10,
-  issue #11, and issue #12 Loop 1 traces
+  issue #11, issue #12, and issue #13 Loop 1 traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -549,7 +565,8 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #5, #6, #8, #9, #10, #11, #12, and #28 pilots
+- **Discovered during:** issue #5, #6, #8, #9, #10, #11, #12, #13, and #28
+  pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -590,6 +607,16 @@ items require investigation before they can be planned.
   Loop 2 packet kept the authoritative fields consistent as `note`,
   source-sufficient, ready, independently developed, and without a combine
   target; no new structured-versus-narrative contradiction was observed.
+  Issue #13 showed the inverse source-label problem: complete-source review
+  established that `field-report` was a defensible prospective form while
+  research still blocked development, but the evaluator reduced it to a note.
+  Loop 2 retained authoritative `approvedArtifactType: field-report`,
+  `research-required`, Interfaces for Judgment, `supervision-interfaces`, and
+  no combine target, while generic `recommendedStructure` said “Maintain as
+  seed.” It also serialized `sourceSufficiency.status: sufficient` despite the
+  approved partial posture and the unverified external case. Readiness,
+  sufficiency, artifact form, and generic narrative must remain mutually
+  consistent.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -601,8 +628,9 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #11, #12, and #28
-  Loop 1 traces; issue #10, issue #11, and issue #12 Loop 2 packets
+- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #11, #12, #13, and
+  #28 Loop 1 traces; issue #10, issue #11, issue #12, and issue #13 Loop 2
+  packets
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -639,7 +667,17 @@ items require investigation before they can be planned.
   architecture, a proposed five-stage market sequence, and terminology that
   could be mistaken for taxonomy. Human review kept the bounded distinction
   draft-ready without treating those broader claims as established or making
-  external research a blocker.
+  external research a blocker. Issue #13 mixed an unverified external
+  healthcare case, conceptual distinctions about inferred attributes,
+  hypothetical sensitive-state examples, privacy and governance claims,
+  interface requirements, ambient-AI predictions, and proposed action
+  boundaries. Human review had to distinguish collected inputs, observations,
+  evidence, interpretation, inference, detection, classification, prediction,
+  hypothesis, judgment, recommendation, action, and runtime model inference.
+  The same case confirms that `inference` can mean runtime computation,
+  epistemic conclusion, or operational decision support; confidence is not
+  truth, inferred intent is not explicit authority, and lineage must preserve
+  the assumptions connecting signals to conclusions and actions.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -648,13 +686,14 @@ items require investigation before they can be planned.
 - **Reason deferred:** Several false research blockers were already fixed, but
   the broader classification scope is not formally assessed.
 - **Dependencies or prerequisites:** Gather examples such as nutrition-label
-  user needs, chatbot-to-harness progression, and claims about ordinary users.
+  user needs, chatbot-to-harness progression, claims about ordinary users, and
+  issue #13's collected-data versus inferred-attribute boundary.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
 - **Relevant references:** issue #5, issue #7, issue #8, issue #9, issue #10,
-  issue #11, and issue #12 Loop 1 traces; commits `1331234`, `d309019`,
-  `e3b4132`; Loop 2 evidence-posture fixtures
+  issue #11, issue #12, and issue #13 Loop 1 traces; issue #13 Loop 2 packet;
+  commits `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
 
@@ -716,7 +755,11 @@ items require investigation before they can be planned.
   of the temporary envelope, registry state, or draft. Temporary generated
   artifacts must not silently become corpus sources, combine targets, or
   canonical material, and durable reprocessing should make possible duplicate
-  development visible without merging state automatically.
+  development visible without merging state automatically. Issue #13 showed
+  the same approved-context gap without a combine disposition: ordinary Loop 1
+  retrieval could not see the approved issue #10, #11, and #12 boundaries or
+  issue #17's issue-specific development records, so manual inspection was
+  required to preserve each as context and reject a combine target.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -853,8 +896,8 @@ items require investigation before they can be planned.
 - **Category:** workflow, retrieval, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** bounded backlog operation, issues #6, #7, #10, and
-  #11, and #12
+- **Discovered during:** bounded backlog operation, issues #6, #7, #10, #11,
+  #12, and #13
 - **Problem or observation:** The complete issue #6 source was saved in the
   isolated workspace, but Loop 1 analyzed only a 4,000-character active-body
   excerpt. The excerpt ended inside the proposed pattern list, causing Loop 1
@@ -907,7 +950,20 @@ items require investigation before they can be planned.
   layer-separation argument, prevented full assessment of the naming problem,
   hid most speculative architecture and market claims, and obscured
   relationships to issues #10, #11, and #29. The note recommendation remained
-  defensible, but for incomplete reasons.
+  defensible, but for incomplete reasons. For issue #13, the complete stored
+  source was 8,131 characters and the complete active body was 6,999
+  characters, but the model-facing body contained only the first 4,000
+  characters, omitting 2,999 characters. The normalized full body was 6,921
+  characters and the normalized retrieval excerpt was 1,200 characters. The
+  omitted section contained the useful-versus-dangerous comparison, ambient
+  assistance, the distinction from autonomous agents, the personal
+  early-warning framing, the complete inference-control interface, controls
+  over observation, inference, storage, action, explanation, locality, and
+  prohibition, and the unresolved governance conclusion. The truncation hid
+  the strongest governance contribution and most interface implications,
+  underestimated field-report maturity, obscured Interfaces for Judgment and
+  `supervision-interfaces`, hid relationships to issues #10, #11, #12, #16,
+  #17, and #20, and contributed to the evaluator's reduction to a note.
 - **Current safeguard:** The complete source artifact and content fingerprint
   are preserved for human review. In issue #6, direct inspection corrected the
   false missing-content inference before an approval envelope was created. In
@@ -920,7 +976,10 @@ items require investigation before they can be planned.
   recommendation, and kept the vocabulary provisional. For issue #12, manual
   complete-source inspection established the bounded conceptual center,
   excluded the market and architecture overreach, and recovered the stronger
-  contextual relationships before approval.
+  contextual relationships before approval. For issue #13, manual
+  complete-source inspection restored the prospective field-report boundary,
+  primary domain, existing theme, governance center, and related-material
+  boundaries before approval.
 - **Desired improvement:** Make truncation explicit in the review packet and
   preserve complete-source awareness. Use the full source when provider limits
   permit, or use deterministic chunking that allows analysis to account for
@@ -941,9 +1000,9 @@ items require investigation before they can be planned.
   - Summaries and recommendations incorporate materially relevant later
     sections.
   - Short-source behavior and existing Loop 1 fixtures do not regress.
-- **Relevant references:** dfw-intake issues #6, #7, #10, #11, and #12;
-  issue #6, issue #7, issue #10, issue #11, and issue #12 complete sources,
-  Loop 1 traces, and review packets;
+- **Relevant references:** dfw-intake issues #6, #7, #10, #11, #12, and #13;
+  issue #6, issue #7, issue #10, issue #11, issue #12, and issue #13 complete
+  sources, Loop 1 traces, and review packets;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   `scripts/loop1-intake-understanding.mjs`
