@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, #5, and #7
+  operation, issues #3, #4, #5, #7, and #8
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -92,7 +92,11 @@ items require investigation before they can be planned.
   `publishing-systems` theme. For issue #7, canonical homepage, domain-page,
   and content-strategy guidance established a legitimate orientation job but
   changed the recommended handling from content combination to a governance
-  stop pending a choice among existing curation structures.
+  stop pending a choice among existing curation structures. For issue #8,
+  canonical artifact thresholds distinguished a prospective field-report
+  structure from the material's present maturity as a research seed, while
+  canonical domain guidance confirmed Institutions in Transition and the
+  existing `organizational-redesign` theme.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -105,7 +109,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issues #3, #4, #5, #6, and #7;
+- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, and #8;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -115,7 +119,7 @@ items require investigation before they can be planned.
 - **Category:** retrieval
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** real-backlog pilots, issues #3, #4, #16, and #28
+- **Discovered during:** real-backlog pilots, issues #3, #4, #8, #16, and #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
@@ -128,6 +132,11 @@ items require investigation before they can be planned.
   implemented homepage, canonical homepage and domain-page orientation
   guidance, the published “The Archive Becomes Part of the Work,” and backlog
   issues #11, #12, and #29 that materially clarified the complete proposal.
+  For issue #8, retrieval surfaced issue #5's raw source but not its approved
+  combine-first carry-forward packet or evidence cautions, omitted canonical
+  artifact thresholds and several stronger contextual sources, and elevated
+  issue #9's longitudinal cadence proposal into a combine recommendation even
+  though issue #8 is the initial cluster anchor.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -141,6 +150,7 @@ items require investigation before they can be planned.
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
+  issue #8 Loop 1 trace and review packet;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
   “The Archive Becomes Part of the Work”
 
@@ -294,7 +304,10 @@ items require investigation before they can be planned.
   material even though the full source artifact was available. Issue #7
   repeated the metadata signal: sender, timestamp, UUID, URL, and transport
   fields contributed to the self-source match and had to be separated from
-  substantive orientation evidence during human review.
+  substantive orientation evidence during human review. Issue #8 again ranked
+  its self-source using timestamp, UUID, sender, email, URL, and transport
+  terms; shared metadata also contributed to the apparent strength of nearby
+  issue #9 and had to be separated from the substantive cluster relationship.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -310,7 +323,7 @@ items require investigation before they can be planned.
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
-  trace and complete source artifact; issue #7 Loop 1 trace
+  trace and complete source artifact; issue #7 and issue #8 Loop 1 traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -480,7 +493,7 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #5, #6, #12, and #28 pilots
+- **Discovered during:** issue #5, #6, #8, #12, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -492,7 +505,11 @@ items require investigation before they can be planned.
   existing `publishing-systems` theme without authorizing content development.
   For issue #7, the provisional stage again assigned two domains, and the
   evaluator then overcorrected toward content combination even though no
-  single target could absorb the distinct reader-orientation decision.
+  single target could absorb the distinct reader-orientation decision. For
+  issue #8, the provisional `field-report` label described a possible future
+  form rather than current seed maturity, and the evaluator overcorrected
+  toward combining the initial cluster anchor with issue #9's longitudinal
+  cadence proposal.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -504,7 +521,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #7, #12, and #28 Loop 1 traces
+- **Relevant references:** issue #5, #6, #7, #8, #12, and #28 Loop 1 traces
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -520,7 +537,10 @@ items require investigation before they can be planned.
   orientation-design proposal and editorial sequence with product claims,
   instructional advice, claims about ordinary user behavior, and unsupported
   assertions about prompting, agents, harnesses, project memory, and
-  personal-corpus advantage.
+  personal-corpus advantage. Issue #8 mixed a useful institutional framing
+  hypothesis and conceptual implementation mechanisms with unsupported
+  cross-company, deployment-pattern, model-capability, and enterprise-adoption
+  claims that require primary-source research before field-report development.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -533,7 +553,7 @@ items require investigation before they can be planned.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
-- **Relevant references:** issue #5 and issue #7 Loop 1 traces; commits
+- **Relevant references:** issue #5, issue #7, and issue #8 Loop 1 traces; commits
   `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
@@ -567,20 +587,34 @@ items require investigation before they can be planned.
   standalone drafting, but does not carry the distinct contribution into the
   target material. Issue #5 adds a substantial proposed control layer for
   non-human actors to issue #8 while requiring that the target remain
-  unmodified until a separate human-approved merge process exists.
+  unmodified until a separate human-approved merge process exists. That
+  combine-first result safely preserved issue #5 without mutating issue #8.
+  When issue #8 was later processed, ordinary retrieval surfaced issue #5's
+  raw source, but Loop 1 could not discover the approved carry-forward packet,
+  its exact distinct contribution, or its evidence cautions. Target review
+  therefore required manual inspection of workflow artifacts. A future design
+  should make approved carry-forward material and cautions legible to target
+  processing without automatically merging or mutating the target, and it
+  must prohibit circular combine recommendations.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
   and target, extracting distinct material, proposing an amendment, and
-  preserving lineage.
+  preserving lineage. Make reviewed carry-forward contributions and cautions
+  discoverable during later target review without authorizing automatic
+  mutation or allowing the target to be combined circularly back into its
+  supporting source.
 - **Reason deferred:** Automatic merging is not authorized, and target mutation
   requires a separate governance design.
 - **Dependencies or prerequisites:** DFW-BL-009, durable source snapshots, and
   a decision about retained review artifacts.
 - **Validation criteria:** A dry-run proposal identifies only distinct material
-  and cannot modify the target or source without explicit approval.
+  and cannot modify the target or source without explicit approval. Target
+  processing can retrieve the approved contribution and cautions while keeping
+  raw source, reviewed carry-forward material, and target state distinct.
+  Circular combine recommendations are rejected.
 - **Relevant references:** issue #5, #16, and #28 combination packets;
-  `loop2-development-packet.v1`
+  issue #8 Loop 1 review; `loop2-development-packet.v1`
 
 ### DFW-BL-021 — Define intake GitHub issue lifecycle and status handling
 
