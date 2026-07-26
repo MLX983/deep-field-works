@@ -76,7 +76,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, #5, #7, #8, #9, and #10
+  operation, issues #3, #4, #5, #7, #8, #9, #10, and #11
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -102,7 +102,11 @@ items require investigation before they can be planned.
   private governance seed with no authorized cadence. For issue #10, canonical
   artifact and domain guidance corrected a provisional two-domain result while
   preserving `essay` as the prospective form without treating that form as
-  authorization to draft.
+  authorization to draft. For issue #11, canonical essay, project-log,
+  workflow, and domain guidance rejected both the note reduction and any
+  project-log interpretation. It preserved one Human-Machine Workflows domain
+  and an essay-shaped conceptual argument without authorizing a new workflow
+  model or draft.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -115,8 +119,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** A structural proposal cites the relevant canonical
   constraints, does not invent a type or domain, and still stops for human
   approval.
-- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, #9, and
-  #10;
+- **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, #9,
+  #10, and #11;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -127,7 +131,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** real-backlog pilots, issues #3, #4, #8, #9, #10,
-  #16, and #28
+  #11, #16, and #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
@@ -151,7 +155,13 @@ items require investigation before they can be planned.
   decision. For issue #10, retrieval missed the existing issue-specific essay
   development packet and contract, canonical artifact guidance, and stronger
   contextual sources. Human review had to recover those records to preserve
-  the prospective essay boundary and its evidence gate.
+  the prospective essay boundary and its evidence gate. For issue #11,
+  retrieval elevated issue #27 without exposing its approved supporting
+  relationship to the narrower issue #21 anchor. It also missed stronger
+  published conceptual context, current processor and workflow documentation,
+  approved issue #10 and issue #12 boundaries, and relevant orchestration and
+  harness sources. Incomplete source coverage then contributed to an
+  unsupported combine recommendation.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -165,7 +175,8 @@ items require investigation before they can be planned.
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
-  issue #8, issue #9, and issue #10 Loop 1 traces and review packets;
+  issue #8, issue #9, issue #10, and issue #11 Loop 1 traces and review
+  packets;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
@@ -330,7 +341,10 @@ items require investigation before they can be planned.
   had to distinguish that noise from the real cadence relationship. Issue #10
   again used timestamp, UUID, sender, email, URL, and transport terms in
   ranking, while incomplete source coverage and undiscovered issue-specific
-  records materially affected the review boundary.
+  records materially affected the review boundary. Issue #11 repeated the
+  pattern: timestamp, UUID, sender, email, URL, transport, and generic workflow
+  terms affected self-source and related-issue scores, requiring human review
+  to separate metadata and lexical overlap from substantive relationships.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -346,8 +360,8 @@ items require investigation before they can be planned.
   from a matching reviewed recommendation.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, and #28 pilot artifacts; issue #6 Loop 1
-  trace and complete source artifact; issue #7, issue #8, issue #9, and issue
-  #10 Loop 1 traces
+  trace and complete source artifact; issue #7, issue #8, issue #9, issue #10,
+  and issue #11 Loop 1 traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -517,7 +531,7 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #5, #6, #8, #9, #10, #12, and #28 pilots
+- **Discovered during:** issue #5, #6, #8, #9, #10, #11, #12, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -546,6 +560,14 @@ items require investigation before they can be planned.
   never imply draft authorization. Loop 2 retained `approvedArtifactType:
   essay` but its generic recommended structure still said “Maintain as seed,”
   showing that the distinction must remain consistent throughout the packet.
+  Issue #11 repeated both failures: the evaluator reduced a structurally
+  developed prospective essay to a note and recommended combination based on
+  partial source and relationship context. After human correction, Loop 2
+  retained authoritative `approvedArtifactType: essay`, `research-required`,
+  and no combine target, but its generic `readerQuestion` referred to a field
+  report and `recommendedStructure` again said “Maintain as seed.”
+  Authoritative structured fields and narrative guidance must not contradict
+  each other.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -557,8 +579,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #12, and #28 Loop 1
-  traces
+- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #11, #12, and #28
+  Loop 1 traces; issue #10 and issue #11 Loop 2 packets
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -585,7 +607,11 @@ items require investigation before they can be planned.
   empirical claims, predictions about user behavior and application
   architecture, design implications, and unresolved questions. Human review
   preserved the argument while routing the factual and predictive claims to
-  research.
+  research. Issue #11 mixed a provisional conceptual model, descriptions of
+  the DFW implementation, operating-model proposals, empirical benefit claims,
+  cybernetics and systems-engineering analogies, design implications, and
+  predictions. Human review preserved the essay argument while requiring
+  repository verification and research.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -598,8 +624,8 @@ items require investigation before they can be planned.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
-- **Relevant references:** issue #5, issue #7, issue #8, issue #9, and issue
-  #10 Loop 1 traces; commits `1331234`, `d309019`, `e3b4132`; Loop 2
+- **Relevant references:** issue #5, issue #7, issue #8, issue #9, issue #10,
+  and issue #11 Loop 1 traces; commits `1331234`, `d309019`, `e3b4132`; Loop 2
   evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
@@ -649,7 +675,12 @@ items require investigation before they can be planned.
   outside a combine relationship: ordinary Loop 1 retrieval missed its
   existing issue-specific essay development packet and contract, so manual
   inspection was required to recover the prospective artifact, distinctive
-  contribution, and evidence boundary.
+  contribution, and evidence boundary. For issue #11, ordinary retrieval
+  surfaced issue #27's raw source but not its approved supporting relationship
+  to issue #21, and it could not see issue #10's completed essay boundary,
+  issue #12's approved contextual role, or current workflow state. Manual
+  inspection was required to reject combine-first and keep issues #21 and #27
+  contextual.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -668,7 +699,7 @@ items require investigation before they can be planned.
   raw source, reviewed carry-forward material, and target state distinct.
   Circular combine recommendations are rejected.
 - **Relevant references:** issue #5, #16, and #28 combination packets;
-  issue #8, issue #9, and issue #10 Loop 1 reviews;
+  issue #8, issue #9, issue #10, and issue #11 Loop 1 reviews;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   `loop2-development-packet.v1`
@@ -783,7 +814,8 @@ items require investigation before they can be planned.
 - **Category:** workflow, retrieval, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** bounded backlog operation, issues #6, #7, and #10
+- **Discovered during:** bounded backlog operation, issues #6, #7, #10, and
+  #11
 - **Problem or observation:** The complete issue #6 source was saved in the
   isolated workspace, but Loop 1 analyzed only a 4,000-character active-body
   excerpt. The excerpt ended inside the proposed pattern list, causing Loop 1
@@ -810,7 +842,19 @@ items require investigation before they can be planned.
   underestimated argument maturity. The evaluator reduced the artifact to a
   note even though complete-source inspection and issue-specific records
   supported preserving an essay boundary with research still blocking
-  drafting.
+  drafting. For issue #11, the complete stored source was 9,890 characters and
+  the complete active body was 8,767 characters, but the model-facing body
+  contained only the first 4,000 characters, omitting 4,767 characters. The
+  normalized full body was 8,675 characters and the normalized retrieval
+  excerpt was 1,200 characters. Omitted material included the current DFW
+  harness example; token and operating-cost implications; the “content washing
+  machine” failure mode; the contrary view and limits; the cybernetics
+  framing; the intended opening and closing; and additional distinctions among
+  loops, harnesses, governance, judgment, and lineage. The missing material
+  hid the full breadth and maturity of the thesis, removed counterpressure,
+  prevented accurate current-system comparison, and contributed to an
+  evaluator recommendation of note plus combine-first even though the complete
+  source supported a broader essay boundary.
 - **Current safeguard:** The complete source artifact and content fingerprint
   are preserved for human review. In issue #6, direct inspection corrected the
   false missing-content inference before an approval envelope was created. In
@@ -818,7 +862,9 @@ items require investigation before they can be planned.
   later entries before the reviewed disposition was approved. For issue #10,
   manual complete-source inspection plus the existing development packet and
   essay contract restored the distinctive argument and prospective artifact
-  boundary before approval.
+  boundary before approval. For issue #11, manual complete-source and current
+  repository inspection restored the essay boundary, rejected the combine
+  recommendation, and kept the vocabulary provisional.
 - **Desired improvement:** Make truncation explicit in the review packet and
   preserve complete-source awareness. Use the full source when provider limits
   permit, or use deterministic chunking that allows analysis to account for
@@ -839,8 +885,9 @@ items require investigation before they can be planned.
   - Summaries and recommendations incorporate materially relevant later
     sections.
   - Short-source behavior and existing Loop 1 fixtures do not regress.
-- **Relevant references:** dfw-intake issues #6, #7, and #10; issue #6, issue
-  #7, and issue #10 complete sources, Loop 1 traces, and review packets;
+- **Relevant references:** dfw-intake issues #6, #7, #10, and #11; issue #6,
+  issue #7, issue #10, and issue #11 complete sources, Loop 1 traces, and
+  review packets;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   `scripts/loop1-intake-understanding.mjs`
