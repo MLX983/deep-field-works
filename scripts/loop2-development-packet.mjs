@@ -4,6 +4,11 @@ import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import {
+  deriveAuthoritativeNarrative,
+  reconcileSourceSufficiency,
+  validateLoop2Consistency,
+} from './lib/loop2-consistency.mjs';
 
 const REPO_ROOT = process.cwd();
 const SCHEMA_PATH = path.join(
@@ -540,7 +545,8 @@ function developmentRole(text) {
 function developmentPosture(text, role) {
   if (role === 'caution') return 'editorial-caution';
   if (role === 'hypothesis' || /\b(?:may|might|could)\b/i.test(text)) return 'speculation';
-  return 'inference';
+  if (role === 'question') return 'research-question';
+  return 'source-assertion';
 }
 
 function buildDevelopmentMaterial(recommendation, issueMeta, claims) {
@@ -565,17 +571,17 @@ function buildDevelopmentMaterial(recommendation, issueMeta, claims) {
       recommendation.rationale,
       developmentRole(recommendation.rationale ?? ''),
       'reviewed-recommendation',
-      'inference',
+      'approved-claim',
     );
   }
   for (const inference of claims.inferences) {
-    add(inference, developmentRole(inference), 'source', 'inference');
+    add(inference, developmentRole(inference), 'source', 'source-assertion');
   }
   for (const speculation of claims.speculation) {
     add(speculation, 'hypothesis', 'source', 'speculation');
   }
   for (const question of claims.unresolvedQuestions) {
-    add(question, 'question', 'source', 'inference');
+    add(question, 'question', 'source', 'research-question');
   }
 
   const paragraphs = extractSubstantiveParagraphs(issueMeta.contentBody)
@@ -601,15 +607,21 @@ function buildDevelopmentMaterial(recommendation, issueMeta, claims) {
     if (items.filter((item) => item.role !== 'caution').length >= 7) break;
   }
 
+  const boundedItems = items.slice(0, recommendation.uncertaintyOrReviewFlag ? 7 : 8);
   if (recommendation.uncertaintyOrReviewFlag) {
-    add(
-      recommendation.uncertaintyOrReviewFlag,
-      'caution',
-      'reviewed-recommendation',
-      'editorial-caution',
+    const caution = {
+      content: recommendation.uncertaintyOrReviewFlag.trim(),
+      role: 'caution',
+      evidencePosture: 'editorial-caution',
+      provenance: 'reviewed-recommendation',
+    };
+    const existingIndex = boundedItems.findIndex(
+      (item) => item.content === caution.content,
     );
+    if (existingIndex >= 0) boundedItems[existingIndex] = caution;
+    else boundedItems.push(caution);
   }
-  return items.slice(0, 8);
+  return boundedItems;
 }
 
 function hasDraftableDevelopmentMaterial(material, artifactType) {
@@ -875,13 +887,21 @@ function deriveCentralTension(claims, recommendation, sufficiency) {
   return recommendation.rationale || '';
 }
 
-function deriveReaderQuestion(issueMeta, recommendation, draftReadiness, claims, developmentMaterial) {
-  if (draftReadiness === 'combine-first') {
-    return `How should material from issue #${issueMeta.number} support an existing cluster without becoming a standalone artifact?`;
-  }
-  if (draftReadiness === 'research-required') {
-    return 'What must be verified before this signal can support a field report or larger artifact?';
-  }
+function deriveReaderQuestion(
+  issueMeta,
+  recommendation,
+  draftReadiness,
+  claims,
+  developmentMaterial,
+  approvedArtifactType,
+) {
+  const authoritative = deriveAuthoritativeNarrative({
+    issueNumber: issueMeta.number,
+    artifactType: approvedArtifactType,
+    disposition: recommendation.disposition,
+    draftReadiness,
+  });
+  if (authoritative.readerQuestion) return authoritative.readerQuestion;
   const candidates = [
     ...(claims.unresolvedQuestions ?? []),
     ...(developmentMaterial ?? [])
@@ -1151,35 +1171,12 @@ function buildRecommendedStructure(
   claims,
   approvedArtifactType,
 ) {
-  if (draftReadiness === 'combine-first') {
-    return [
-      'Preserve source issue examples and framing as supporting material',
-      'Do not open a standalone article outline',
-      recommendation.nextAction,
-    ];
-  }
-  if (draftReadiness === 'research-required') {
-    return [
-      'Maintain as seed until primary sources are verified',
-      'Separate verified observations from inference after source review',
-    ];
-  }
-  if (approvedArtifactType === 'prototype-note') {
-    return [
-      'The design problem',
-      'The interaction choice',
-      'How the control surface is grouped',
-      'Why it matters',
-      'Current state',
-      'Remaining questions',
-    ];
-  }
-  return [
-    'Observation',
-    'Working model',
-    'Open questions',
-    'Explicit uncertainty boundaries',
-  ].filter(Boolean);
+  return deriveAuthoritativeNarrative({
+    issueNumber: recommendation.issueNumber,
+    artifactType: approvedArtifactType,
+    disposition: recommendation.disposition,
+    draftReadiness,
+  }).recommendedStructure;
 }
 
 function buildCombinationPlan(
@@ -1332,6 +1329,7 @@ function buildPacket({
     draftReadiness,
     claims,
     developmentMaterial,
+    approvedArtifactType,
   );
 
   const packet = {
@@ -1426,7 +1424,7 @@ function buildPacket({
   return packet;
 }
 
-function validatePacket(packet) {
+function validatePacket(packet, recommendation) {
   const required = [
     'contractVersion',
     'issueReference',
@@ -1517,6 +1515,7 @@ function validatePacket(packet) {
       );
     }
   }
+  validateLoop2Consistency(packet, recommendation);
 }
 
 function buildSummaryMarkdown(packet) {
@@ -1636,7 +1635,7 @@ async function main() {
     targetIssue = await findIssueInCache(intakeCachePath, targetRef.number);
   }
 
-  const sourceSufficiency = assessSourceSufficiency({
+  const assessedSourceSufficiency = assessSourceSufficiency({
     issueMeta,
     recommendation,
     claims,
@@ -1647,7 +1646,12 @@ async function main() {
   });
   const draftReadiness = determineDraftReadiness(
     recommendation,
-    sourceSufficiency,
+    assessedSourceSufficiency,
+  );
+  const sourceSufficiency = reconcileSourceSufficiency(
+    assessedSourceSufficiency,
+    draftReadiness,
+    recommendation.disposition,
   );
 
   const queryParts = [
@@ -1711,7 +1715,7 @@ async function main() {
     developmentMaterial,
   });
 
-  validatePacket(packet);
+  validatePacket(packet, recommendation);
 
   await fs.mkdir(outDir, { recursive: true });
   const packetPath = path.join(outDir, `loop2-${packet.issueReference.number}-packet.json`);

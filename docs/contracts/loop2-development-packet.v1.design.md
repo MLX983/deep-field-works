@@ -66,7 +66,7 @@ Loop 2 does **not** always produce a draft. It may conclude that research, combi
 | `verifiedObservations` | Claims tied to verified sources or explicit issue observations |
 | `inferences` | Reasonable interpretations not yet fully evidenced |
 | `speculation` | Hypotheses explicitly marked provisional |
-| `developmentMaterial` | Approved conceptual grounding with role, evidence posture, and source/review provenance; not verified evidence |
+| `developmentMaterial` | Conceptual grounding with role, evidence posture, and source/review provenance; source assertions remain distinct from approved claims and reviewed cautions |
 | `sourceRequirements` | Sources that must be verified or obtained before drafting |
 | `evidenceGaps` | Missing proof, examples, or counterevidence |
 | `relatedMaterial` | `{ reference, role, note? }` for backlog and published pieces |
@@ -84,6 +84,23 @@ Loop 2 does **not** always produce a draft. It may conclude that research, combi
 | `combine-first` | Material should merge into an existing cluster before standalone development |
 | `insufficient-material` | Observation exists but cannot yet support even a short note |
 | `not-for-publication` | Preserve for archive/context only |
+
+### Consistency invariants
+
+- `ready` requires `sourceSufficiency.status: sufficient`.
+- `research-required` and `insufficient-material` must not serialize source
+  sufficiency as `sufficient`. A reviewed `research before development`
+  disposition reconciles otherwise sufficient conceptual material to
+  `partial` because required evidence is still missing.
+- Generic `readerQuestion` and `recommendedStructure` values derive from the
+  authoritative artifact, disposition, and readiness fields.
+- Source-authored development material uses `source-assertion`,
+  `research-question`, or `speculation`; reviewed rationale uses
+  `approved-claim`; reviewed counterpressure uses `editorial-caution`.
+- Reviewed counterpressure must remain present in both `developmentMaterial`
+  and `unresolvedQuestions`.
+- Packet generation fails before writing output when the authoritative fields
+  and derived content contradict one another.
 
 ## Explicit non-goals
 

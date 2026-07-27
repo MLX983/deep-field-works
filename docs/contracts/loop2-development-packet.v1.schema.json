@@ -79,7 +79,16 @@
             "enum": ["mechanism", "example", "distinction", "framing", "hypothesis", "question", "caution"]
           },
           "evidencePosture": {
-            "enum": ["inference", "speculation", "editorial-caution"]
+            "enum": [
+              "inference",
+              "source-assertion",
+              "approved-claim",
+              "rejected-claim",
+              "qualified-claim",
+              "research-question",
+              "speculation",
+              "editorial-caution"
+            ]
           },
           "provenance": {
             "enum": ["source", "reviewed-recommendation", "both"]

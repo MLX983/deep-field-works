@@ -1,0 +1,12 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9213,
+  "disposition": "research before development",
+  "suggestedArtifact": "field-report",
+  "primaryDomain": "Interfaces for Judgment",
+  "themeOrCluster": "supervision-interfaces",
+  "rationale": "Preserve inference governance as the prospective field-report boundary while treating external cases and capability claims as unverified.",
+  "nextAction": "Verify the healthcare case, inference method, inputs, oversight, calibration, false-positive burden, and reported outcomes before development.",
+  "uncertaintyOrReviewFlag": "Do not treat fluent output as calibrated confidence or truth; preserve the distinction among observation, inference, prediction, recommendation, and authorized action.",
+  "humanApprovalStatus": "approved"
+}

@@ -675,8 +675,17 @@ items require investigation before they can be planned.
   metadata.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
+  Loop 2 now derives generic reader questions and structures from the
+  authoritative artifact, disposition, and readiness; reconciles
+  research-required and preservation stops so they cannot serialize
+  `sourceSufficiency: sufficient`; and fails generation when artifact, domain,
+  theme, disposition/readiness, combine target, sufficiency, or derived
+  narrative contradicts the reviewed state. Issue #13–#15 regressions and
+  adversarial mutations cover the implemented consistency boundary.
 - **Desired improvement:** Make provisional classification more conservative
   about field reports, multidomain assignments, and research recommendations.
+  Canonical status is not yet represented in this packet contract, so
+  cross-field canonical validation remains outside this implementation.
 - **Reason deferred:** The independent evaluator currently prevents unsafe
   development.
 - **Dependencies or prerequisites:** Review corrected pilot classifications
@@ -762,9 +771,19 @@ items require investigation before they can be planned.
   legitimacy-specific backlog item.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
-  speculation in several tested paths.
+  speculation in several tested paths. Loop 2 now serializes source-authored
+  propositions as `source-assertion`, source questions as
+  `research-question`, reviewed rationale as `approved-claim`, and reviewed
+  counterpressure as a reserved `editorial-caution` entry that cannot be
+  displaced by packet limits. Validation fails if a source-only assertion is
+  relabeled as approved or reviewed counterpressure is dropped. Issue #15
+  proves that “Use proves availability, utility...” remains a source assertion
+  under explicit reviewed caution rather than an endorsed proposition.
 - **Desired improvement:** Investigate a clearer claim-role boundary including
-  empirical claims and normative proposals.
+  empirical claims and normative proposals. Rejected and qualified claim
+  postures are contract-compatible, but the current reviewed-recommendation
+  schema does not yet provide structured per-claim decisions; this fix does
+  not infer them heuristically from prose.
 - **Reason deferred:** Several false research blockers were already fixed, but
   the broader classification scope is not formally assessed.
 - **Dependencies or prerequisites:** Gather examples such as nutrition-label

@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
+import { validateLoop2Consistency } from './lib/loop2-consistency.mjs';
 
 const root = process.cwd();
 const fixtureRoot = path.join(root, 'scripts/fixtures/loop3');
@@ -298,8 +299,33 @@ try {
       expectedCode: 2,
       expectedReadiness: 'research-required',
     },
+    {
+      name: 'consistency-13',
+      issue: 'issue-consistency-13.md',
+      recommendation: 'recommendation-consistency-13.json',
+      issueNumber: 9213,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
+    {
+      name: 'consistency-14',
+      issue: 'issue-consistency-14.md',
+      recommendation: 'recommendation-consistency-14.json',
+      issueNumber: 9214,
+      expectedCode: 2,
+      expectedReadiness: 'insufficient-material',
+    },
+    {
+      name: 'consistency-15',
+      issue: 'issue-consistency-15.md',
+      recommendation: 'recommendation-consistency-15.json',
+      issueNumber: 9215,
+      expectedCode: 2,
+      expectedReadiness: 'research-required',
+    },
   ];
 
+  const consistencyCases = new Map();
   for (const fixture of nonPrototypeCases) {
     const recommendationPath = path.join(
       adversarialFixtureRoot,
@@ -344,6 +370,12 @@ try {
       true,
       `${fixture.name}: packet must pass Loop 2 schema: ${ajv.errorsText(validate.errors)}`,
     );
+    if (fixture.name.startsWith('consistency-')) {
+      consistencyCases.set(fixture.name, {
+        packet: casePacket,
+        recommendation: caseRecommendation,
+      });
+    }
     if (fixture.expectedReadiness === 'ready') {
       assert.equal(
         Object.hasOwn(casePacket, 'blockingCondition'),
@@ -650,6 +682,56 @@ try {
         );
       }
     }
+    if (fixture.name === 'consistency-13') {
+      assert.equal(casePacket.approvedArtifactType, 'field-report');
+      assert.equal(casePacket.sourceSufficiency.status, 'partial');
+      assert.match(casePacket.readerQuestion, /prospective field report/);
+      assert.equal(
+        casePacket.recommendedStructure.some((item) => /seed/i.test(item)),
+        false,
+      );
+      assert.ok(
+        casePacket.developmentMaterial.some((item) =>
+          /fluent output as calibrated confidence or truth/i.test(item.content)),
+      );
+    }
+    if (fixture.name === 'consistency-14') {
+      assert.equal(casePacket.approvedArtifactType, 'seed');
+      assert.equal(casePacket.sourceSufficiency.status, 'partial');
+      assert.match(casePacket.readerQuestion, /without authorizing independent development/);
+      assert.equal(Object.hasOwn(casePacket, 'combinationPlan'), false);
+      assert.ok(
+        casePacket.relatedMaterial.some((item) =>
+          item.reference === 'src/content/field-notes/context-inequality.md'),
+      );
+      assert.ok(
+        casePacket.developmentMaterial.some((item) =>
+          /AI may raise the floor or reduce some inequalities/i.test(item.content)),
+      );
+    }
+    if (fixture.name === 'consistency-15') {
+      assert.equal(casePacket.approvedArtifactType, 'note');
+      assert.equal(casePacket.sourceSufficiency.status, 'partial');
+      assert.match(casePacket.readerQuestion, /prospective note/);
+      assert.equal(
+        casePacket.recommendedStructure.some((item) => /seed|field report/i.test(item)),
+        false,
+      );
+      const disputedAssertion = casePacket.developmentMaterial.find((item) =>
+        /Use proves availability, utility/i.test(item.content));
+      assert.ok(disputedAssertion);
+      assert.equal(disputedAssertion.provenance, 'source');
+      assert.equal(disputedAssertion.evidencePosture, 'source-assertion');
+      assert.ok(
+        casePacket.developmentMaterial.some((item) =>
+          /Reject the source assertion that use proves utility/i.test(item.content)),
+      );
+      assert.ok(
+        casePacket.developmentMaterial.some((item) =>
+          /reliable use may contribute to legitimacy over time/i.test(item.content)),
+      );
+    }
+
     if (fixture.name === 'ready-note') {
       assert.equal(
         Object.hasOwn(casePacket, 'researchPlan'),
@@ -662,6 +744,89 @@ try {
     console.log(
       `PASS non-prototype-${fixture.name}: ${fixture.expectedReadiness}`,
     );
+  }
+
+  const issue13Case = consistencyCases.get('consistency-13');
+  const issue14Case = consistencyCases.get('consistency-14');
+  const issue15Case = consistencyCases.get('consistency-15');
+  const contradictoryCases = [
+    {
+      name: 'research-sufficient',
+      base: issue13Case,
+      mutate(packet) {
+        packet.sourceSufficiency.status = 'sufficient';
+      },
+    },
+    {
+      name: 'disposition-readiness',
+      base: issue13Case,
+      mutate(packet) {
+        packet.draftReadiness = 'ready';
+        packet.sourceSufficiency.status = 'sufficient';
+        delete packet.blockingCondition;
+      },
+    },
+    {
+      name: 'artifact-narrative',
+      base: issue13Case,
+      mutate(packet) {
+        packet.recommendedStructure[0] = 'Maintain as seed';
+      },
+    },
+    {
+      name: 'preservation-development',
+      base: issue14Case,
+      mutate(packet) {
+        packet.readerQuestion = 'How should this seed be developed independently?';
+      },
+    },
+    {
+      name: 'combine-without-reviewed-target',
+      base: issue14Case,
+      mutate(packet) {
+        packet.combinationPlan = {
+          targetReference: '#99',
+          targetTitle: 'Unauthorized target',
+          materialToCarryForward: ['Source material'],
+          doNotStandalone: true,
+        };
+      },
+    },
+    {
+      name: 'source-assertion-approved',
+      base: issue15Case,
+      mutate(packet) {
+        const disputed = packet.developmentMaterial.find((item) =>
+          /Use proves availability, utility/i.test(item.content));
+        disputed.evidencePosture = 'approved-claim';
+      },
+    },
+    {
+      name: 'counterpressure-dropped',
+      base: issue15Case,
+      mutate(packet) {
+        packet.developmentMaterial = packet.developmentMaterial.filter(
+          (item) =>
+            item.content !==
+            issue15Case.recommendation.uncertaintyOrReviewFlag,
+        );
+      },
+    },
+  ];
+
+  for (const fixture of contradictoryCases) {
+    const contradictoryPacket = structuredClone(fixture.base.packet);
+    fixture.mutate(contradictoryPacket);
+    assert.throws(
+      () =>
+        validateLoop2Consistency(
+          contradictoryPacket,
+          fixture.base.recommendation,
+        ),
+      /Loop 2 consistency validation failed/,
+      fixture.name,
+    );
+    console.log(`PASS contradiction-${fixture.name}: validation failed closed`);
   }
 
   const evidencePostureOut = path.join(tempRoot, 'evidence-posture');

@@ -1,0 +1,18 @@
+{
+  "contractVersion": "loop1-reviewed-recommendation.v1",
+  "issueNumber": 9214,
+  "disposition": "preserve as seed",
+  "suggestedArtifact": "seed",
+  "primaryDomain": "Cognitive Infrastructure",
+  "themeOrCluster": "context-inequality-and-judgment-legibility",
+  "rationale": "Preserve the intake as provenance because the bounded public argument already exists in the local context inequality derivative.",
+  "relatedMaterial": [
+    {
+      "reference": "src/content/field-notes/context-inequality.md",
+      "note": "Existing local derivative and substantive home; related material, not a combine target."
+    }
+  ],
+  "nextAction": "Preserve the source and its relationship to the existing local derivative without independent development.",
+  "uncertaintyOrReviewFlag": "Preserve the counterpressure that AI may raise the floor or reduce some inequalities; do not canonicalize the proposed social strata.",
+  "humanApprovalStatus": "approved"
+}
