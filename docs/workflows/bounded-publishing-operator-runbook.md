@@ -70,6 +70,12 @@ codex --version
 export CODEX_BIN=/absolute/path/to/codex
 ```
 
+`npm` inherits the environment of the shell that invokes it. Both `gh` and
+`codex` must be discoverable in that inherited `PATH` (unless `CODEX_BIN`
+names the Codex executable explicitly). Do not replace `PATH` with an
+incomplete value for a processor run; first confirm the exact shell can run
+both `gh --version` and `codex --version`.
+
 No processor-specific environment variable is required. A real notification
 send requires the Resend variables documented in section 5.
 
@@ -146,6 +152,11 @@ The command prints:
 
 - a batch plan to stderr;
 - JSON to stdout containing `runId`, `manifestPath`, `summaryPath`, and counts.
+
+Exit code `2` means at least one selected issue ended in a durably recorded
+`failed-retriable` or `failed-terminal` state. The batch command did not
+succeed, but the per-issue registry, workspace, logs, and failure details may
+have been written successfully. Inspect them before retrying.
 
 The durable registry is:
 
@@ -365,6 +376,8 @@ ledger to force another send.
 
 The standalone Loop 1 notification is not recorded in the processor registry.
 Confirm notification status from the command result and this ledger.
+Processor `notificationStatus` therefore remains unchanged by standalone
+preview or delivery; this separation is intentional.
 
 ## 6. Approve and continue to Loop 2
 
@@ -435,7 +448,10 @@ npm run backlog:process -- \
 ```
 
 `--stop-after-loop2` is mandatory for the workflow governed by this runbook.
-Do not omit it.
+Do not omit it. The `nextCommand` generated in `review-packet.json`, and the
+same instruction rendered by the standalone notification, must contain this
+flag exactly once. Replace only the private review-envelope placeholder before
+running the command.
 
 The processor:
 
@@ -611,7 +627,8 @@ mandatory between Loop 1 and Loop 2. Loop 2 stops without publication.
 | --- | --- |
 | Wrong issue selected | Use `--issue-number N` and `--limit 1` |
 | GitHub discovery fails | Run `gh auth status`; confirm `--repo MLX983/dfw-intake` |
-| Loop 1 cannot start Codex | Check Codex login, network, executable, and optional `CODEX_BIN` |
+| Loop 1 cannot start Codex | Confirm the invoking shell's inherited `PATH` finds `codex`, do not replace `PATH` incompletely, and check optional `CODEX_BIN` |
+| Batch exits `2` | Inspect the batch result and durable per-issue failure in `registry.v2.json`; correct it before a targeted retry |
 | No matching review record | Use the original `--state-dir`; verify issue number and open-issue source |
 | `review-envelope-invalid` | Compare every binding, use envelope v2, and use the current resume commit |
 | Loop 1 fingerprint mismatch | Do not edit the Loop 1 result; use the bound artifact or reprocess explicitly |

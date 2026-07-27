@@ -75,7 +75,42 @@ await check('dry run previews bounded Loop 1 review fields', async () => {
   assert.equal(result.plan.summary.confidence, 'medium');
   assert.match(result.content.text, /Repository commit: 2222/);
   assert.match(result.content.text, /Review packet:/);
+  assert.equal(
+    result.content.text.match(/--stop-after-loop2/g)?.length,
+    1,
+  );
+  assert.match(
+    result.content.text,
+    /--reviewed-recommendation '\/absolute\/private\/path\/to\/review-envelope\.json' --stop-after-loop2/,
+  );
   await assert.rejects(fs.access(ledgerPath));
+});
+
+await check('subject removes only the exact leading intake transport prefix', async () => {
+  const exact = await writeFixture('subject-exact', {
+    packetUpdate: { issueTitle: '[DFW Intake] Synthetic subject' },
+  });
+  const exactResult = await notifyLoop1Review({
+    reviewPacketPath: exact.packetPath,
+    ledgerPath: path.join(base, 'subject-exact-ledger.json'),
+  });
+  assert.equal(
+    exactResult.plan.subject,
+    '[Deep Field Works] Loop 1 review needed — #9902 Synthetic subject',
+  );
+  assert.match(exactResult.content.text, /Issue #9902: \[DFW Intake\] Synthetic subject/);
+
+  const nearMatch = await writeFixture('subject-near-match', {
+    packetUpdate: { issueTitle: '[DFW intake] Synthetic subject' },
+  });
+  const nearResult = await notifyLoop1Review({
+    reviewPacketPath: nearMatch.packetPath,
+    ledgerPath: path.join(base, 'subject-near-match-ledger.json'),
+  });
+  assert.equal(
+    nearResult.plan.subject,
+    '[Deep Field Works] Loop 1 review needed — #9902 [DFW intake] Synthetic subject',
+  );
 });
 
 await check('email excludes source body and non-summary sections', async () => {
@@ -278,6 +313,30 @@ await check('malformed packet and malformed ledger are rejected', async () => {
     /Malformed Loop 1 notification ledger/,
   );
   assert.equal(await fs.readFile(ledgerPath, 'utf8'), original);
+});
+
+await check('unbounded or duplicated Loop 2 review instructions are rejected', async () => {
+  for (const [name, nextCommand] of [
+    [
+      'missing-stop',
+      'npm run backlog:process -- --reviewed-recommendation /private/review.json',
+    ],
+    [
+      'duplicate-stop',
+      'npm run backlog:process -- --reviewed-recommendation /private/review.json --stop-after-loop2 --stop-after-loop2',
+    ],
+  ]) {
+    const fixture = await writeFixture(name, {
+      packetUpdate: { nextCommand },
+    });
+    await assert.rejects(
+      notifyLoop1Review({
+        reviewPacketPath: fixture.packetPath,
+        ledgerPath: path.join(base, `${name}-ledger.json`),
+      }),
+      /exactly one --stop-after-loop2/,
+    );
+  }
 });
 
 await check('missing provider configuration fails before send', async () => {

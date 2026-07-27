@@ -17,6 +17,7 @@ import {
   StageError,
   acquireIssueClaim,
   atomicWriteJson,
+  defaultRunLoop1,
   processBacklog,
 } from "./lib/backlog-processor.mjs";
 
@@ -255,6 +256,22 @@ test("05 review packet binds source, workspace, commit, and Loop 1 artifact", as
   assert.equal(packet.workspacePath, record.workspacePath);
   assert.equal(packet.sourceProcessingCommitSha, COMMIT);
   assert.equal(packet.loop1ResultSha256, record.loop1ResultSha256);
+  assert.match(packet.nextCommand, /^npm run backlog:process -- --execute /);
+  assert.match(packet.nextCommand, /--repo 'MLX983\/dfw-intake'/);
+  assert.match(packet.nextCommand, /--repo-path '.+'/);
+  assert.match(packet.nextCommand, /--limit 1/);
+  assert.match(packet.nextCommand, /--issue-number 1/);
+  assert.match(packet.nextCommand, new RegExp(`--state-dir '${setup.value.stateDir}'`));
+  assert.match(packet.nextCommand, new RegExp(`--work-root '${setup.value.workRoot}'`));
+  assert.match(
+    packet.nextCommand,
+    /--reviewed-recommendation '\/absolute\/private\/path\/to\/review-envelope\.json'/,
+  );
+  assert.equal(
+    packet.nextCommand.match(/--stop-after-loop2/g)?.length,
+    1,
+  );
+  assert.match(packet.nextCommand, /--stop-after-loop2$/);
 });
 
 test("06 valid approval resumes at Loop 2 without rerunning Loop 1", async () => {
@@ -653,6 +670,28 @@ test("32 per-issue failure does not stop later issues", async () => {
     result.batch.results[1].processingStatus,
     "awaiting-loop1-review",
   );
+});
+
+test("32b missing Codex executable is durably diagnosed and remains retriable", async () => {
+  const setup = options("missing-codex", [issue(1)]);
+  const originalCodexBin = process.env.CODEX_BIN;
+  const missingCodexBin = join(setup.directory, "codex-does-not-exist");
+  process.env.CODEX_BIN = missingCodexBin;
+  try {
+    const result = await firstPass(
+      setup,
+      mockDeps({ runLoop1: defaultRunLoop1 }),
+    );
+    const failed = result.batch.results[0];
+    assert.equal(failed.processingStatus, "failed-retriable");
+    assert.equal(failed.failureCategory, "loop1-failed");
+    assert.match(failed.failureMessage, /Codex executable not found/);
+    assert.match(failed.failureMessage, /ENOENT/);
+    assert.match(failed.failureMessage, new RegExp(missingCodexBin));
+  } finally {
+    if (originalCodexBin === undefined) delete process.env.CODEX_BIN;
+    else process.env.CODEX_BIN = originalCodexBin;
+  }
 });
 
 test("33 global registry invariant failure stops the batch", async () => {

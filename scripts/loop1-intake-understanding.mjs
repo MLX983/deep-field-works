@@ -810,9 +810,10 @@ function callModel(kind, payload) {
   const tempDir = mkdtempSync(path.join(os.tmpdir(), 'dfw-loop1-'));
   const outPath = path.join(tempDir, 'last-message.txt');
   const prompt = modelPrompt(kind, payload);
+  const executable = codexBin();
 
   const result = spawnSync(
-    codexBin(),
+    executable,
     [
       'exec',
       '--cd',
@@ -841,11 +842,41 @@ function callModel(kind, payload) {
     );
   }
 
+  if (result.error) {
+    const code = result.error.code || 'UNKNOWN';
+    const error =
+      code === 'ENOENT'
+        ? new Error(
+            `Codex executable not found for ${kind}: ${executable} (${code}). Set CODEX_BIN to a valid executable or ensure codex is discoverable in the inherited PATH.`,
+          )
+        : new Error(
+            `Could not launch Codex executable for ${kind}: ${executable} (${code}). ${result.error.message}`,
+          );
+    error.code = code;
+    error.executable = executable;
+    error.category = code === 'ENOENT' ? 'executable-not-found' : 'spawn';
+    error.cause = result.error;
+    throw error;
+  }
+
   if (result.status !== 0 || !lastMessage) {
     const detail = [result.stderr, result.stdout].filter(Boolean).join('\n').slice(-4000);
-    throw new Error(
-      `Model call failed for ${kind}. Ensure Codex CLI is logged in and has network access.\n${detail}`,
+    const normalized = detail.toLowerCase();
+    const category =
+      /\b(unauthenticated|unauthorized|authentication|login|log in|401)\b/.test(normalized)
+        ? 'authentication'
+        : /\b(econn|enotfound|dns|network|socket|timed? ?out|connection)\b/.test(normalized)
+          ? 'network'
+          : /\b(provider|rate.?limit|429|service unavailable|502|503|504)\b/.test(normalized)
+            ? 'provider'
+            : 'model';
+    const error = new Error(
+      `Codex ${category} failure for ${kind}; executable ${executable} exited ${result.status ?? 'without a status'}${lastMessage ? '' : ' without a final response'}.\n${detail}`,
     );
+    error.category = category;
+    error.executable = executable;
+    error.exitCode = result.status;
+    throw error;
   }
 
   return lastMessage;
@@ -1171,6 +1202,7 @@ async function main() {
 export {
   activeQueryFields,
   buildCandidate,
+  callModel,
   likelyDuplicateOrSelfSource,
   parseIssue,
   rankCandidates,

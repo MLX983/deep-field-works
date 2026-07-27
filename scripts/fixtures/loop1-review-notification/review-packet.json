@@ -9,5 +9,5 @@
   "loop1ResultPath": "scripts/fixtures/loop1-review-notification/loop1-result.md",
   "loop1ResultSha256": "dd33d08f370b7a1f7d3304a2ea7d184e09a6a1d63b26049ed834fc37cfc71ecc",
   "approvalRequired": true,
-  "nextCommand": "Create a matching backlog-loop1-review-envelope.v2, then rerun backlog:process explicitly with --reviewed-recommendation and --stop-after-loop2."
+  "nextCommand": "npm run backlog:process -- --execute --repo 'MLX983/dfw-intake' --repo-path '/absolute/path/to/deep-field-works' --limit 1 --issue-number 9902 --state-dir '/absolute/private/path/dfw-backlog-state' --work-root '/absolute/private/path/dfw-backlog-work' --reviewed-recommendation '/absolute/private/path/to/review-envelope.json' --stop-after-loop2"
 }

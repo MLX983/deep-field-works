@@ -639,7 +639,7 @@ function spawnLogged({
   return run;
 }
 
-function defaultRunLoop1(context) {
+export function defaultRunLoop1(context) {
   ensureDir(context.loop1Dir);
   const resultPath = join(
     context.loop1Dir,
@@ -665,7 +665,15 @@ function defaultRunLoop1(context) {
     executionPath: join(context.loop1Dir, "execution.json"),
   });
   if (run.status !== 0) {
-    throw new StageError("loop1-failed", `Loop 1 exited ${run.status}.`, true);
+    const diagnostic = String(run.stderr || "")
+      .trim()
+      .split("\n")
+      .find(Boolean);
+    throw new StageError(
+      "loop1-failed",
+      `Loop 1 exited ${run.status}.${diagnostic ? ` ${diagnostic}` : ""}`,
+      true,
+    );
   }
   return { resultPath };
 }
@@ -872,6 +880,25 @@ function validateCompletedReviewReplay(envelope, context) {
   return recommendation;
 }
 
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", "'\\''")}'`;
+}
+
+function boundedLoop2Command(context) {
+  return [
+    "npm run backlog:process --",
+    "--execute",
+    `--repo ${shellQuote(context.options.sourceRepository)}`,
+    `--repo-path ${shellQuote(resolve(context.options.repoPath))}`,
+    "--limit 1",
+    `--issue-number ${context.issue.number}`,
+    `--state-dir ${shellQuote(context.stateDir)}`,
+    `--work-root ${shellQuote(context.workRoot)}`,
+    `--reviewed-recommendation ${shellQuote("/absolute/private/path/to/review-envelope.json")}`,
+    "--stop-after-loop2",
+  ].join(" ");
+}
+
 function writeReviewPacket(context, resultPath) {
   const packetPath = join(context.loop1Dir, "review-packet.json");
   const packet = {
@@ -885,8 +912,7 @@ function writeReviewPacket(context, resultPath) {
     loop1ResultPath: resultPath,
     loop1ResultSha256: sha256(readFileSync(resultPath)),
     approvalRequired: true,
-    nextCommand:
-      "Rerun backlog:process with --reviewed-recommendation pointing to a matching backlog-loop1-review-envelope.v2 file.",
+    nextCommand: boundedLoop2Command(context),
   };
   atomicWriteJson(packetPath, packet);
   return { packetPath, packet };
@@ -1445,6 +1471,7 @@ export async function processBacklog(options, deps = {}) {
             deps,
             registry,
             stateDir,
+            workRoot,
             timestamp,
             runId,
             processingCommitSha,

@@ -47,6 +47,10 @@ function bounded(value, length = 500) {
   return text.length <= length ? text : `${text.slice(0, length - 1)}…`;
 }
 
+function notificationSubjectTitle(value) {
+  return String(value).replace(/^\[DFW Intake\]\s*/, '');
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -88,6 +92,19 @@ export function validateReviewPacket(packet) {
   }
   if (packet.approvalRequired !== true) {
     throw new Error('Malformed Loop 1 review packet: approvalRequired must be true.');
+  }
+  if (packet.nextCommand.length > 4096) {
+    throw new Error('Malformed Loop 1 review packet: nextCommand exceeds 4096 characters.');
+  }
+  const stopAfterLoop2Flags =
+    packet.nextCommand.match(/(?:^|\s)--stop-after-loop2(?=\s|$)/g) ?? [];
+  if (
+    !/(?:^|\s)--reviewed-recommendation(?=\s|$)/.test(packet.nextCommand) ||
+    stopAfterLoop2Flags.length !== 1
+  ) {
+    throw new Error(
+      'Malformed Loop 1 review packet: nextCommand must contain --reviewed-recommendation and exactly one --stop-after-loop2.',
+    );
   }
   return packet;
 }
@@ -149,7 +166,7 @@ function identityInput(packet, summary) {
     sourceContentSha256: packet.sourceContentSha256,
     sourceProcessingCommitSha: packet.sourceProcessingCommitSha,
     loop1ResultSha256: packet.loop1ResultSha256,
-    nextCommand: bounded(packet.nextCommand, 800),
+    nextCommand: packet.nextCommand.trim(),
     summary,
   };
 }
@@ -169,7 +186,7 @@ export function buildNotificationPlan({
 }) {
   const key = notificationKey(packet, summary);
   const issueLine = `Issue #${packet.issueNumber}: ${bounded(packet.issueTitle, 180)}`;
-  const reviewInstruction = bounded(packet.nextCommand, 800);
+  const reviewInstruction = packet.nextCommand.trim();
   const text = [
     'Deep Field Works Loop 1 review is required.',
     '',
@@ -229,7 +246,7 @@ export function buildNotificationPlan({
     from,
     to,
     recipientRepresentation: to ? `sha256:${sha256(to.trim().toLowerCase())}` : 'not-configured',
-    subject: `[Deep Field Works] Loop 1 review needed — #${packet.issueNumber} ${bounded(packet.issueTitle, 120)}`,
+    subject: `[Deep Field Works] Loop 1 review needed — #${packet.issueNumber} ${bounded(notificationSubjectTitle(packet.issueTitle), 120)}`,
     text,
     html,
   };

@@ -6,6 +6,7 @@ import path from 'node:path';
 import {
   activeQueryFields,
   buildCandidate,
+  callModel,
   likelyDuplicateOrSelfSource,
   parseIssue,
   rankCandidates,
@@ -29,6 +30,31 @@ const proposal = {
   theme: 'agent evaluation',
   recommendedAction: 'develop as note',
 };
+
+const originalCodexBin = process.env.CODEX_BIN;
+const missingCodexBin = path.join(
+  '/tmp',
+  'dfw-fixture-executable-that-does-not-exist',
+);
+process.env.CODEX_BIN = missingCodexBin;
+try {
+  assert.throws(
+    () => callModel('proposal', { issueSummary }),
+    (error) => {
+      assert.equal(error.code, 'ENOENT');
+      assert.equal(error.executable, missingCodexBin);
+      assert.equal(error.category, 'executable-not-found');
+      assert.match(error.message, /Codex executable not found/);
+      assert.match(error.message, /ENOENT/);
+      assert.match(error.message, /inherited PATH/);
+      assert.equal(error.message.includes('logged in and has network access'), false);
+      return true;
+    },
+  );
+} finally {
+  if (originalCodexBin === undefined) delete process.env.CODEX_BIN;
+  else process.env.CODEX_BIN = originalCodexBin;
+}
 
 const candidateFiles = [
   'issue-body-match.md',
@@ -399,6 +425,7 @@ console.log('PASS cached-representation: one semantic title and one substantive 
 console.log('PASS active-query-representation: exact title and body overlap contributes once');
 console.log('PASS generic-resistance: cache-envelope repetition contributes zero');
 console.log('PASS existing-behavior: duplicate detection, deterministic top five, evaluator shape');
+console.log('PASS subprocess-diagnostics: missing Codex executable preserves ENOENT and executable');
 console.log(
   `SCORES ${JSON.stringify({
     bodyMatch: bodyMatchScore,
