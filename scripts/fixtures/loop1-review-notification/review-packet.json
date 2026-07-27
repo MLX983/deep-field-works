@@ -1,0 +1,13 @@
+{
+  "contractVersion": "backlog-loop1-review-packet.v2",
+  "createdAt": "2026-07-27T18:00:00.000Z",
+  "issueNumber": 9902,
+  "issueTitle": "Synthetic Loop 1 notification fixture",
+  "sourceContentSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "sourceProcessingCommitSha": "2222222222222222222222222222222222222222",
+  "workspacePath": "/tmp/dfw-loop1-review-synthetic",
+  "loop1ResultPath": "scripts/fixtures/loop1-review-notification/loop1-result.md",
+  "loop1ResultSha256": "dd33d08f370b7a1f7d3304a2ea7d184e09a6a1d63b26049ed834fc37cfc71ecc",
+  "approvalRequired": true,
+  "nextCommand": "Create a matching backlog-loop1-review-envelope.v2, then rerun backlog:process explicitly with --reviewed-recommendation and --stop-after-loop2."
+}

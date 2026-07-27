@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepfieldworks.com/contracts/dfw-loop1-review-notification-ledger.v1.schema.json",
+  "title": "dfw-loop1-review-notification-ledger.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "attempts", "deliveries"],
+  "properties": {
+    "contractVersion": { "const": "dfw-loop1-review-notification-ledger.v1" },
+    "attempts": { "type": "array", "items": { "type": "object" } },
+    "deliveries": { "type": "array", "items": { "type": "object" } }
+  }
+}

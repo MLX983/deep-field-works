@@ -1,5 +1,12 @@
 # Bounded backlog processor
 
+> **Current operator reference:** Use
+> `docs/workflows/bounded-publishing-operator-runbook.md` for the bounded
+> Loop 1 → human review → explicit approval → Loop 2 → stop workflow. The
+> runbook requires `--stop-after-loop2` and uses the separately invoked Loop 1
+> review notifier. This implementation reference also documents broader
+> processor paths; their presence is not operator authorization.
+
 The backlog processor is a manually invoked operational wrapper around the
 existing Deep Field Works publishing pipeline. It discovers open issues,
 selects at most an explicit limit, isolates work by issue and run, records

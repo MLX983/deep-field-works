@@ -24,6 +24,11 @@ Use `article-templates.md` to draft the artifact.
 
 Use `editorial-guidelines.md` and `voice-and-style.md` before publication.
 
+For manual operation of the current bounded processor workflow, use
+`docs/workflows/bounded-publishing-operator-runbook.md`. That runbook is the
+canonical command and recovery reference for the implemented
+Loop 1 → human review → explicit approval → Loop 2 → stop boundary.
+
 ---
 
 # Core philosophy
