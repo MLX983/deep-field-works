@@ -76,7 +76,8 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
-  operation, issues #3, #4, #5, #7, #8, #9, #10, #11, #12, #13, and #14
+  operation, issues #3, #4, #5, #7, #8, #9, #10, #11, #12, #13, #14, and
+  #15
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -121,7 +122,12 @@ items require investigation before they can be planned.
   Cognitive Infrastructure under the existing
   `context-inequality-and-judgment-legibility` theme, while the existing local
   derivative remains the substantive home and no social-strata taxonomy,
-  ladder, or second artifact is authorized.
+  ladder, or second artifact is authorized. For issue #15, canonical review
+  preserved `note` as a prospective form while research blocks development,
+  selected one Institutions in Transition domain and the existing
+  `organizational-redesign` theme, and rejected the provisional second domain,
+  ad hoc `AI legitimacy` theme, and any legitimacy framework, glossary,
+  taxonomy, schema field, or policy.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -135,7 +141,7 @@ items require investigation before they can be planned.
   constraints, does not invent a type or domain, and still stops for human
   approval.
 - **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, #9,
-  #10, #11, #12, #13, and #14;
+  #10, #11, #12, #13, #14, and #15;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -146,7 +152,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** real-backlog pilots, issues #3, #4, #8, #9, #10,
-  #11, #12, #13, #14, #16, and #28
+  #11, #12, #13, #14, #15, #16, and #28
 - **Problem or observation:** Loosely related material sometimes outranked a
   more useful cluster anchor. For issue #28, `context-inequality.md` ranked
   above “Storage Is Not Memory.” For issue #3, retrieval surfaced thematic
@@ -193,7 +199,13 @@ items require investigation before they can be planned.
   as an explicit workflow relationship and could not see the approved
   downstream boundaries of adjacent issues. Human review was still required
   to distinguish an existing derivative home from a combine target and to
-  avoid duplicate development.
+  avoid duplicate development. For issue #15, retrieval found useful
+  product-control context but missed the more specific legitimacy objects in
+  issue #23's employee-data collection, issue #5's institutional sign-off,
+  and issue #19's identity-versus-authorization distinction. It also could not
+  see the approved issue #10 and #13 boundaries or distinguish their reviewed
+  roles from raw intake. Metadata-heavy issue #14 and issue #21 adjacency
+  outranked several of those stronger contexts.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -207,8 +219,8 @@ items require investigation before they can be planned.
   adjacency without reducing direct-duplicate recall.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
-  issue #8, issue #9, issue #10, issue #11, issue #12, issue #13, and issue #14 Loop 1
-  traces and review packets;
+  issue #8, issue #9, issue #10, issue #11, issue #12, issue #13, issue #14,
+  and issue #15 Loop 1 traces and review packets;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
@@ -394,7 +406,16 @@ items require investigation before they can be planned.
   cached self-source using intake-wrapper identifiers, sender, timestamps,
   email, URL, and generic AI, context, work, and model terminology; human
   review separated those terms from the substantive relationship to
-  `context-inequality.md`.
+  `context-inequality.md`. Issue #15 added a malformed-title boundary. The
+  durable GitHub title and source metadata remain `AI u is not legitimacy`,
+  while the complete body establishes `Use Is Not Legitimacy` as working
+  editorial language. Human review preserved both facts without silently
+  normalizing the source, inferring another meaning for `u`, or turning one
+  malformed title into a processor rule. Its self-source and weak issue #14
+  and issue #21 matches were again inflated by email identifiers, sender,
+  timestamps, URLs, intake wrappers, and generic terms. Loop 2 also serialized
+  the transport header as inferential `developmentMaterial`, demonstrating
+  that metadata exclusion still needs inspection at the reviewed boundary.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -411,7 +432,7 @@ items require investigation before they can be planned.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, #13, and #28 pilot artifacts; issue #6 Loop 1
   trace and complete source artifact; issue #7, issue #8, issue #9, issue #10,
-  issue #11, issue #12, issue #13, and issue #14 Loop 1 traces
+  issue #11, issue #12, issue #13, issue #14, and issue #15 Loop 1 traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -581,8 +602,8 @@ items require investigation before they can be planned.
 - **Category:** workflow, editorial quality
 - **Status:** proposed
 - **Priority:** medium
-- **Discovered during:** issue #5, #6, #8, #9, #10, #11, #12, #13, #14, and #28
-  pilots
+- **Discovered during:** issue #5, #6, #8, #9, #10, #11, #12, #13, #14,
+  #15, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -639,7 +660,19 @@ items require investigation before they can be planned.
   the existing theme, and no independent development. Loop 2's authoritative
   fields and generic narrative did not contradict that reviewed disposition,
   although its generic content-shaped structure was unnecessary for a
-  preservation-only stop.
+  preservation-only stop. Issue #15's provisional stage assigned two primary
+  domains and an ad hoc `AI legitimacy` theme. The evaluator kept seed as
+  present maturity but proposed a field report; human review instead preserved
+  `note` as the prospective bounded form, one Institutions in Transition
+  domain, the existing `organizational-redesign` theme, and a research stop.
+  Loop 2 retained those authoritative artifact, domain, theme, readiness, and
+  no-combine fields, but serialized `sourceSufficiency.status: sufficient`
+  instead of the approved partial posture. Its generic `readerQuestion`
+  referred to a field report, and `recommendedStructure` said “Maintain as
+  seed,” contradicting the prospective note boundary. The packet also retained
+  the malformed source title as `workingTitle`; that is correct provenance,
+  but working editorial language must remain distinguishable from source
+  metadata.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
 - **Desired improvement:** Make provisional classification more conservative
@@ -651,9 +684,9 @@ items require investigation before they can be planned.
 - **Validation criteria:** Pilot-derived fixtures produce the smallest
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
-- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #11, #12, #13, #14, and
-  #28 Loop 1 traces; issue #10, issue #11, issue #12, and issue #13 Loop 2
-  packets
+- **Relevant references:** issue #5, #6, #7, #8, #9, #10, #11, #12, #13,
+  #14, #15, and #28 Loop 1 traces; issue #10, issue #11, issue #12, issue #13,
+  and issue #15 Loop 2 packets
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -710,7 +743,23 @@ items require investigation before they can be planned.
   unsupported claims but did not explicitly carry forward the approved
   counterpressure that AI may raise the floor or reduce some inequalities,
   showing that reviewed counterevidence can be lost even when authoritative
-  disposition fields remain correct.
+  disposition fields remain correct. Issue #15 required an explicit object for
+  legitimacy and separation among use, utility, adoption, normalization,
+  acceptance, trust, credibility, capability, accuracy, reliability,
+  authority, accountability, consent, compliance, social proof, and
+  legitimacy. It also distinguished substantive human review from ceremonial
+  approval and public-opinion measures from evidence of legitimacy. Loop 2
+  safely preserved the research stop and reviewed caution, but it also carried
+  the source sentence “Use proves availability, utility...” as inferential
+  development material even though the approved review states that use proves
+  neither utility nor legitimacy. Most counterpressure survived, including
+  reliable use contributing over time, stake-dependent conditions, contested
+  legitimacy, process costs, accepted injustice, and performative anti-AI
+  signaling. The packet did not explicitly retain every approved limit,
+  including bounded institutional authorization, low-stakes consultation,
+  rejection despite transparency, and legitimacy deficits in non-AI systems.
+  This case fits the existing claim-role scope; it does not require a separate
+  legitimacy-specific backlog item.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths.
@@ -719,14 +768,15 @@ items require investigation before they can be planned.
 - **Reason deferred:** Several false research blockers were already fixed, but
   the broader classification scope is not formally assessed.
 - **Dependencies or prerequisites:** Gather examples such as nutrition-label
-  user needs, chatbot-to-harness progression, claims about ordinary users, and
-  issue #13's collected-data versus inferred-attribute boundary.
+  user needs, chatbot-to-harness progression, claims about ordinary users,
+  issue #13's collected-data versus inferred-attribute boundary, and issue
+  #15's use-versus-legitimacy and substantive-review distinctions.
 - **Validation criteria:** Fixtures route empirical claims to verification,
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
 - **Relevant references:** issue #5, issue #7, issue #8, issue #9, issue #10,
-  issue #11, issue #12, issue #13, and issue #14 Loop 1 traces; issue #13 and
-  issue #14 Loop 2 packets;
+  issue #11, issue #12, issue #13, issue #14, and issue #15 Loop 1 traces;
+  issue #13, issue #14, and issue #15 Loop 2 packets;
   commits `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
@@ -802,7 +852,13 @@ items require investigation before they can be planned.
   preserve-as-seed disposition avoided duplicate development while keeping
   the intake as provenance. Future relationship handling must make same-issue
   derivative provenance visible without treating the local derivative as an
-  independent source, combine target, or mutation destination.
+  independent source, combine target, or mutation destination. Issue #15
+  repeated the general reviewed-context gap: ordinary retrieval could not see
+  issue #10's approved governance-interface boundary or issue #13's approved
+  inference, action-authority, correction, and contestability boundary. It
+  surfaced issue #17's raw intake but not its development packet, and missed
+  issue #23's more concrete legitimacy object. Manual inspection was required
+  to preserve each relationship as context without assigning a combine target.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -828,7 +884,8 @@ items require investigation before they can be planned.
   `sourceNote` names the current issue remains related provenance, not a
   separate combine target, and does not trigger duplicate drafting.
 - **Relevant references:** issue #5, #16, and #28 combination packets;
-  issue #8, issue #9, issue #10, issue #11, issue #12, issue #13, and issue #14 Loop 1 reviews;
+  issue #8, issue #9, issue #10, issue #11, issue #12, issue #13, issue #14,
+  and issue #15 Loop 1 reviews;
   `/private/tmp/dfw-real-pilot-issue12-20260723-WMT4Ov`;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
