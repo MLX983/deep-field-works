@@ -77,7 +77,7 @@ items require investigation before they can be planned.
 - **Priority:** medium
 - **Discovered during:** governance-boundary pilot, issue #6; bounded backlog
   operation, issues #3, #4, #5, #7, #8, #9, #10, #11, #12, #13, #14, and
-  #15
+  #15; combine-first validation, issue #16
 - **Problem or observation:** Loop 1 correctly stopped a proposed new artifact
   type and collection, but its strongest retrieval results were corpus pieces
   rather than `content-schema.md` or `domain-structure.md`. For issue #3,
@@ -127,7 +127,12 @@ items require investigation before they can be planned.
   selected one Institutions in Transition domain and the existing
   `organizational-redesign` theme, and rejected the provisional second domain,
   ad hoc `AI legitimacy` theme, and any legitimacy framework, glossary,
-  taxonomy, schema field, or policy.
+  taxonomy, schema field, or policy. For issue #16, canonical review corrected
+  a provisional note with two domains and an ad hoc disclosure theme to a
+  supporting seed in Interfaces for Judgment under the existing
+  `supervision-interfaces` theme. It also established issue #17 as the one
+  GitHub combine target without authorizing a standalone artifact, standard,
+  schema, taxonomy, or mutation of related local files.
 - **Current safeguard:** The evaluator recognizes structural language and
   escalates taxonomy changes for human judgment. Repository instructions also
   require source-of-truth review before structural changes.
@@ -141,7 +146,7 @@ items require investigation before they can be planned.
   constraints, does not invent a type or domain, and still stops for human
   approval.
 - **Relevant references:** dfw-intake issues #3, #4, #5, #6, #7, #8, #9,
-  #10, #11, #12, #13, #14, and #15;
+  #10, #11, #12, #13, #14, #15, and #16;
   `docs/source-of-truth/content-strategy.md`;
   `docs/source-of-truth/content-schema.md`;
   `docs/source-of-truth/domain-structure.md`; `src/pages/index.astro`
@@ -205,7 +210,12 @@ items require investigation before they can be planned.
   and issue #19's identity-versus-authorization distinction. It also could not
   see the approved issue #10 and #13 boundaries or distinguish their reviewed
   roles from raw intake. Metadata-heavy issue #14 and issue #21 adjacency
-  outranked several of those stronger contexts.
+  outranked several of those stronger contexts. For issue #16, retrieval found
+  raw issue #17 and `my-ai-rules.md`, but missed issue #17's approved
+  recommendation, development packet, and prototype-note contract as a
+  complete downstream relationship. It also missed the approved issue
+  #10–#15 boundaries needed to separate disclosure, control, verification,
+  inference, and legitimacy.
 - **Current safeguard:** The evaluator reviews the ranked set rather than
   accepting rank order as editorial authority.
 - **Desired improvement:** Improve ranking quality when a known cluster anchor
@@ -220,7 +230,7 @@ items require investigation before they can be planned.
 - **Relevant references:** issue #3 Loop 1 trace; issue #4 Loop 1 trace;
   issue #28 Loop 1 trace; issue #6 Loop 1 trace; issue #7 Loop 1 trace;
   issue #8, issue #9, issue #10, issue #11, issue #12, issue #13, issue #14,
-  and issue #15 Loop 1 traces and review packets;
+  issue #15, and issue #16 Loop 1 traces and review packets;
   `docs/development/issue-10-essay-development-packet.json`;
   `docs/development/issue-10-essay-contract.md`;
   “Skills half-life”; “Context inequality”; “Storage Is Not Memory”;
@@ -416,6 +426,15 @@ items require investigation before they can be planned.
   timestamps, URLs, intake wrappers, and generic terms. Loop 2 also serialized
   the transport header as inferential `developmentMaterial`, demonstrating
   that metadata exclusion still needs inspection at the reviewed boundary.
+  Issue #16 repeated self-source dominance through the intake wrapper,
+  timestamp, UUID, sender, recipient, URL, and generic AI terminology, while
+  the memorable “nutrition label” metaphor biased the initial artifact and
+  theme framing. Its hardened Loop 2 `developmentMaterial` correctly labeled
+  substantive source excerpts as `source-assertion`, but the separate
+  `combinationPlan.materialToCarryForward` still retained raw transport
+  metadata as untyped carry-forward material. The human-reviewed boundary
+  therefore remains necessary even when the authoritative packet fields are
+  consistent.
 - **Current safeguard:** Loop 2 and Loop 3 require an approved reviewed
   recommendation. Pilot runs stop rather than silently treating human silence
   as approval.
@@ -432,7 +451,8 @@ items require investigation before they can be planned.
 - **Relevant references:** `loop1-reviewed-recommendation.v1`; Loop 2 and Loop
   3 approval gates; issue #6, #12, #13, and #28 pilot artifacts; issue #6 Loop 1
   trace and complete source artifact; issue #7, issue #8, issue #9, issue #10,
-  issue #11, issue #12, issue #13, issue #14, and issue #15 Loop 1 traces
+  issue #11, issue #12, issue #13, issue #14, issue #15, and issue #16 Loop 1
+  traces
 
 ### DFW-BL-010 — Improve precision and role labeling of Loop 2 related material
 
@@ -603,7 +623,7 @@ items require investigation before they can be planned.
 - **Status:** proposed
 - **Priority:** medium
 - **Discovered during:** issue #5, #6, #8, #9, #10, #11, #12, #13, #14,
-  #15, and #28 pilots
+  #15, #16, and #28 pilots
 - **Problem or observation:** Provisional proposals inflated issue #12 toward a
   field report, assigned issue #6 an unnecessary secondary domain, and
   recommended field-report research with multiple domains for issue #28 before
@@ -672,7 +692,12 @@ items require investigation before they can be planned.
   seed,” contradicting the prospective note boundary. The packet also retained
   the malformed source title as `workingTitle`; that is correct provenance,
   but working editorial language must remain distinguishable from source
-  metadata.
+  metadata. Issue #16 was the first live post-hardening combine case. Loop 2
+  consistently serialized the reviewed `seed` artifact, Interfaces for
+  Judgment domain, `supervision-interfaces` theme, `partial` sufficiency,
+  `combine-first` readiness, exact `#17` target, and no-standalone narrative.
+  The contradiction validator passed before output, and the packet proposed
+  neither independent development nor another artifact type.
 - **Current safeguard:** The evaluator corrects artifact inflation, domain
   overreach, and unsafe research or development recommendations before Loop 2.
   Loop 2 now derives generic reader questions and structures from the
@@ -694,8 +719,8 @@ items require investigation before they can be planned.
   plausible artifact and one justified primary domain while preserving
   evaluator independence.
 - **Relevant references:** issue #5, #6, #7, #8, #9, #10, #11, #12, #13,
-  #14, #15, and #28 Loop 1 traces; issue #10, issue #11, issue #12, issue #13,
-  and issue #15 Loop 2 packets
+  #14, #15, #16, and #28 Loop 1 traces; issue #10, issue #11, issue #12,
+  issue #13, issue #15, and issue #16 Loop 2 packets
 
 ### DFW-BL-018 — Distinguish conceptual, normative, speculative, and empirical claims
 
@@ -768,7 +793,17 @@ items require investigation before they can be planned.
   including bounded institutional authorization, low-stakes consultation,
   rejection despite transparency, and legitimacy deficits in non-AI systems.
   This case fits the existing claim-role scope; it does not require a separate
-  legitimacy-specific backlog item.
+  legitimacy-specific backlog item. Issue #16 required a strict distinction
+  between disclosure and control, and between comprehension, consent, trust,
+  accountability, verification, and legitimacy. The hardened Loop 2 packet
+  preserved the reviewed rationale as an `approved-claim`, source propositions
+  as `source-assertion`, and the full reviewed caution as reserved
+  `editorial-caution`. It kept claims about label usefulness, user demand,
+  field sufficiency, and trust unverified. However, the independent
+  `combinationPlan.materialToCarryForward` remains an untyped source excerpt
+  list and can carry assertions such as “Model cards are for institutions and
+  experts” without an adjacent claim role. Future claim-role coverage should
+  include carry-forward material as well as `developmentMaterial`.
 - **Current safeguard:** Reviewed recommendations and Loop 2 evidence posture
   distinguish verified observations, inference, mechanism, hypothesis, and
   speculation in several tested paths. Loop 2 now serializes source-authored
@@ -794,8 +829,8 @@ items require investigation before they can be planned.
   retain conceptual and normative proposals without false research blockers,
   and keep speculation visible.
 - **Relevant references:** issue #5, issue #7, issue #8, issue #9, issue #10,
-  issue #11, issue #12, issue #13, issue #14, and issue #15 Loop 1 traces;
-  issue #13, issue #14, and issue #15 Loop 2 packets;
+  issue #11, issue #12, issue #13, issue #14, issue #15, and issue #16 Loop 1
+  traces; issue #13, issue #14, issue #15, and issue #16 Loop 2 packets;
   commits `1331234`, `d309019`, `e3b4132`; Loop 2 evidence-posture fixtures
 
 ### DFW-BL-019 — Improve handling of named-product catalysts
@@ -878,6 +913,14 @@ items require investigation before they can be planned.
   surfaced issue #17's raw intake but not its development packet, and missed
   issue #23's more concrete legitimacy object. Manual inspection was required
   to preserve each relationship as context without assigning a combine target.
+  Issue #16 then demonstrated the exact downstream-context case in a live
+  combine-first run: ordinary retrieval found raw issue #17 and
+  `my-ai-rules.md`, but not issue #17's approved recommendation, development
+  packet, or prototype-note contract as a complete reviewed relationship.
+  Human review named only GitHub issue #17 as the combine target while keeping
+  `my-ai-rules.md` and the prototype-note contract as nonmutable related
+  context. Loop 2 preserved that distinction and stopped without mutating any
+  target or local derivative.
 - **Current safeguard:** Combine-first packets name the target, preserve
   carry-forward material, and set `doNotStandalone: true`.
 - **Desired improvement:** Define a human-approved process for comparing source
@@ -890,7 +933,9 @@ items require investigation before they can be planned.
   exist, and keep temporary generated artifacts outside corpus retrieval.
   Represent local same-issue derivative provenance explicitly enough to
   prevent duplicate development without coercing it into `combineTarget` or
-  authorizing local-file mutation.
+  authorizing local-file mutation. Make approved issue packets, prototype
+  contracts, and derivative provenance visible to supporting-source review
+  without allowing local files to become issue combine targets.
 - **Reason deferred:** Automatic merging is not authorized, and target mutation
   requires a separate governance design.
 - **Dependencies or prerequisites:** DFW-BL-009, durable source snapshots, and
