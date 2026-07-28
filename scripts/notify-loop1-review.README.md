@@ -43,10 +43,19 @@ The email includes:
 - provisional disposition derived from the fixed Loop 1 recommendation
   vocabulary;
 - proposed artifact, domain, theme, confidence, and bounded rationale;
-- absolute local review-packet path;
+- a safe repository-relative or processor-workspace-relative packet reference,
+  or a local-workspace label when neither can be derived;
 - source processing commit;
-- bounded review instruction from the packet;
+- a bounded review instruction whose machine-specific path arguments are
+  replaced with local operator placeholders;
 - notification key and review-packet fingerprint.
+
+The notifier resolves and uses the absolute packet path locally for reading,
+validation, and hashing. It does not render that absolute path in the subject,
+text body, HTML body, provider request, idempotency metadata, or new ledger
+records. The rendered reference is not a public link and never uses
+`file://`. Open the packet through the original local command or processor
+state.
 
 The disposition mapping is deterministic:
 
@@ -81,19 +90,24 @@ object keys. Its identity input is:
 - source-content fingerprint;
 - source processing commit;
 - Loop 1 result fingerprint;
-- bounded packet review instruction;
+- normalized packet review instruction with machine-specific repository,
+  state, workspace, and envelope paths replaced by stable placeholders;
 - normalized recommendation, provisional disposition, proposed artifact,
   domain, theme, confidence, and rationale.
 
-Packet path, workspace path, packet creation time, send time, sender, and
-recipient are excluded. Repeating the same review state therefore produces the
-same key. A changed source, commit, Loop 1 artifact, title, instruction, or
-review summary produces a new key and permits an intentional new notification.
+Absolute packet path, workspace path, packet creation time, send time, sender,
+and recipient are excluded. Equivalent reviewed-recommendation commands at
+different local paths produce the same key. A changed source, commit, Loop 1
+artifact, title, non-path instruction semantics, or review summary produces a
+new key and permits an intentional new notification. Successful legacy keys
+remain eligible for local duplicate suppression.
 
 The dedicated ledger contract is
 `dfw-loop1-review-notification-ledger.v1`. It keeps provider attempts separate
 from successful deliveries and stores the recipient only as a normalized-email
-SHA-256 hash.
+SHA-256 hash. New attempts store only the safe human-facing packet reference;
+the absolute path remains local to the running process. Existing ledgers with
+the legacy packet-path field remain readable.
 
 Ledger updates use a mode-0600 temporary file and atomic rename. The command
 holds an exclusive `<ledger>.lock` from its final duplicate check through

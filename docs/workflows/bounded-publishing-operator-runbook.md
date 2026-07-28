@@ -283,8 +283,21 @@ Expected result:
 }
 ```
 
-Inspect the subject, recipient-configuration flags, summary fields, local
-packet path, commit, and complete text/HTML bodies.
+Inspect the subject, recipient-configuration flags, summary fields, safe local
+packet reference, commit, and complete text/HTML bodies.
+
+The command uses the absolute packet path locally for validation and hashing,
+but the notification renders only:
+
+- a repository-relative reference when the packet is in this repository;
+- an `issues/issue-N/<run-id>/loop1/review-packet.json` workspace reference
+  when safely derivable; or
+- a local processor-workspace label.
+
+The rendered reference is not a public link. It contains no `file://` URL.
+Use the original local command or processor registry to open the packet. The
+rendered review instruction similarly replaces local repository, state,
+workspace, and envelope paths with operator placeholders.
 
 Preview mode:
 
@@ -340,9 +353,11 @@ Confirm the provider message ID in Resend and delivery to the intended mailbox.
 
 ### Duplicate prevention
 
-The notifier derives one deterministic SHA-256 key from the bound review state
-and normalized summary. It excludes send time, sender, recipient, and local
-packet path.
+The notifier derives one deterministic SHA-256 key from the bound review state,
+normalized summary, and path-normalized review instruction. It excludes send
+time, sender, recipient, absolute packet path, and machine-specific command
+paths. Equivalent review states at different local locations therefore retain
+the same identity. Successful legacy keys remain suppressible.
 
 The local ledger:
 
@@ -352,7 +367,9 @@ The local ledger:
 
 uses `dfw-loop1-review-notification-ledger.v1`, records attempts and successful
 deliveries separately, stores a hashed recipient identity, and uses atomic
-mode-0600 writes.
+mode-0600 writes. New attempt records contain only the safe packet reference,
+while existing ledgers with the legacy absolute packet-path field remain
+readable.
 
 A lock covers the final duplicate check, provider call, and ledger write.
 Resend receives:

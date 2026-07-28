@@ -51,6 +51,68 @@ function notificationSubjectTitle(value) {
   return String(value).replace(/^\[DFW Intake\]\s*/, '');
 }
 
+function hasUnsafeAbsolutePath(value) {
+  return /(?:^|[\s'"(])(?:\/Users\/|\/home\/|\/private\/tmp\/|\/tmp\/|[a-z]:[\\/]+Users[\\/]+)/i
+    .test(String(value));
+}
+
+export function safeReviewPacketReference(
+  reviewPacketPath,
+  repositoryRoot = process.cwd(),
+) {
+  const value = String(reviewPacketPath);
+  const windowsAbsolute = /^[a-z]:[\\/]/i.test(value);
+  if (!windowsAbsolute) {
+    const relative = path.relative(
+      path.resolve(repositoryRoot),
+      path.resolve(value),
+    );
+    if (
+      relative &&
+      relative !== '..' &&
+      !relative.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relative)
+    ) {
+      return `Repository-relative: ${relative.split(path.sep).join('/')}`;
+    }
+  }
+
+  const normalized = value.replaceAll('\\', '/');
+  const segments = normalized.split('/').filter(Boolean);
+  for (let index = 0; index < segments.length - 4; index += 1) {
+    const candidate = segments.slice(index).join('/');
+    if (
+      segments[index] === 'issues' &&
+      /^issue-\d+$/.test(segments[index + 1]) &&
+      /^issues\/issue-\d+\/[^/]+\/loop1\/review-packet\.json$/.test(candidate)
+    ) {
+      return `Processor workspace: ${candidate}`;
+    }
+  }
+
+  return 'Local Loop 1 review packet in the processor workspace';
+}
+
+export function safeReviewInstruction(nextCommand) {
+  const replacements = new Map([
+    ['repo-path', '<local-repository>'],
+    ['state-dir', '<local-processor-state>'],
+    ['work-root', '<local-processor-workspace>'],
+    ['reviewed-recommendation', '<local-review-envelope>'],
+  ]);
+  let instruction = String(nextCommand).trim();
+  for (const [flag, replacement] of replacements) {
+    instruction = instruction.replace(
+      new RegExp(`(--${flag})\\s+.*?(?=\\s+--[a-z0-9-]+(?:\\s|$)|$)`, 'i'),
+      `$1 '${replacement}'`,
+    );
+  }
+  if (hasUnsafeAbsolutePath(instruction)) {
+    return "Use the packet's local resume command through the operator environment with --reviewed-recommendation '<local-review-envelope>' --stop-after-loop2.";
+  }
+  return instruction;
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -157,7 +219,7 @@ export function parseLoop1ReviewSummary(markdown) {
   };
 }
 
-function identityInput(packet, summary) {
+function identityInput(packet, summary, { legacy = false } = {}) {
   return {
     notificationContractVersion: NOTIFICATION_CONTRACT,
     reviewPacketContractVersion: packet.contractVersion,
@@ -166,7 +228,9 @@ function identityInput(packet, summary) {
     sourceContentSha256: packet.sourceContentSha256,
     sourceProcessingCommitSha: packet.sourceProcessingCommitSha,
     loop1ResultSha256: packet.loop1ResultSha256,
-    nextCommand: packet.nextCommand.trim(),
+    nextCommand: legacy
+      ? packet.nextCommand.trim()
+      : safeReviewInstruction(packet.nextCommand),
     summary,
   };
 }
@@ -176,17 +240,24 @@ export function notificationKey(packet, summary) {
   return sha256(JSON.stringify(canonicalize(identityInput(packet, summary))));
 }
 
+function legacyNotificationKey(packet, summary) {
+  return sha256(JSON.stringify(canonicalize(
+    identityInput(packet, summary, { legacy: true }),
+  )));
+}
+
 export function buildNotificationPlan({
   packet,
-  reviewPacketPath,
+  reviewPacketReference,
   reviewPacketSha256,
   summary,
   from = '',
   to = '',
 }) {
   const key = notificationKey(packet, summary);
+  const legacyKey = legacyNotificationKey(packet, summary);
   const issueLine = `Issue #${packet.issueNumber}: ${bounded(packet.issueTitle, 180)}`;
-  const reviewInstruction = packet.nextCommand.trim();
+  const reviewInstruction = safeReviewInstruction(packet.nextCommand);
   const text = [
     'Deep Field Works Loop 1 review is required.',
     '',
@@ -201,7 +272,8 @@ export function buildNotificationPlan({
     'Brief rationale:',
     summary.rationale,
     '',
-    `Review packet: ${reviewPacketPath}`,
+    `Local review packet: ${reviewPacketReference}`,
+    'Open it through the operator environment; this is not a public link.',
     `Repository commit: ${packet.sourceProcessingCommitSha}`,
     `Review instruction: ${reviewInstruction}`,
     `Notification key: ${key}`,
@@ -222,7 +294,8 @@ export function buildNotificationPlan({
     `<dt>Confidence</dt><dd>${escapeHtml(summary.confidence)}</dd>`,
     '</dl>',
     `<h2>Brief rationale</h2><p>${escapeHtml(summary.rationale)}</p>`,
-    `<p>Review packet: <code>${escapeHtml(reviewPacketPath)}</code><br>`,
+    `<p>Local review packet: <code>${escapeHtml(reviewPacketReference)}</code><br>`,
+    'Open it through the operator environment; this is not a public link.<br>',
     `Repository commit: <code>${packet.sourceProcessingCommitSha}</code><br>`,
     `Review instruction: ${escapeHtml(reviewInstruction)}<br>`,
     `Notification key: <code>${key}</code><br>`,
@@ -232,9 +305,10 @@ export function buildNotificationPlan({
   return {
     contractVersion: NOTIFICATION_CONTRACT,
     notificationKey: key,
+    notificationKeyCandidates: [...new Set([key, legacyKey])],
     issueNumber: packet.issueNumber,
     issueTitle: packet.issueTitle,
-    reviewPacketPath,
+    reviewPacketReference,
     reviewPacketSha256,
     sourceContentSha256: packet.sourceContentSha256,
     sourceProcessingCommitSha: packet.sourceProcessingCommitSha,
@@ -280,8 +354,13 @@ export async function readLedger(ledgerPath) {
     if (!attempt || typeof attempt !== 'object' || !/^[a-f0-9]{64}$/.test(attempt.notificationKey ?? '')) {
       throw new Error(`Malformed Loop 1 notification ledger: attempts[${index}] has no valid notification key.`);
     }
+    const validPacketReference =
+      typeof attempt.reviewPacketReference === 'string' &&
+      attempt.reviewPacketReference &&
+      !hasUnsafeAbsolutePath(attempt.reviewPacketReference);
+    const validLegacyPacketPath = typeof attempt.reviewPacketPath === 'string';
     if (!Number.isInteger(attempt.issueNumber)
-      || typeof attempt.reviewPacketPath !== 'string'
+      || (!validPacketReference && !validLegacyPacketPath)
       || !/^[a-f0-9]{64}$/.test(attempt.reviewPacketSha256 ?? '')
       || !/^[a-f0-9]{64}$/.test(attempt.loop1ResultSha256 ?? '')
       || typeof attempt.provider !== 'string'
@@ -417,9 +496,10 @@ export async function notifyLoop1Review({
     throw new Error('Loop 1 result fingerprint does not match the review packet.');
   }
   const summary = parseLoop1ReviewSummary(resultBytes.toString('utf8'));
+  const reviewPacketReference = safeReviewPacketReference(resolvedPacket);
   const plan = buildNotificationPlan({
     packet,
-    reviewPacketPath: resolvedPacket,
+    reviewPacketReference,
     reviewPacketSha256: sha256(packetBytes),
     summary,
     from: env.DFW_REVIEW_EMAIL_FROM ?? '',
@@ -427,7 +507,9 @@ export async function notifyLoop1Review({
   });
   const ledger = await readLedger(resolvedLedger);
   const duplicate = ledger.deliveries.some(
-    (entry) => entry.notificationKey === plan.notificationKey && entry.result === 'sent',
+    (entry) =>
+      plan.notificationKeyCandidates.includes(entry.notificationKey) &&
+      entry.result === 'sent',
   );
   const publicPlan = {
     mode: send ? 'send' : 'dry-run',
@@ -471,7 +553,9 @@ export async function notifyLoop1Review({
   try {
     const lockedLedger = await readLedger(resolvedLedger);
     if (lockedLedger.deliveries.some(
-      (entry) => entry.notificationKey === plan.notificationKey && entry.result === 'sent',
+      (entry) =>
+        plan.notificationKeyCandidates.includes(entry.notificationKey) &&
+        entry.result === 'sent',
     )) {
       return {
         result: 'duplicate-suppressed',
@@ -479,7 +563,9 @@ export async function notifyLoop1Review({
       };
     }
     if (lockedLedger.attempts.some(
-      (entry) => entry.notificationKey === plan.notificationKey && entry.result === 'sending',
+      (entry) =>
+        plan.notificationKeyCandidates.includes(entry.notificationKey) &&
+        entry.result === 'sending',
     )) {
       return {
         result: 'delivery-uncertain',
@@ -492,7 +578,7 @@ export async function notifyLoop1Review({
     const attempt = {
       notificationKey: plan.notificationKey,
       issueNumber: plan.issueNumber,
-      reviewPacketPath: plan.reviewPacketPath,
+      reviewPacketReference: plan.reviewPacketReference,
       reviewPacketSha256: plan.reviewPacketSha256,
       loop1ResultSha256: plan.loop1ResultSha256,
       provider: plan.provider,

@@ -5,8 +5,12 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
+  buildNotificationPlan,
   notifyLoop1Review,
+  parseLoop1ReviewSummary,
   readLedger,
+  safeReviewInstruction,
+  safeReviewPacketReference,
 } from './lib/loop1-review-notification.mjs';
 
 const root = process.cwd();
@@ -31,6 +35,7 @@ await fs.mkdir(base, { recursive: true });
 const sourcePacket = JSON.parse(await fs.readFile(fixturePacketPath, 'utf8'));
 const sourceResult = await fs.readFile(fixtureResultPath);
 sourcePacket.loop1ResultSha256 = sha256(sourceResult);
+const sourceSummary = parseLoop1ReviewSummary(sourceResult.toString('utf8'));
 
 async function writeFixture(name, { packetUpdate = {}, resultUpdate } = {}) {
   const directory = path.join(base, name);
@@ -74,14 +79,14 @@ await check('dry run previews bounded Loop 1 review fields', async () => {
   assert.equal(result.plan.summary.theme, 'bounded review notifications');
   assert.equal(result.plan.summary.confidence, 'medium');
   assert.match(result.content.text, /Repository commit: 2222/);
-  assert.match(result.content.text, /Review packet:/);
+  assert.match(result.content.text, /Local review packet:/);
   assert.equal(
     result.content.text.match(/--stop-after-loop2/g)?.length,
     1,
   );
   assert.match(
     result.content.text,
-    /--reviewed-recommendation '\/absolute\/private\/path\/to\/review-envelope\.json' --stop-after-loop2/,
+    /--reviewed-recommendation '<local-review-envelope>' --stop-after-loop2/,
   );
   await assert.rejects(fs.access(ledgerPath));
 });
@@ -126,6 +131,86 @@ await check('email excludes source body and non-summary sections', async () => {
   }
 });
 
+await check('human-facing packet references redact unsafe local roots', async () => {
+  const pathCases = [
+    {
+      input: '/Users/example-user/dfw/issues/issue-31/run-macos/loop1/review-packet.json',
+      expected: 'Processor workspace: issues/issue-31/run-macos/loop1/review-packet.json',
+    },
+    {
+      input: '/home/example-user/dfw/issues/issue-31/run-linux/loop1/review-packet.json',
+      expected: 'Processor workspace: issues/issue-31/run-linux/loop1/review-packet.json',
+    },
+    {
+      input: '/tmp/dfw/issues/issue-31/run-tmp/loop1/review-packet.json',
+      expected: 'Processor workspace: issues/issue-31/run-tmp/loop1/review-packet.json',
+    },
+    {
+      input: '/private/tmp/dfw/issues/issue-31/run-private-tmp/loop1/review-packet.json',
+      expected: 'Processor workspace: issues/issue-31/run-private-tmp/loop1/review-packet.json',
+    },
+    {
+      input: 'C:\\Users\\example-user\\dfw\\issues\\issue-31\\run-windows\\loop1\\review-packet.json',
+      expected: 'Processor workspace: issues/issue-31/run-windows/loop1/review-packet.json',
+    },
+    {
+      input: fixturePacketPath,
+      expected: 'Repository-relative: scripts/fixtures/loop1-review-notification/review-packet.json',
+    },
+    {
+      input: '/opt/opaque/review-packet.json',
+      expected: 'Local Loop 1 review packet in the processor workspace',
+    },
+  ];
+  for (const pathCase of pathCases) {
+    const reference = safeReviewPacketReference(pathCase.input, root);
+    assert.equal(reference, pathCase.expected);
+    const plan = buildNotificationPlan({
+      packet: sourcePacket,
+      reviewPacketReference: reference,
+      reviewPacketSha256: 'a'.repeat(64),
+      summary: sourceSummary,
+    });
+    for (const rendered of [plan.subject, plan.text, plan.html]) {
+      assert.equal(rendered.includes('example-user'), false);
+      assert.equal(rendered.includes('/Users/'), false);
+      assert.equal(rendered.includes('/home/'), false);
+      assert.equal(rendered.includes('/tmp/'), false);
+      assert.equal(rendered.includes('/private/tmp/'), false);
+      assert.equal(/[a-z]:[\\/]Users[\\/]/i.test(rendered), false);
+      assert.equal(rendered.includes('file://'), false);
+    }
+    assert.match(plan.text, /Open it through the operator environment/);
+    assert.match(plan.html, /not a public link/);
+  }
+});
+
+await check('review instruction removes known machine-specific command paths', async () => {
+  const instruction = [
+    'npm run backlog:process -- --execute',
+    "--repo 'MLX983/dfw-intake'",
+    "--repo-path '/Users/example-user/deep-field-works'",
+    '--limit 1',
+    '--issue-number 9902',
+    "--state-dir '/home/example-user/dfw-state'",
+    "--work-root '/private/tmp/dfw-work'",
+    "--reviewed-recommendation 'C:\\Users\\example-user\\review.json'",
+    '--stop-after-loop2',
+  ].join(' ');
+  const safe = safeReviewInstruction(instruction);
+  assert.equal(safe.includes('example-user'), false);
+  assert.equal(safe.includes('/Users/'), false);
+  assert.equal(safe.includes('/home/'), false);
+  assert.equal(safe.includes('/private/tmp/'), false);
+  assert.equal(/[a-z]:[\\/]Users[\\/]/i.test(safe), false);
+  assert.equal(safe.match(/--stop-after-loop2/g)?.length, 1);
+  assert.match(safe, /--repo 'MLX983\/dfw-intake'/);
+  assert.match(safe, /--repo-path '<local-repository>'/);
+  assert.match(safe, /--state-dir '<local-processor-state>'/);
+  assert.match(safe, /--work-root '<local-processor-workspace>'/);
+  assert.match(safe, /--reviewed-recommendation '<local-review-envelope>'/);
+});
+
 await check('notification key is stable across packet paths and timestamps', async () => {
   const first = await writeFixture('stable-a');
   const second = await writeFixture('stable-b', {
@@ -140,6 +225,82 @@ await check('notification key is stable across packet paths and timestamps', asy
     ledgerPath: path.join(base, 'stable-ledger.json'),
   });
   assert.equal(one.plan.notificationKey, two.plan.notificationKey);
+});
+
+await check('notification key is stable across equivalent machine locations', async () => {
+  const command = (repoPath, statePath, workPath, envelopePath) => [
+    'npm run backlog:process -- --execute',
+    "--repo 'MLX983/dfw-intake'",
+    `--repo-path '${repoPath}'`,
+    '--limit 1',
+    '--issue-number 9902',
+    `--state-dir '${statePath}'`,
+    `--work-root '${workPath}'`,
+    `--reviewed-recommendation '${envelopePath}'`,
+    '--stop-after-loop2',
+  ].join(' ');
+  const first = await writeFixture('location-a', {
+    packetUpdate: {
+      nextCommand: command(
+        '/Users/example-user/deep-field-works',
+        '/Users/example-user/dfw-state',
+        '/tmp/dfw-work',
+        '/Users/example-user/review.json',
+      ),
+    },
+  });
+  const second = await writeFixture('location-b', {
+    packetUpdate: {
+      nextCommand: command(
+        '/home/example-user/deep-field-works',
+        '/home/example-user/dfw-state',
+        '/private/tmp/dfw-work',
+        '/home/example-user/review.json',
+      ),
+    },
+  });
+  const one = await notifyLoop1Review({
+    reviewPacketPath: first.packetPath,
+    ledgerPath: path.join(base, 'location-ledger.json'),
+  });
+  const two = await notifyLoop1Review({
+    reviewPacketPath: second.packetPath,
+    ledgerPath: path.join(base, 'location-ledger.json'),
+  });
+  assert.equal(one.plan.notificationKey, two.plan.notificationKey);
+});
+
+await check('legacy notification key remains locally suppressible', async () => {
+  const fixture = await writeFixture('legacy-key');
+  const ledgerPath = path.join(base, 'legacy-key-ledger.json');
+  const legacyKey = 'fb51c8b563b711a703ab75715c0dc55c0fbf6d3bf3067293c17413fc7643fa7d';
+  await fs.writeFile(ledgerPath, `${JSON.stringify({
+    contractVersion: 'dfw-loop1-review-notification-ledger.v1',
+    attempts: [],
+    deliveries: [{
+      notificationKey: legacyKey,
+      issueNumber: 9902,
+      provider: 'resend',
+      recipient: `sha256:${'a'.repeat(64)}`,
+      deliveredAt: '2026-07-27T20:00:00.000Z',
+      result: 'sent',
+      providerMessageId: 'legacy-fixture-message',
+    }],
+  }, null, 2)}\n`);
+  const result = await notifyLoop1Review({
+    reviewPacketPath: fixture.packetPath,
+    ledgerPath,
+    send: true,
+    env: configuredEnv,
+    provider: {
+      sendReviewNotification: async () => {
+        throw new Error('legacy delivery must suppress provider call');
+      },
+    },
+  });
+  assert.equal(result.result, 'duplicate-suppressed');
+  assert.equal(result.plan.duplicate, true);
+  assert.notEqual(result.plan.notificationKey, legacyKey);
 });
 
 await check('meaningful review-state change produces a new key', async () => {
@@ -163,8 +324,12 @@ await check('meaningful review-state change produces a new key', async () => {
 await check('successful duplicate is suppressed', async () => {
   const fixture = await writeFixture('duplicate');
   let calls = 0;
+  let providerInput;
   const provider = {
-    sendReviewNotification: async () => ({ messageId: `fixture-${++calls}` }),
+    sendReviewNotification: async (input) => {
+      providerInput = input;
+      return { messageId: `fixture-${++calls}` };
+    },
   };
   const ledgerPath = path.join(base, 'duplicate-ledger.json');
   const first = await notifyLoop1Review({
@@ -184,6 +349,22 @@ await check('successful duplicate is suppressed', async () => {
   assert.equal(first.result, 'sent');
   assert.equal(second.result, 'duplicate-suppressed');
   assert.equal(calls, 1);
+  const providerPayload = JSON.stringify(providerInput);
+  assert.equal(providerPayload.includes(base), false);
+  assert.equal(providerPayload.includes('/tmp/'), false);
+  assert.equal(providerPayload.includes('/Users/'), false);
+  assert.equal(providerPayload.includes('/home/'), false);
+  assert.equal(providerPayload.includes('/private/tmp/'), false);
+  assert.equal(providerInput.idempotencyKey, `dfw-loop1-review-${first.plan.notificationKey}`);
+  const ledger = await readLedger(ledgerPath);
+  assert.equal(ledger.attempts.length, 1);
+  assert.equal(ledger.attempts[0].reviewPacketPath, undefined);
+  assert.equal(
+    ledger.attempts[0].reviewPacketReference,
+    'Local Loop 1 review packet in the processor workspace',
+  );
+  assert.equal(JSON.stringify(ledger).includes(base), false);
+  assert.equal(JSON.stringify(ledger).includes('/tmp/'), false);
 });
 
 await check('changed state may be sent after earlier successful delivery', async () => {
