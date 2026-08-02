@@ -8,6 +8,15 @@ import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
+import {
+  canonicalGeneratedLoop1Recommendation,
+  canonicalTitleVariant,
+  LOOP1_CONFIDENCE_VALUES,
+  LOOP1_DOCUMENT_TYPES,
+  LOOP1_DOMAINS,
+  LOOP1_EVALUATION_RESULTS,
+  LOOP1_RECOMMENDATION_DISPOSITIONS,
+} from './lib/loop1-review-vocabulary.mjs';
 
 const REPO_ROOT = process.cwd();
 const DEFAULT_CODEX_BIN = '/Applications/Codex.app/Contents/Resources/codex';
@@ -99,35 +108,10 @@ const STOP_WORDS = new Set([
 ]);
 
 const CANONICAL_GUIDANCE = {
-  documentTypes: [
-    'seed',
-    'note',
-    'field-report',
-    'essay',
-    'experiment',
-    'prototype-note',
-    'concept',
-    'checkpoint',
-    'project-log',
-  ],
+  documentTypes: [...LOOP1_DOCUMENT_TYPES],
   statuses: ['seed', 'draft', 'review', 'published', 'archived', 'superseded'],
-  domains: [
-    'Cognitive Infrastructure',
-    'Human-Machine Workflows',
-    'Institutions in Transition',
-    'Interfaces for Judgment',
-    'Media, Memory, and Meaning',
-  ],
-  nextActions: [
-    'preserve as-is',
-    'defer',
-    'combine with other material',
-    'develop as note',
-    'research as field report',
-    'draft artifact',
-    'needs human judgment',
-    'not for publication',
-  ],
+  domains: [...LOOP1_DOMAINS],
+  nextActions: [...LOOP1_RECOMMENDATION_DISPOSITIONS.keys()],
   rule:
     'Use the smallest adequate artifact. Do not inflate material into essays. Preserve uncertainty. Human silence is never approval.',
 };
@@ -1113,6 +1097,60 @@ ${openQuestions}
 `;
 }
 
+function normalizeFixedMarkdownField(markdown, label, normalize) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const expression = new RegExp(
+    `^(\\*\\*${escaped}:\\*\\*[ \\t]*)(.*?)([ \\t]*)$`,
+    'gm',
+  );
+  let count = 0;
+  const normalized = markdown.replace(expression, (line, prefix, rawValue, suffix) => {
+    count += 1;
+    const value = rawValue.trim();
+    const canonical = normalize(value);
+    if (!canonical) {
+      throw new Error(`Final Loop 1 result returned invalid ${label}: ${value || 'missing'}`);
+    }
+    return `${prefix}${canonical}${suffix}`;
+  });
+  if (count !== 1) {
+    throw new Error(`Final Loop 1 result must contain exactly one ${label} field.`);
+  }
+  return normalized;
+}
+
+function normalizeLoop1ResultMarkdown(markdown) {
+  if (typeof markdown !== 'string' || !/^## Loop 1 Intake Understanding\s*$/m.test(markdown)) {
+    throw new Error('Final Loop 1 result is missing the Loop 1 Intake Understanding heading.');
+  }
+  let normalized = normalizeFixedMarkdownField(
+    markdown,
+    'Recommendation',
+    canonicalGeneratedLoop1Recommendation,
+  );
+  normalized = normalizeFixedMarkdownField(
+    normalized,
+    'Document type',
+    (value) => canonicalTitleVariant(value, LOOP1_DOCUMENT_TYPES),
+  );
+  normalized = normalizeFixedMarkdownField(
+    normalized,
+    'Confidence',
+    (value) => canonicalTitleVariant(value, LOOP1_CONFIDENCE_VALUES),
+  );
+  normalized = normalizeFixedMarkdownField(
+    normalized,
+    'Primary domain',
+    (value) => (LOOP1_DOMAINS.has(value) ? value : null),
+  );
+  normalized = normalizeFixedMarkdownField(
+    normalized,
+    'Result',
+    (value) => canonicalTitleVariant(value, LOOP1_EVALUATION_RESULTS),
+  );
+  return normalized;
+}
+
 function traceMarkdown(proposal, matches, evaluation, finalMarkdown) {
   const matchLines =
     matches.length === 0
@@ -1181,12 +1219,13 @@ async function main() {
   const evaluationText = callModel('evaluation', { issueSummary, proposal, matches });
   const evaluation = validateEvaluation(parseJsonResponse(evaluationText, 'evaluation'));
 
-  const finalMarkdown =
+  const generatedMarkdown =
     evaluation.result === 'PASS'
       ? formatPassResult(issueSummary, proposal, evaluation, matches)
       : evaluation.result === 'ESCALATE'
         ? formatEscalateResult(proposal, evaluation, matches)
         : callModel('final', { issueSummary, proposal, evaluation, matches });
+  const finalMarkdown = normalizeLoop1ResultMarkdown(generatedMarkdown);
 
   const output = args.trace
     ? traceMarkdown(proposal, matches, evaluation, finalMarkdown)
@@ -1204,6 +1243,7 @@ export {
   buildCandidate,
   callModel,
   likelyDuplicateOrSelfSource,
+  normalizeLoop1ResultMarkdown,
   parseIssue,
   rankCandidates,
   retrievalQuery,

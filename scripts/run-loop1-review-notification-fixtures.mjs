@@ -7,6 +7,7 @@ import path from 'node:path';
 import {
   buildNotificationPlan,
   notifyLoop1Review,
+  notificationKey,
   parseLoop1ReviewSummary,
   readLedger,
   safeReviewInstruction,
@@ -36,6 +37,53 @@ const sourcePacket = JSON.parse(await fs.readFile(fixturePacketPath, 'utf8'));
 const sourceResult = await fs.readFile(fixtureResultPath);
 sourcePacket.loop1ResultSha256 = sha256(sourceResult);
 const sourceSummary = parseLoop1ReviewSummary(sourceResult.toString('utf8'));
+
+await check('known title-cased recommendation normalizes before validation and hashing', async () => {
+  const canonicalMarkdown = sourceResult.toString('utf8').replace(
+    '**Recommendation:** develop as note',
+    '**Recommendation:** combine with other material',
+  );
+  const legacyMarkdown = canonicalMarkdown.replace(
+    '**Recommendation:** combine with other material',
+    '**Recommendation:** Combine with other material',
+  );
+  const canonicalSummary = parseLoop1ReviewSummary(canonicalMarkdown);
+  const legacySummary = parseLoop1ReviewSummary(legacyMarkdown);
+  assert.deepEqual(legacySummary, canonicalSummary);
+  assert.equal(
+    notificationKey(sourcePacket, legacySummary),
+    notificationKey(sourcePacket, canonicalSummary),
+  );
+});
+
+await check('unknown recommendation casing and free text still fail closed', async () => {
+  for (const unsupported of [
+    'Develop as note',
+    'Develop As Note',
+    'DEVELOP AS NOTE',
+    'develop as a note',
+  ]) {
+    const markdown = sourceResult.toString('utf8').replace(
+      '**Recommendation:** develop as note',
+      `**Recommendation:** ${unsupported}`,
+    );
+    assert.throws(
+      () => parseLoop1ReviewSummary(markdown),
+      new RegExp(`unsupported Recommendation value ${unsupported}`),
+    );
+  }
+});
+
+await check('non-canonical confidence casing fails closed', async () => {
+  const markdown = sourceResult.toString('utf8').replace(
+    '**Confidence:** medium',
+    '**Confidence:** MEDIUM',
+  );
+  assert.throws(
+    () => parseLoop1ReviewSummary(markdown),
+    /unsupported Confidence value MEDIUM/,
+  );
+});
 
 async function writeFixture(name, { packetUpdate = {}, resultUpdate } = {}) {
   const directory = path.join(base, name);

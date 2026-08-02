@@ -8,6 +8,7 @@ import {
   buildCandidate,
   callModel,
   likelyDuplicateOrSelfSource,
+  normalizeLoop1ResultMarkdown,
   parseIssue,
   rankCandidates,
   retrievalQuery,
@@ -30,6 +31,24 @@ const proposal = {
   theme: 'agent evaluation',
   recommendedAction: 'develop as note',
 };
+
+const titleCasedResult = await fs.readFile(
+  fixturePath('title-cased-loop1-result.md'),
+  'utf8',
+);
+const normalizedResult = normalizeLoop1ResultMarkdown(titleCasedResult);
+assert.match(normalizedResult, /^\*\*Recommendation:\*\* combine with other material$/m);
+assert.match(normalizedResult, /^\*\*Document type:\*\* seed$/m);
+assert.match(normalizedResult, /^\*\*Confidence:\*\* medium$/m);
+assert.match(normalizedResult, /^\*\*Primary domain:\*\* Cognitive Infrastructure$/m);
+assert.match(normalizedResult, /^\*\*Result:\*\* REVISE$/m);
+assert.equal(normalizeLoop1ResultMarkdown(normalizedResult), normalizedResult);
+assert.throws(
+  () => normalizeLoop1ResultMarkdown(
+    titleCasedResult.replace('Combine with other material', 'Combine With Other Material'),
+  ),
+  /invalid Recommendation: Combine With Other Material/,
+);
 
 const originalCodexBin = process.env.CODEX_BIN;
 const missingCodexBin = path.join(
@@ -426,6 +445,7 @@ console.log('PASS active-query-representation: exact title and body overlap cont
 console.log('PASS generic-resistance: cache-envelope repetition contributes zero');
 console.log('PASS existing-behavior: duplicate detection, deterministic top five, evaluator shape');
 console.log('PASS subprocess-diagnostics: missing Codex executable preserves ENOENT and executable');
+console.log('PASS result-vocabulary: fixed fields normalize to exact canonical casing');
 console.log(
   `SCORES ${JSON.stringify({
     bodyMatch: bodyMatchScore,

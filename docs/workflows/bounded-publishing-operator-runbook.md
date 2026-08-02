@@ -227,6 +227,14 @@ The Loop 1 result contains:
 - suggested next action;
 - open questions and uncertainty notes.
 
+Fixed machine-readable fields use their exact contract vocabulary and casing.
+In particular, recommendation, document type, and confidence values are
+lowercase; primary domains retain their canonical title case; and evaluation
+results are `PASS`, `REVISE`, or `ESCALATE`. Display formatting is separate
+from stored values. The standalone notifier rejects unsupported values rather
+than inferring intent; its bounded legacy compatibility is documented in
+`scripts/notify-loop1-review.README.md`.
+
 Before approval, the operator must:
 
 1. Compare the recommendation with the complete issue snapshot.

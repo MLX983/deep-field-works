@@ -70,6 +70,16 @@ The disposition mapping is deterministic:
 | `needs human judgment` | `needs human judgment` |
 | `not for publication` | `not for publication` |
 
+The recommendation column is an exact machine-readable vocabulary. Newly
+generated Loop 1 results store these lowercase values even when a human-facing
+view chooses different display capitalization. The notifier remains
+fail-closed: it accepts the canonical values above plus only the exact observed
+legacy spelling `Combine with other material` from an already stored result,
+normalizing it before validation and notification-key hashing.
+
+Other casing and free-text variants are rejected. Document type, domain, and
+confidence are also validated against their exact canonical values.
+
 This is review context, not approved `loop1-reviewed-recommendation.v1`
 guidance. The human reviewer may correct any field when creating the approval
 envelope.

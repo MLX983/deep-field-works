@@ -1,32 +1,17 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {
+  canonicalLoop1Recommendation,
+  LOOP1_CONFIDENCE_VALUES,
+  LOOP1_DOCUMENT_TYPES,
+  LOOP1_DOMAINS,
+  LOOP1_RECOMMENDATION_DISPOSITIONS,
+} from './loop1-review-vocabulary.mjs';
 
 export const NOTIFICATION_CONTRACT = 'dfw-loop1-review-notification.v1';
 export const LEDGER_CONTRACT = 'dfw-loop1-review-notification-ledger.v1';
 export const REVIEW_PACKET_CONTRACT = 'backlog-loop1-review-packet.v2';
-
-const RECOMMENDATION_DISPOSITIONS = new Map([
-  ['preserve as-is', 'preserve as seed'],
-  ['defer', 'defer'],
-  ['combine with other material', 'combine with overlapping material'],
-  ['develop as note', 'develop independently'],
-  ['research as field report', 'research before development'],
-  ['draft artifact', 'develop independently'],
-  ['needs human judgment', 'needs human judgment'],
-  ['not for publication', 'not for publication'],
-]);
-const DOCUMENT_TYPES = new Set([
-  'seed', 'note', 'field-report', 'essay', 'experiment',
-  'prototype-note', 'concept', 'checkpoint', 'project-log',
-]);
-const DOMAINS = new Set([
-  'Cognitive Infrastructure',
-  'Human-Machine Workflows',
-  'Institutions in Transition',
-  'Interfaces for Judgment',
-  'Media, Memory, and Meaning',
-]);
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -187,22 +172,23 @@ export function parseLoop1ReviewSummary(markdown) {
   if (typeof markdown !== 'string' || !/^## Loop 1 Intake Understanding\s*$/mi.test(markdown)) {
     throw new Error('Malformed Loop 1 result: missing Loop 1 Intake Understanding heading.');
   }
-  const recommendation = bounded(markdownField(markdown, 'Recommendation'), 160);
+  const storedRecommendation = bounded(markdownField(markdown, 'Recommendation'), 160);
+  const recommendation = canonicalLoop1Recommendation(storedRecommendation);
   const proposedArtifact = bounded(markdownField(markdown, 'Document type'), 80);
-  const confidence = bounded(markdownField(markdown, 'Confidence'), 20).toLowerCase();
+  const confidence = bounded(markdownField(markdown, 'Confidence'), 20);
   const domain = bounded(markdownField(markdown, 'Primary domain'), 120);
   const theme = bounded(markdownField(markdown, 'Theme'), 160);
   const rationale = bounded(markdownSection(markdown, 'Why this may matter'), 1000);
-  if (!RECOMMENDATION_DISPOSITIONS.has(recommendation)) {
-    throw new Error(`Malformed Loop 1 result: unsupported Recommendation value ${recommendation || 'missing'}.`);
+  if (!recommendation) {
+    throw new Error(`Malformed Loop 1 result: unsupported Recommendation value ${storedRecommendation || 'missing'}.`);
   }
-  if (!DOCUMENT_TYPES.has(proposedArtifact)) {
+  if (!LOOP1_DOCUMENT_TYPES.has(proposedArtifact)) {
     throw new Error(`Malformed Loop 1 result: unsupported Document type ${proposedArtifact || 'missing'}.`);
   }
-  if (!['low', 'medium', 'high'].includes(confidence)) {
+  if (!LOOP1_CONFIDENCE_VALUES.has(confidence)) {
     throw new Error(`Malformed Loop 1 result: unsupported Confidence value ${confidence || 'missing'}.`);
   }
-  if (!DOMAINS.has(domain)) {
+  if (!LOOP1_DOMAINS.has(domain)) {
     throw new Error(`Malformed Loop 1 result: unsupported Primary domain ${domain || 'missing'}.`);
   }
   if (!rationale) {
@@ -210,7 +196,7 @@ export function parseLoop1ReviewSummary(markdown) {
   }
   return {
     recommendation,
-    disposition: RECOMMENDATION_DISPOSITIONS.get(recommendation),
+    disposition: LOOP1_RECOMMENDATION_DISPOSITIONS.get(recommendation),
     proposedArtifact,
     domain,
     theme: theme || 'Unassigned',
