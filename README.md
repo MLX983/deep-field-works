@@ -47,6 +47,21 @@ Start here:
 
 These files describe the purpose, structure, and operating principles of the project.
 
+## Development Materials
+
+`docs/development/research/` retains production-excluded research dossiers
+based on public sources. `docs/development/briefs/` retains production-excluded
+editorial development contracts. Published content must not load from either
+directory.
+
+Site exclusion is not access privacy: these records remain visible to anyone
+with repository access. Do not store credentials, personal or sensitive
+information, confidential sources, provider payloads, or licensed full-text
+articles or transcripts in them. Retained records should identify source and
+research dates, provenance, status, and any superseding record. Superseded
+records should be marked and linked to their replacement rather than silently
+overwritten or deleted.
+
 ---
 
 ## Development Philosophy
