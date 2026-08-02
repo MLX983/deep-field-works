@@ -21,6 +21,7 @@ import {
   ELIGIBLE_STATUSES as NOTIFICATION_ELIGIBLE,
   notifyReview as existingNotifier,
 } from "./review-notification.mjs";
+import { canonicalReviewedArtifact } from "./artifact-vocabulary.mjs";
 
 export const CONTRACTS = Object.freeze({
   source: "backlog-source-snapshot.v1",
@@ -142,6 +143,13 @@ function getGitCommit(repoPath) {
     cwd: repoPath,
     encoding: "utf8",
   }).trim();
+}
+
+function repositoryIsClean(repoPath) {
+  return execFileSync("git", ["status", "--porcelain"], {
+    cwd: repoPath,
+    encoding: "utf8",
+  }).trim() === "";
 }
 
 export function discoverGitHubIssues(sourceRepository) {
@@ -843,6 +851,12 @@ function validateReviewEnvelope(envelope, context) {
     !VALID_DOMAINS.has(recommendation.primaryDomain)
   ) {
     failures.push("recommendation");
+  } else {
+    try {
+      canonicalReviewedArtifact(recommendation.suggestedArtifact);
+    } catch {
+      failures.push("recommendation.suggestedArtifact");
+    }
   }
   if (
     recommendation &&
@@ -858,6 +872,118 @@ function validateReviewEnvelope(envelope, context) {
     );
   }
   return recommendation;
+}
+
+function loop2PacketExists(record) {
+  if (record.loop2PacketPath || record.orchestrationManifestPath) return true;
+  if (
+    (record.artifactPaths || []).some((path) =>
+      /(?:^|\/)loop2-[1-9][0-9]*-packet\.json$/.test(path),
+    )
+  ) return true;
+  const loop2Dir = join(record.workspacePath, "loop2");
+  if (!existsSync(loop2Dir)) return false;
+  const pending = [loop2Dir];
+  while (pending.length) {
+    const directory = pending.pop();
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) pending.push(path);
+      else if (/^loop2-[1-9][0-9]*-packet\.json$/.test(entry.name)) return true;
+    }
+  }
+  return false;
+}
+
+function validateLoop2RetryEnvelope(envelope, context) {
+  const { record } = context;
+  if (
+    record.processingStatus !== "failed-retriable" ||
+    record.currentOrFinalStage !== "loop2" ||
+    record.failureCategory !== "loop2-failed"
+  ) {
+    throw new StageError(
+      "loop2-retry-invalid",
+      "Loop 2 retry requires failed-retriable state at loop2 with loop2-failed.",
+      false,
+    );
+  }
+  if (loop2PacketExists(record)) {
+    throw new StageError(
+      "loop2-retry-output-exists",
+      "Loop 2 retry rejected because a Loop 2 packet or downstream record already exists.",
+      false,
+    );
+  }
+  const orchestrationDir = join(record.workspacePath, "orchestration");
+  if (existsSync(orchestrationDir)) {
+    throw new StageError(
+      "loop2-retry-downstream-exists",
+      "Loop 2 retry rejected because downstream work has begun.",
+      false,
+    );
+  }
+  const recommendation = validateReviewEnvelope(envelope, context);
+  const savedPath = join(
+    record.workspacePath,
+    "loop1",
+    "reviewed-recommendation.json",
+  );
+  if (!existsSync(savedPath)) {
+    throw new StageError(
+      "loop2-retry-review-missing",
+      "Loop 2 retry rejected because the accepted reviewed recommendation is missing.",
+      false,
+    );
+  }
+  const saved = readJson(savedPath);
+  let savedArtifact;
+  let retryArtifact;
+  try {
+    savedArtifact = canonicalReviewedArtifact(saved.suggestedArtifact);
+    retryArtifact = canonicalReviewedArtifact(recommendation.suggestedArtifact);
+  } catch (error) {
+    throw new StageError("loop2-retry-artifact-invalid", error.message, false);
+  }
+  if (savedArtifact !== retryArtifact) {
+    throw new StageError(
+      "loop2-retry-review-mismatch",
+      "Loop 2 retry cannot change the accepted canonical artifact.",
+      false,
+    );
+  }
+  const allowedCorrections = new Set([
+    "suggestedArtifact",
+    "artifactTreatment",
+    "possibleFutureArtifact",
+    "researchRequirements",
+  ]);
+  const stableSaved = Object.fromEntries(
+    Object.entries(saved).filter(([key]) => !allowedCorrections.has(key)),
+  );
+  const stableRetry = Object.fromEntries(
+    Object.entries(recommendation).filter(([key]) => !allowedCorrections.has(key)),
+  );
+  if (!isDeepStrictEqual(stableSaved, stableRetry)) {
+    throw new StageError(
+      "loop2-retry-review-mismatch",
+      "Loop 2 retry cannot change the accepted review beyond artifact representation and narrative treatment.",
+      false,
+    );
+  }
+  if (
+    !isDeepStrictEqual(saved, recommendation) &&
+    (!/^[a-f0-9]{64}$/.test(envelope.supersedesEnvelopeSha256 || "") ||
+      typeof envelope.supersessionReason !== "string" ||
+      !envelope.supersessionReason.trim())
+  ) {
+    throw new StageError(
+      "loop2-retry-supersession-missing",
+      "A corrected retry envelope must fingerprint and explain the envelope it operationally supersedes.",
+      false,
+    );
+  }
+  return { recommendation, saved, savedPath };
 }
 
 function validateCompletedReviewReplay(envelope, context) {
@@ -1037,7 +1163,35 @@ async function processClaimedIssue(context) {
 
     let recommendation;
     let recommendationPath;
-    if (record.processingStatus === "awaiting-loop1-review") {
+    if (
+      options.retryLoop2 &&
+      record.processingStatus === "failed-retriable" &&
+      record.currentOrFinalStage === "loop2"
+    ) {
+      const envelope = readJson(options.reviewedRecommendation);
+      const retry = validateLoop2RetryEnvelope(envelope, {
+        issue,
+        record,
+        currentProcessingCommitSha: context.processingCommitSha,
+      });
+      recommendation = retry.recommendation;
+      const archivePath = join(
+        record.workspacePath,
+        "loop1",
+        "reviewed-recommendation.pre-loop2-retry.json",
+      );
+      if (!existsSync(archivePath)) atomicWriteJson(archivePath, retry.saved);
+      recommendationPath = retry.savedPath;
+      atomicWriteJson(recommendationPath, recommendation);
+      record.reviewEnvelopeSha256 = sha256(
+        readFileSync(options.reviewedRecommendation),
+      );
+      record.resumeProcessingCommitSha = context.processingCommitSha;
+      record.processingStatus = "claimed";
+      record.failureCategory = null;
+      record.failureMessage = null;
+      persist();
+    } else if (record.processingStatus === "awaiting-loop1-review") {
       const envelope = readJson(options.reviewedRecommendation);
       recommendation = validateReviewEnvelope(envelope, {
         issue,
@@ -1051,6 +1205,9 @@ async function processClaimedIssue(context) {
         "reviewed-recommendation.json",
       );
       atomicWriteJson(recommendationPath, recommendation);
+      record.reviewEnvelopeSha256 = sha256(
+        readFileSync(options.reviewedRecommendation),
+      );
       record.processingStatus = "claimed";
       record.currentOrFinalStage = "loop2";
       persist();
@@ -1085,7 +1242,9 @@ async function processClaimedIssue(context) {
       return;
     }
 
-    const loop2Dir = join(record.workspacePath, "loop2");
+    const loop2Dir = options.retryLoop2
+      ? join(record.workspacePath, "loop2", `retry-${record.attemptCount}`)
+      : join(record.workspacePath, "loop2");
     ensureDir(loop2Dir);
     const loop2 = await (deps.runLoop2 || defaultRunLoop2)({
       issue,
@@ -1250,6 +1409,31 @@ export async function processBacklog(options, deps = {}) {
   if (options.mode === "execute" && (!options.stateDir || !options.workRoot)) {
     throw new Error("--state-dir and --work-root are required.");
   }
+  if (options.retryLoop2) {
+    const stopCount = options.stopAfterLoop2Count ??
+      (options.stopAfterLoop2 ? 1 : 0);
+    if (
+      options.mode !== "execute" ||
+      options.issueNumber === undefined ||
+      options.limit !== 1 ||
+      !options.reviewedRecommendation
+    ) {
+      throw new Error(
+        "--retry-loop2 requires --execute, --issue-number, --limit 1, and --reviewed-recommendation.",
+      );
+    }
+    if (stopCount !== 1) {
+      throw new Error(
+        "--retry-loop2 requires exactly one --stop-after-loop2.",
+      );
+    }
+    const clean = deps.repositoryIsClean
+      ? deps.repositoryIsClean(options.repoPath)
+      : repositoryIsClean(options.repoPath);
+    if (!clean) {
+      throw new Error("--retry-loop2 requires a clean repository.");
+    }
+  }
 
   const timestamp = now(deps);
   const runId = `${timestamp.replace(/[^0-9]/g, "").slice(0, 14)}-${randomUUID()}`;
@@ -1326,7 +1510,13 @@ export async function processBacklog(options, deps = {}) {
           "Reviewed recommendation rejected: no matching issue is awaiting Loop 1 review in this registry.",
         );
       }
-      if (COMPLETE_STATES.has(reviewRecord.processingStatus)) {
+      if (options.retryLoop2) {
+        validateLoop2RetryEnvelope(reviewEnvelope, {
+          issue: reviewIssue,
+          record: reviewRecord,
+          currentProcessingCommitSha: processingCommitSha,
+        });
+      } else if (COMPLETE_STATES.has(reviewRecord.processingStatus)) {
         validateCompletedReviewReplay(reviewEnvelope, {
           issue: reviewIssue,
           record: reviewRecord,
@@ -1429,7 +1619,11 @@ export async function processBacklog(options, deps = {}) {
           const notificationResume =
             previous?.processingStatus === "failed-retriable" &&
             previous.currentOrFinalStage === "notification";
-          if (!reviewResume && !notificationResume) {
+          const loop2Retry =
+            options.retryLoop2 &&
+            previous?.processingStatus === "failed-retriable" &&
+            previous.currentOrFinalStage === "loop2";
+          if (!reviewResume && !notificationResume && !loop2Retry) {
             record = makeRecord(issue, previous, {
               fetchedAt: source.fetchedAt,
               timestamp: now(deps),
@@ -1460,7 +1654,7 @@ export async function processBacklog(options, deps = {}) {
             record.attemptCount += 1;
             record.resumeProcessingCommitSha = processingCommitSha;
           }
-          if (!reviewResume && !notificationResume) {
+          if (!reviewResume && !notificationResume && !loop2Retry) {
             record.processingStatus = "claimed";
           }
           persistRegistry(stateDir, registry, now(deps));

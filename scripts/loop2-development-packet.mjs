@@ -9,6 +9,7 @@ import {
   reconcileSourceSufficiency,
   validateLoop2Consistency,
 } from './lib/loop2-consistency.mjs';
+import { canonicalReviewedArtifact } from './lib/artifact-vocabulary.mjs';
 
 const REPO_ROOT = process.cwd();
 const SCHEMA_PATH = path.join(
@@ -243,14 +244,6 @@ function stripStructuralIntakePrelude(rawBody) {
   }
 
   return lines.slice(index).join('\n').trim();
-}
-
-function canonicalArtifactType(value) {
-  const normalized = value.toLowerCase().trim();
-  if (normalized === 'prototype-note' || normalized === 'prototype note') {
-    return 'prototype-note';
-  }
-  return value;
 }
 
 function extractLevelTwoSection(rawBody, heading) {
@@ -1155,6 +1148,7 @@ function validateRecommendation(rec) {
   for (const key of required) {
     if (!rec[key]) throw new Error(`Recommendation missing required field: ${key}`);
   }
+  canonicalReviewedArtifact(rec.suggestedArtifact);
   if (
     rec.combineTargetReference &&
     !COMBINE_DISPOSITIONS.has(rec.disposition)
@@ -1228,6 +1222,10 @@ function joinCleanSentences(items) {
 }
 
 function buildResearchPlan(recommendation, claims) {
+  const explicitRequirements = uniqueResearchItems(
+    recommendation.researchRequirements ?? [],
+    16,
+  );
   const reviewedRequirements = uniqueResearchItems([
     recommendation.nextAction,
     recommendation.uncertaintyOrReviewFlag,
@@ -1246,6 +1244,9 @@ function buildResearchPlan(recommendation, claims) {
   }
   if (reviewedRequirements.length > 0) {
     evidenceNeededForReady = reviewedRequirements;
+  }
+  if (explicitRequirements.length > 0) {
+    evidenceNeededForReady = explicitRequirements;
   }
 
   let claimsRequiringVerification = sourceClaims;
@@ -1342,6 +1343,8 @@ function buildPacket({
         `https://github.com/MLX983/dfw-intake/issues/${recommendation.issueNumber}`,
     },
     approvedArtifactType,
+    artifactTreatment: recommendation.artifactTreatment ?? '',
+    possibleFutureArtifact: recommendation.possibleFutureArtifact ?? '',
     primaryDomain: recommendation.primaryDomain,
     theme: recommendation.themeOrCluster || '',
     workingTitle,
@@ -1429,6 +1432,8 @@ function validatePacket(packet, recommendation) {
     'contractVersion',
     'issueReference',
     'approvedArtifactType',
+    'artifactTreatment',
+    'possibleFutureArtifact',
     'primaryDomain',
     'theme',
     'workingTitle',
@@ -1525,6 +1530,8 @@ function buildSummaryMarkdown(packet) {
     `- **Issue:** #${packet.issueReference.number} — ${packet.issueReference.title}`,
     `- **Draft readiness:** ${packet.draftReadiness}`,
     `- **Approved artifact:** ${packet.approvedArtifactType}`,
+    `- **Artifact treatment:** ${packet.artifactTreatment || '(none)'}`,
+    `- **Possible future artifact:** ${packet.possibleFutureArtifact || '(none)'}`,
     `- **Primary domain:** ${packet.primaryDomain}`,
     `- **Theme:** ${packet.theme || '(none)'}`,
     '',
@@ -1599,7 +1606,7 @@ async function main() {
   const issueMeta = extractIssueMetadata(issueBody);
   const recommendation = await readJson(recommendationPath);
   validateRecommendation(recommendation);
-  const approvedArtifactType = canonicalArtifactType(
+  const approvedArtifactType = canonicalReviewedArtifact(
     recommendation.suggestedArtifact,
   );
 

@@ -13,7 +13,10 @@ Machine schema: `loop1-reviewed-recommendation.v1.schema.json`
 | `contractVersion` | yes | Always `loop1-reviewed-recommendation.v1` |
 | `issueNumber` | yes | Intake repo issue number |
 | `disposition` | yes | Reviewed editorial stance |
-| `suggestedArtifact` | yes | Smallest adequate artifact or supporting role |
+| `suggestedArtifact` | yes | Canonical artifact identity from the content schema |
+| `artifactTreatment` | no | Current narrative treatment or qualifier |
+| `possibleFutureArtifact` | no | Conditional future artifact possibility |
+| `researchRequirements` | no | Explicit evidence questions required before development |
 | `primaryDomain` | yes | One canonical DFW domain |
 | `themeOrCluster` | no | Omit when unset |
 | `rationale` | yes | 1–2 concise sentences |
@@ -45,6 +48,19 @@ Reviewed dispositions observed in the manual trial:
 - `combine with overlapping material`
 
 Additional allowed values for edge cases: `preserve as seed`, `defer`, `needs human judgment`, `not for publication`.
+
+## Artifact identity and narrative treatment
+
+New records must use the exact canonical content-schema value in
+`suggestedArtifact`, such as `seed`, `note`, or `field-report`. Status and
+editorial qualification belong in `artifactTreatment`; a conditional later
+form belongs in `possibleFutureArtifact`.
+
+The processor retains exact-match compatibility for these historical v1
+values only: `prototype note`, `field report`, `seed pending sourcing`,
+`seed, with potential to become a field report`, `supporting seed`, and
+`supporting note or section within the loop-engineering cluster`. The mapping
+is explicit and deprecated. Unknown or ambiguous artifact text is rejected.
 
 ## GitHub comment mapping
 

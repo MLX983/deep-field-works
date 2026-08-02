@@ -569,6 +569,33 @@ existing packet. Do not run Loop 1 again. If the registry records
 processor preserves prior result metadata and creates a new run workspace when
 required.
 
+If Loop 2 alone failed before a packet was created after accepted human review,
+use the explicit bounded retry path:
+
+```bash
+npm run backlog:process -- \
+  --execute \
+  --repo "$DFW_SOURCE_REPO" \
+  --repo-path "$DFW_REPO_PATH" \
+  --limit 1 \
+  --issue-number "$ISSUE_NUMBER" \
+  --state-dir "$DFW_STATE_DIR" \
+  --work-root "$DFW_WORK_ROOT" \
+  --reviewed-recommendation "$REVIEW_ENVELOPE" \
+  --retry-loop2 \
+  --stop-after-loop2
+```
+
+This path requires a clean repository and exactly one `--stop-after-loop2`.
+It revalidates the issue, source fingerprint, original and resuming commits,
+workspace, and Loop 1 result; preserves the original Loop 1 outputs; archives
+the previously saved recommendation if a contract-only correction is supplied;
+and rejects a retry if a Loop 2 packet or downstream directory exists. A
+corrected recommendation may only change the artifact representation and its
+separate narrative treatment while preserving the accepted editorial decision.
+The corrected private envelope must fingerprint and explain the earlier
+envelope it operationally supersedes.
+
 ### Failed or uncertain notification
 
 | Result | Action |

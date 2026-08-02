@@ -31,8 +31,22 @@
     },
     "workspacePath": { "type": "string", "minLength": 1 },
     "loop1ResultSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supersedesEnvelopeSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Optional fingerprint of an earlier private envelope corrected for an operational retry."
+    },
+    "supersessionReason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Why this envelope operationally supersedes the fingerprinted envelope without replacing its human decision."
+    },
     "recommendation": {
       "$ref": "loop1-reviewed-recommendation.v1.schema.json"
     }
+  },
+  "dependentRequired": {
+    "supersedesEnvelopeSha256": ["supersessionReason"],
+    "supersessionReason": ["supersedesEnvelopeSha256"]
   }
 }

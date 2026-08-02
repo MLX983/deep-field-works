@@ -108,6 +108,83 @@ try {
   await fs.access(path.join(validOut, 'loop2-9601-summary.md'));
   console.log('PASS valid-prototype-note: generated packet is schema-valid');
 
+  const artifactBase = JSON.parse(
+    await fs.readFile(
+      path.join(adversarialFixtureRoot, 'recommendation-research-sparse.json'),
+      'utf8',
+    ),
+  );
+  for (const [name, suggestedArtifact] of [
+    ['legacy-qualified-seed', 'seed pending sourcing'],
+    ['canonical-seed', 'seed'],
+  ]) {
+    const recommendationPath = path.join(tempRoot, `${name}.json`);
+    await fs.writeFile(
+      recommendationPath,
+      `${JSON.stringify({
+        ...artifactBase,
+        suggestedArtifact,
+        artifactTreatment: 'retain as seed pending sourcing',
+        possibleFutureArtifact: 'sourced field-report after research',
+        researchRequirements: [
+          'Hyperscaler AI capital-expenditure trajectories.',
+          'Investment-to-utilization-to-return timing.',
+        ],
+      }, null, 2)}\n`,
+    );
+    const out = path.join(tempRoot, name);
+    const run = await runNode([
+      runnerPath,
+      '--issue',
+      path.join(adversarialFixtureRoot, 'issue-research-sparse.md'),
+      '--recommendation',
+      recommendationPath,
+      '--out-dir',
+      out,
+    ]);
+    assert.equal(run.code, 2, run.stderr || run.stdout);
+    const packet = JSON.parse(
+      await fs.readFile(path.join(out, 'loop2-9111-packet.json'), 'utf8'),
+    );
+    assert.equal(packet.approvedArtifactType, 'seed');
+    assert.equal(packet.artifactTreatment, 'retain as seed pending sourcing');
+    assert.equal(
+      packet.possibleFutureArtifact,
+      'sourced field-report after research',
+    );
+    assert.deepEqual(packet.sourceRequirements, [
+      'Hyperscaler AI capital-expenditure trajectories.',
+      'Investment-to-utilization-to-return timing.',
+    ]);
+    assert.equal(validate(packet), true, ajv.errorsText(validate.errors));
+    assert.deepEqual(
+      (await fs.readdir(out)).sort(),
+      ['loop2-9111-packet.json', 'loop2-9111-summary.md'],
+    );
+  }
+  console.log('PASS artifact-canonicalization: canonical output preserves narrative treatment');
+
+  const ambiguousPath = path.join(tempRoot, 'ambiguous-artifact.json');
+  await fs.writeFile(
+    ambiguousPath,
+    `${JSON.stringify({
+      ...artifactBase,
+      suggestedArtifact: 'seed or perhaps note',
+    }, null, 2)}\n`,
+  );
+  const ambiguousArtifactRun = await runNode([
+    runnerPath,
+    '--issue',
+    path.join(adversarialFixtureRoot, 'issue-research-sparse.md'),
+    '--recommendation',
+    ambiguousPath,
+    '--out-dir',
+    path.join(tempRoot, 'ambiguous-output'),
+  ]);
+  assert.equal(ambiguousArtifactRun.code, 1);
+  assert.match(ambiguousArtifactRun.stderr, /Unsupported or ambiguous suggestedArtifact/);
+  console.log('PASS artifact-canonicalization-ambiguous: unknown text fails closed');
+
   for (const [expectedReadiness, expectedCode, cases] of [
     ['ready', 0, reviewFlagCases.nonBlocking],
     ['research-required', 2, reviewFlagCases.blocking],

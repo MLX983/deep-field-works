@@ -11,6 +11,7 @@ Options:
   --source-snapshot PATH           Use an immutable local issue snapshot instead of GitHub.
   --issue-number N                 Restrict selection and execution to one issue.
   --reviewed-recommendation PATH   Resume one awaiting issue with a bound approval envelope.
+  --retry-loop2                    Retry only a failed-retriable Loop 2 attempt.
   --reprocess-changed              Reprocess a completed issue whose source changed.
   --recover-stale-claims           Recover claims older than the configured timeout.
   --claim-timeout-minutes N        Stale threshold (default: 120).
@@ -24,6 +25,8 @@ function parseArgs(argv) {
     mode: null,
     sendNotification: false,
     stopAfterLoop2: false,
+    stopAfterLoop2Count: 0,
+    retryLoop2: false,
     reprocessChanged: false,
     recoverStaleClaims: false,
     claimTimeoutMinutes: 120,
@@ -54,6 +57,9 @@ function parseArgs(argv) {
       options.sendNotification = true;
     } else if (arg === "--stop-after-loop2") {
       options.stopAfterLoop2 = true;
+      options.stopAfterLoop2Count += 1;
+    } else if (arg === "--retry-loop2") {
+      options.retryLoop2 = true;
     } else if (arg === "--reprocess-changed") {
       options.reprocessChanged = true;
     } else if (arg === "--recover-stale-claims") {

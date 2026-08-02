@@ -1,3 +1,5 @@
+import { canonicalReviewedArtifact } from './artifact-vocabulary.mjs';
+
 const COMBINE_DISPOSITIONS = new Set([
   'combine with existing material',
   'combine with overlapping material',
@@ -11,16 +13,6 @@ const PRESERVATION_DISPOSITIONS = new Set([
 
 function artifactLabel(artifactType) {
   return String(artifactType ?? '').replaceAll('-', ' ');
-}
-
-function canonicalArtifactType(artifactType) {
-  const value = artifactLabel(artifactType).trim().toLowerCase();
-  if (value.includes('prototype note')) return 'prototype-note';
-  if (value.includes('field report')) return 'field-report';
-  if (value.includes('note')) return 'note';
-  if (value.includes('essay')) return 'essay';
-  if (value.includes('seed')) return 'seed';
-  return value.replace(/\s+/g, '-');
 }
 
 export function reconcileSourceSufficiency(
@@ -178,13 +170,38 @@ export function validateLoop2Consistency(packet, recommendation) {
     draftReadiness: packet.draftReadiness,
   });
 
-  if (
-    packet.approvedArtifactType !==
-    canonicalArtifactType(recommendation.suggestedArtifact)
-  ) {
+  let reviewedArtifact;
+  let packetArtifact;
+  try {
+    reviewedArtifact = canonicalReviewedArtifact(recommendation.suggestedArtifact);
+  } catch (error) {
+    errors.push(error.message);
+  }
+  try {
+    packetArtifact = canonicalReviewedArtifact(packet.approvedArtifactType);
+  } catch (error) {
+    errors.push(`packet ${error.message}`);
+  }
+  if (reviewedArtifact && packetArtifact && packetArtifact !== reviewedArtifact) {
     errors.push(
       `artifact conflict: packet=${packet.approvedArtifactType}, reviewed=${recommendation.suggestedArtifact}`,
     );
+  }
+  if (
+    (packet.artifactTreatment ?? '') !== (recommendation.artifactTreatment ?? '')
+  ) {
+    errors.push('artifact-treatment conflict');
+  }
+  if (
+    (packet.possibleFutureArtifact ?? '') !==
+    (recommendation.possibleFutureArtifact ?? '')
+  ) {
+    errors.push('possible-future-artifact conflict');
+  }
+  for (const requirement of recommendation.researchRequirements ?? []) {
+    if (!packet.sourceRequirements.includes(requirement)) {
+      errors.push(`research requirement missing from packet: ${requirement}`);
+    }
   }
   if (packet.primaryDomain !== recommendation.primaryDomain) {
     errors.push(

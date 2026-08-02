@@ -127,6 +127,12 @@ withholds drafting authorization, add:
 --stop-after-loop2
 ```
 
+For a targeted `failed-retriable` Loop 2 failure after accepted review but
+before packet creation, add `--retry-loop2`. This explicit operator path
+requires `--execute`, `--limit 1`, `--issue-number`, a bound review envelope, a
+clean repository, and exactly one `--stop-after-loop2`. It preserves Loop 1 and
+fails closed if a Loop 2 packet or downstream work already exists.
+
 If Loop 2 is draft-ready, the processor records
 `completed-waiting-for-human` at stage `loop2`, preserves the ready packet, and
 does not create an orchestration directory or invoke notification. A later

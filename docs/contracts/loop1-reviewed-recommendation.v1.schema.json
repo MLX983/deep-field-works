@@ -40,8 +40,41 @@
     },
     "suggestedArtifact": {
       "type": "string",
+      "enum": [
+        "seed",
+        "note",
+        "field-report",
+        "essay",
+        "experiment",
+        "prototype-note",
+        "concept",
+        "checkpoint",
+        "project-log",
+        "prototype note",
+        "field report",
+        "seed pending sourcing",
+        "seed, with potential to become a field report",
+        "supporting seed",
+        "supporting note or section within the loop-engineering cluster"
+      ],
+      "description": "Canonical artifact identity. Newly authored records must use the canonical content-schema value. Listed narrative phrases are deprecated exact-match compatibility inputs."
+    },
+    "artifactTreatment": {
+      "type": "string",
       "minLength": 1,
-      "description": "Smallest adequate artifact or role (e.g. note, seed, supporting seed, section within a cluster)."
+      "description": "Human-readable current treatment or qualifier; never used as the artifact enum."
+    },
+    "possibleFutureArtifact": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Conditional future artifact possibility; does not authorize changing the current artifact."
+    },
+    "researchRequirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Human-reviewed evidence questions that must be answered before development."
     },
     "primaryDomain": {
       "type": "string",

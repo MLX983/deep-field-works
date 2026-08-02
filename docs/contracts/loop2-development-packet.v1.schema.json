@@ -40,7 +40,18 @@
         "url": { "type": "string", "minLength": 1 }
       }
     },
-    "approvedArtifactType": { "type": "string", "minLength": 1 },
+    "approvedArtifactType": {
+      "enum": [
+        "seed", "note", "field-report", "essay", "experiment",
+        "prototype-note", "concept", "checkpoint", "project-log",
+        "prototype note", "field report", "seed pending sourcing",
+        "seed, with potential to become a field report", "supporting seed",
+        "supporting note or section within the loop-engineering cluster"
+      ],
+      "description": "Canonical artifact identity. Exact historical v1 phrases remain accepted for packet compatibility; generators must emit canonical values."
+    },
+    "artifactTreatment": { "type": "string" },
+    "possibleFutureArtifact": { "type": "string" },
     "primaryDomain": {
       "type": "string",
       "enum": [

@@ -207,6 +207,55 @@ async function resume(
   );
 }
 
+async function failedLoop2Setup(name) {
+  const setup = options(name, [issue(1)], { limit: 1, issueNumber: 1 });
+  await firstPass(setup);
+  const originalEnvelope = makeEnvelope(
+    setup,
+    1,
+    "develop independently",
+    (envelope) => {
+      envelope.recommendation.suggestedArtifact = "seed pending sourcing";
+    },
+  );
+  const failed = await processBacklog(
+    {
+      ...setup.value,
+      reviewedRecommendation: originalEnvelope,
+      stopAfterLoop2: true,
+      stopAfterLoop2Count: 1,
+    },
+    mockDeps({
+      runLoop2: async () => {
+        throw new StageError("loop2-failed", "Loop 2 exited 1.", true);
+      },
+    }),
+  );
+  assert.equal(failed.batch.results[0].processingStatus, "failed-retriable");
+  assert.equal(failed.batch.results[0].currentOrFinalStage, "loop2");
+  const record = readRegistry(setup).issues["1"];
+  const retryEnvelope = makeEnvelope(
+    setup,
+    1,
+    "develop independently",
+    (envelope) => {
+      envelope.recommendation.suggestedArtifact = "seed";
+      envelope.recommendation.artifactTreatment =
+        "retain as seed pending sourcing";
+      envelope.recommendation.possibleFutureArtifact =
+        "sourced field-report after research";
+      envelope.recommendation.researchRequirements = [
+        "Hyperscaler AI capital-expenditure trajectories.",
+      ];
+      envelope.supersedesEnvelopeSha256 = "a".repeat(64);
+      envelope.supersessionReason =
+        "Correct canonical artifact representation after a pre-packet Loop 2 failure.";
+    },
+    RESUME_COMMIT,
+  );
+  return { setup, record, retryEnvelope };
+}
+
 test("01 dry-run shows ordered candidates and skip reasons", async () => {
   const setup = options("dry-order", [issue(3), issue(1), issue(2)], {
     mode: "dry-run",
@@ -1371,6 +1420,151 @@ test("58 explicit Loop 2 stop records ready state without drafting", async () =>
   assert.match(
     result.batch.results[0].recommendedNextAction,
     /explicitly authorize drafting/,
+  );
+});
+
+test("58a failed Loop 2 retries in place without rerunning Loop 1", async () => {
+  const { setup, record: failedRecord, retryEnvelope } =
+    await failedLoop2Setup("loop2-retry");
+  let loop1Calls = 0;
+  let loop2Calls = 0;
+  let laterCalls = 0;
+  const deps = mockDeps({
+    processingCommitSha: RESUME_COMMIT,
+    repositoryIsClean: () => true,
+    runLoop1: async () => {
+      loop1Calls += 1;
+      throw new Error("Loop 1 must not rerun");
+    },
+    runLoop2: async (context) => {
+      loop2Calls += 1;
+      const packetPath = join(context.loop2Dir, "loop2-1-packet.json");
+      writeJson(packetPath, {
+        contractVersion: "loop2-development-packet.v1",
+        issueReference: { number: 1 },
+        disposition: "develop independently",
+        draftReadiness: "ready",
+      });
+      return { packetPath };
+    },
+    runOrchestration: async () => {
+      laterCalls += 1;
+      throw new Error("Loops 3-5 must not run");
+    },
+    notifyReview: async () => {
+      laterCalls += 1;
+      throw new Error("Publication or notification must not run");
+    },
+  });
+  await processBacklog(
+    {
+      ...setup.value,
+      reviewedRecommendation: retryEnvelope,
+      retryLoop2: true,
+      stopAfterLoop2: true,
+      stopAfterLoop2Count: 1,
+    },
+    deps,
+  );
+  const record = readRegistry(setup).issues["1"];
+  assert.equal(loop1Calls, 0);
+  assert.equal(loop2Calls, 1);
+  assert.equal(laterCalls, 0);
+  assert.equal(record.workspacePath, failedRecord.workspacePath);
+  assert.equal(record.loop1ResultSha256, failedRecord.loop1ResultSha256);
+  assert.equal(record.processingStatus, "completed-waiting-for-human");
+  assert.equal(record.currentOrFinalStage, "loop2");
+  assert.equal(record.attemptCount, 3);
+  assert.match(record.loop2PacketPath, /\/loop2\/retry-3\/loop2-1-packet\.json$/);
+  const archived = JSON.parse(readFileSync(join(
+    record.workspacePath,
+    "loop1",
+    "reviewed-recommendation.pre-loop2-retry.json",
+  ), "utf8"));
+  assert.equal(archived.suggestedArtifact, "seed pending sourcing");
+  const corrected = JSON.parse(readFileSync(join(
+    record.workspacePath,
+    "loop1",
+    "reviewed-recommendation.json",
+  ), "utf8"));
+  assert.equal(corrected.suggestedArtifact, "seed");
+  assert.equal(corrected.artifactTreatment, "retain as seed pending sourcing");
+  assert.equal(
+    corrected.possibleFutureArtifact,
+    "sourced field-report after research",
+  );
+  assert.equal(existsSync(join(record.workspacePath, "orchestration")), false);
+});
+
+test("58b Loop 2 retry rejects immutable binding changes", async () => {
+  const { setup, retryEnvelope } = await failedLoop2Setup("loop2-retry-binding");
+  const envelope = JSON.parse(readFileSync(retryEnvelope, "utf8"));
+  envelope.loop1ResultSha256 = "b".repeat(64);
+  writeJson(retryEnvelope, envelope);
+  await assert.rejects(
+    () => processBacklog({
+      ...setup.value,
+      reviewedRecommendation: retryEnvelope,
+      retryLoop2: true,
+      stopAfterLoop2: true,
+      stopAfterLoop2Count: 1,
+    }, mockDeps({
+      processingCommitSha: RESUME_COMMIT,
+      repositoryIsClean: () => true,
+    })),
+    /loop1ResultSha256/,
+  );
+});
+
+test("58c Loop 2 retry rejects an existing packet", async () => {
+  const { setup, record, retryEnvelope } = await failedLoop2Setup("loop2-retry-packet");
+  writeJson(join(record.workspacePath, "loop2", "loop2-1-packet.json"), {});
+  await assert.rejects(
+    () => processBacklog({
+      ...setup.value,
+      reviewedRecommendation: retryEnvelope,
+      retryLoop2: true,
+      stopAfterLoop2: true,
+      stopAfterLoop2Count: 1,
+    }, mockDeps({
+      processingCommitSha: RESUME_COMMIT,
+      repositoryIsClean: () => true,
+    })),
+    /packet or downstream record already exists/,
+  );
+});
+
+test("58d Loop 2 retry requires exactly one stop flag", async () => {
+  const { setup, retryEnvelope } = await failedLoop2Setup("loop2-retry-stop");
+  await assert.rejects(
+    () => processBacklog({
+      ...setup.value,
+      reviewedRecommendation: retryEnvelope,
+      retryLoop2: true,
+      stopAfterLoop2: false,
+      stopAfterLoop2Count: 0,
+    }, mockDeps({
+      processingCommitSha: RESUME_COMMIT,
+      repositoryIsClean: () => true,
+    })),
+    /exactly one --stop-after-loop2/,
+  );
+});
+
+test("58e Loop 2 retry requires a clean repository", async () => {
+  const { setup, retryEnvelope } = await failedLoop2Setup("loop2-retry-clean");
+  await assert.rejects(
+    () => processBacklog({
+      ...setup.value,
+      reviewedRecommendation: retryEnvelope,
+      retryLoop2: true,
+      stopAfterLoop2: true,
+      stopAfterLoop2Count: 1,
+    }, mockDeps({
+      processingCommitSha: RESUME_COMMIT,
+      repositoryIsClean: () => false,
+    })),
+    /requires a clean repository/,
   );
 });
 
