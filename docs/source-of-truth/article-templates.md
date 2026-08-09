@@ -341,6 +341,8 @@ Use for interpreting an external signal: article, product launch, organizational
 
 Target length: 500–1,200 words.
 
+When a field report is treated as long-form, default to approximately 700–1,000 words. More than approximately 1,200 words requires a clear editorial reason. These are strong defaults with human editorial override, not mechanical publication limits.
+
 ```md
 ---
 title: ""
@@ -407,12 +409,21 @@ A field report should have:
 * uncertainty
 * larger pattern
 * what to watch next
+* one central thesis or distinction
+* 3–5 major sections by default
+* one meaningful counterargument or counterpressure when appropriate
+* representative evidence rather than a source inventory
 
 A field report does not need:
 
 * final conclusion
 * comprehensive research
+* exhaustive proof
+* academic treatment
+* complete topic education
 * polished thesis
+
+Research can be extensive in the internal dossier. The public field report should synthesize only enough evidence to establish the point. End when the point lands rather than recapping the research.
 
 ---
 

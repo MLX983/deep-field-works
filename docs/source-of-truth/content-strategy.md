@@ -595,6 +595,87 @@ They can evolve, but changes should be deliberate.
 
 ---
 
+## Three-layer evidence architecture
+
+Research-heavy work should preserve a clear boundary between internal evidence, the public argument, and optional public references.
+
+### Layer 1 — Internal research dossier
+
+Approved location:
+
+```text
+docs/development/research/
+```
+
+Purpose:
+
+* deep research
+* source inventory
+* access dates
+* claim ledger
+* counterevidence
+* rejected or unsupported claims
+* provenance
+* editorial conclusions
+* research questions
+
+Research dossiers may be detailed. Retain them in Git when the source material is safe for repository access. They must remain production excluded and non-reader-facing. They must not contain credentials, sensitive data, or copyrighted full-text source material.
+
+### Layer 2 — Public article
+
+The public article is a short synthesis: a sharp pattern, distinction, or argument supported by only enough evidence to establish the point.
+
+The article is not the research dossier.
+
+### Layer 3 — Public references companion
+
+A research-heavy public piece may have an optional references page belonging to the parent article.
+
+Conceptual URL:
+
+```text
+<article-url>/references
+```
+
+Example:
+
+```text
+/field-notes/capacity-expansion-under-a-higher-standard-of-proof/references
+```
+
+Its purpose is a simple source list supporting the parent article.
+
+Presentation should remain intentionally plain:
+
+* source titles and links
+* optional numbering that matches article citation markers
+* no research narrative
+* no claim ledger
+* no explanation of what each source proves
+* no independent editorial argument
+
+The companion page:
+
+* belongs to its parent article
+* is not an independent content artifact
+* is not listed in chronology
+* is not listed on domain pages
+* is not treated as a related piece
+* is not independently canonical
+* is not surfaced on homepage or archive listings
+* inherits the parent publication lifecycle
+* is reached through a restrained **Sources and references** link on the parent article
+
+This architecture does not approve a schema, route, or UI implementation. Those require separate human review.
+
+### Citation direction
+
+Avoid long inline source-title links throughout public prose. Prefer restrained numbered citation markers or another Figma-approved lightweight treatment. Markers may resolve to the companion references page.
+
+The exact visual and interaction behavior remains intentionally unresolved pending Figma design and human review.
+
+---
+
 # Site structure strategy
 
 The site should support both chronological discovery and thematic discovery.

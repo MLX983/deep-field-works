@@ -255,6 +255,61 @@ const withBase = (path: string) =>
         place(aside, callout.placement);
         if (callout.sourceBehavior === 'extract') sourceParagraph?.remove();
       }
+
+      for (const link of body.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
+        link.dataset.citation = '';
+        const label = link.textContent?.trim() ?? '';
+        const isMarketReaction = /\b(?:Reuters|AP)\b/i.test(label);
+        link.dataset.sourceKind = isMarketReaction ? 'market-reaction' : 'primary-or-institutional';
+        link.setAttribute(
+          'aria-label',
+          `${label} (${isMarketReaction ? 'market-reaction reporting' : 'primary or institutional source'})`,
+        );
+      }
+
+      const findHeading = (text: string) =>
+        [...body.querySelectorAll<HTMLHeadingElement>(':scope > h2')].find(
+          (heading) => heading.textContent?.trim() === text,
+        );
+
+      const timingHeading = findHeading('Cash leaves before returns accumulate');
+      if (timingHeading) {
+        let next = timingHeading.nextElementSibling;
+        while (next && next.tagName !== 'H2') {
+          if (next instanceof HTMLOListElement) {
+            next.classList.add('review-timing-model');
+            next.setAttribute('aria-label', 'Investment-to-return timing model');
+            break;
+          }
+          next = next.nextElementSibling;
+        }
+      }
+
+      const measuresParagraph = [...body.querySelectorAll<HTMLParagraphElement>(':scope > p')].find(
+        (paragraph) => paragraph.textContent?.trim().startsWith('Cloud revenue is not gross margin.'),
+      );
+      measuresParagraph?.classList.add('review-measure-ledger');
+
+      const counterargumentHeading = findHeading('The strongest case against a new regime');
+      if (counterargumentHeading) {
+        const nodes = findSectionNodes('The strongest case against a new regime');
+        const section = document.createElement('section');
+        section.className = 'review-counterargument';
+        section.setAttribute('aria-labelledby', 'counterargument-heading');
+        counterargumentHeading.id = 'counterargument-heading';
+        counterargumentHeading.before(section);
+        section.append(...nodes);
+      }
+
+      const relatedTopic = [...body.querySelectorAll<HTMLParagraphElement>(':scope > p')].find(
+        (paragraph) => paragraph.textContent?.trim().startsWith('Related: Issue #25'),
+      );
+      if (relatedTopic) {
+        relatedTopic.classList.add('review-related-topic');
+        if (relatedTopic.previousElementSibling instanceof HTMLHRElement) {
+          relatedTopic.previousElementSibling.classList.add('review-related-divider');
+        }
+      }
     }
   </script>
 </BaseLayout>
@@ -357,6 +412,91 @@ const withBase = (path: string) =>
     overflow-wrap: break-word;
   }
 
+  .article__body :global(h2) {
+    margin-top: var(--space-600);
+  }
+
+  .article__body :global(a[data-citation]) {
+    font-size: 0.86em;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+  }
+
+  .article__body :global(a[data-source-kind='market-reaction']) {
+    text-decoration-style: dotted;
+  }
+
+  .article__body :global(.review-measure-ledger) {
+    margin: var(--space-300) 0;
+    padding: var(--space-200) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-header);
+  }
+
+  .article__body :global(.review-timing-model) {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-200);
+    margin: var(--space-300) 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: timing-stage;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .article__body :global(.review-timing-model li) {
+    position: relative;
+    display: grid;
+    flex: 0 0 8.5rem;
+    align-content: start;
+    min-height: 5.5rem;
+    margin: 0;
+    padding: var(--space-100) var(--space-300) var(--space-100) 0;
+    border-top: 1px solid var(--color-border);
+    counter-increment: timing-stage;
+    font-size: 0.86em;
+    line-height: 1.4;
+  }
+
+  .article__body :global(.review-timing-model li::before) {
+    content: counter(timing-stage, decimal-leading-zero);
+    margin-bottom: var(--space-50);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .article__body :global(.review-timing-model li:not(:last-child)::after) {
+    content: '→';
+    position: absolute;
+    top: var(--space-100);
+    right: var(--space-50);
+    color: var(--color-text-muted);
+  }
+
+  .article__body :global(.review-counterargument) {
+    margin: var(--space-600) 0;
+    padding: var(--space-50) 0 var(--space-50) var(--space-300);
+    border-left: 2px solid var(--color-text-header);
+  }
+
+  .article__body :global(.review-counterargument h2) {
+    margin-top: 0;
+  }
+
+  .article__body :global(.review-related-divider) {
+    margin-top: var(--space-600);
+  }
+
+  .article__body :global(.review-related-topic) {
+    color: var(--color-text-muted);
+    font-size: 0.92em;
+  }
+
   .article__related {
     display: grid;
     gap: var(--space-200);
@@ -380,5 +520,40 @@ const withBase = (path: string) =>
 
   .review-shell__footer {
     margin-top: var(--space-300);
+  }
+
+  @media (max-width: 36rem) {
+    .article__body :global(.review-pull-quote) {
+      margin-right: 0;
+      margin-left: 0;
+    }
+
+    .article__body :global(.review-timing-model) {
+      display: grid;
+      gap: 0;
+      overflow: visible;
+    }
+
+    .article__body :global(.review-timing-model li) {
+      min-height: 0;
+      padding: var(--space-100) 0 var(--space-300) var(--space-400);
+    }
+
+    .article__body :global(.review-timing-model li::before) {
+      position: absolute;
+      left: 0;
+    }
+
+    .article__body :global(.review-timing-model li:not(:last-child)::after) {
+      content: '↓';
+      top: auto;
+      right: auto;
+      bottom: var(--space-50);
+      left: 0;
+    }
+
+    .article__body :global(.review-counterargument) {
+      padding-left: var(--space-200);
+    }
   }
 </style>

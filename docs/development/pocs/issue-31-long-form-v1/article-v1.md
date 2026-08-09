@@ -1,3 +1,10 @@
+<!--
+Issue #31 long-form POC
+Version: v1
+Preserved: 2026-08-08
+Status: development evidence; nonpublic and noncanonical
+-->
+
 ---
 title: "Capacity Expansion Under a Higher Standard of Proof"
 description: "A field report on why rising AI infrastructure spending and rising demands for operating evidence are concurrent conditions, not opposite phases."

@@ -157,7 +157,9 @@ Checkpoints should help the reader understand where the thinking currently stand
 
 # Punchiness
 
-The writing should be punchy, but not artificially dramatic.
+Keep it short and punchy.
+
+The writing should be punchy, but not artificially dramatic. A developed piece should feel selected and argued, not comprehensive. Deep research may sit behind the prose without becoming the prose.
 
 Punchy means:
 
@@ -173,12 +175,15 @@ Punchy does not mean:
 * shallow
 * clickbait
 * overly compressed
+* stripped of meaningful uncertainty
 * motivational
 * full of dramatic one-liners
 
 A good Deep Field Works paragraph should usually clarify, complicate, or advance the idea.
 
 If it only decorates, cut it.
+
+Internal research and workflow labels belong in development records, not in the reader-facing voice. Translate the judgment into clear prose instead of exposing terms such as “bounded conclusion,” “source assertion,” or “research required.”
 
 ---
 

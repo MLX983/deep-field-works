@@ -254,6 +254,44 @@ A useful compressed sentence should clarify the argument, not merely sound polis
 
 ---
 
+## Long-form policy: keep it short and punchy
+
+Deep Field Works is not creating white papers, educational reference material, analyst reports, or exhaustive explainers.
+
+Long-form means a more developed idea, not comprehensive coverage. These are strong defaults, not mechanical limits; human editorial judgment may override them when the piece has a clear reason.
+
+For a long-form field report or essay:
+
+* Aim for approximately 700–1,000 words.
+* More than approximately 1,200 words requires a clear editorial reason.
+* Prefer 3–5 major sections.
+* Develop one central thesis or distinction.
+* Include one meaningful counterargument or counterpressure when appropriate.
+* Use representative evidence instead of exhaustive company, statistic, or source inventories.
+* Let evidence establish the argument without dominating the reading experience.
+* Make rigor visible through careful claims. Do not repeat disclaimers until the writing becomes defensive.
+* Default to no more than one emphasized proposition and one structured visual or progression unless the content clearly requires more.
+* Make every section earn its existence. Combine aggressively.
+* End when the point lands. Do not recap the research.
+
+Research may be extensive internally. Public prose should synthesize it rather than reproduce it. The article is not the research dossier, and research apparatus should not leak into the reader-facing layer.
+
+Internal workflow language must not appear as public editorial framing. This includes labels such as:
+
+* bounded conclusion
+* source assertion
+* claim role
+* research required
+* evidence-needed labels
+
+Use the compression test:
+
+> If removing 30% of the piece would leave the central insight intact, remove it.
+
+Punchy does not mean shallow, clickbait, artificially dramatic, stripped of uncertainty, or compressed past comprehension. It means that the piece reaches the live question quickly, establishes one useful insight, and stops before the supporting apparatus becomes the experience.
+
+---
+
 ## Evidence and uncertainty
 
 Clearly distinguish between:
@@ -644,6 +682,8 @@ Use notes when the idea is worth preserving but not ready to become an essay.
 
 A field report captures an observed signal and interprets its possible meaning.
 
+Field reports remain observations and interpretations of signals. They are not complete topic education.
+
 Must have:
 
 * observed signal
@@ -655,6 +695,9 @@ Does not need:
 
 * final conclusion
 * comprehensive research
+* exhaustive proof
+* academic treatment
+* complete topic education
 * polished thesis
 
 Recommended structure:
@@ -808,6 +851,7 @@ Before publishing, evaluate the piece against these questions.
 
 ## If the piece feels too long
 
+* Apply the compression test: if removing 30% would leave the central insight intact, remove it.
 * Convert sections into sharper headings.
 * Compress repeated ideas.
 * Use bullets for components or contrasts.
