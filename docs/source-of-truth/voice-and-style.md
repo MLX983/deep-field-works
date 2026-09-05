@@ -161,6 +161,8 @@ Keep it short and punchy.
 
 The writing should be punchy, but not artificially dramatic. A developed piece should feel selected and argued, not comprehensive. Deep research may sit behind the prose without becoming the prose.
 
+Research discipline should mostly be invisible in the reading experience. Evidence should support the point without making the piece read like a research memo.
+
 Punchy means:
 
 * the point arrives quickly

@@ -256,7 +256,11 @@ A useful compressed sentence should clarify the argument, not merely sound polis
 
 ## Long-form policy: keep it short and punchy
 
-Deep Field Works is not creating white papers, educational reference material, analyst reports, or exhaustive explainers.
+> Research can be exhaustive. The article should not be.
+
+Long-form Deep Field Works content should surface a sharp pattern, distinction, or tension. It should not reproduce the work required to verify it.
+
+Deep Field Works is not Wikipedia, an analyst report, educational reference material, a white paper, or an exhaustive explainer.
 
 Long-form means a more developed idea, not comprehensive coverage. These are strong defaults, not mechanical limits; human editorial judgment may override them when the piece has a clear reason.
 
@@ -264,8 +268,8 @@ For a long-form field report or essay:
 
 * Aim for approximately 700–1,000 words.
 * More than approximately 1,200 words requires a clear editorial reason.
-* Prefer 3–5 major sections.
 * Develop one central thesis or distinction.
+* Make 2–4 substantive points by default.
 * Include one meaningful counterargument or counterpressure when appropriate.
 * Use representative evidence instead of exhaustive company, statistic, or source inventories.
 * Let evidence establish the argument without dominating the reading experience.
@@ -274,7 +278,37 @@ For a long-form field report or essay:
 * Make every section earn its existence. Combine aggressively.
 * End when the point lands. Do not recap the research.
 
+The default shape is:
+
+```text
+2–4 main points → one meaningful counterpoint if warranted → sharp ending
+```
+
+Points are not sections. A piece can use several headings while making only a few real claims. Structural limits should govern the thinking, not merely the number of headings.
+
+If a piece needs many more independent claims, ask whether:
+
+* the research dossier is leaking into the article
+* the piece should be split
+* the artifact type is wrong
+
 Research may be extensive internally. Public prose should synthesize it rather than reproduce it. The article is not the research dossier, and research apparatus should not leak into the reader-facing layer.
+
+Use internal research to establish confidence. Bring forward only the evidence the reader needs to understand or trust the point. One specific example is often better than five supporting statistics.
+
+Avoid statistics-heavy analysis. Do not turn the article into a walkthrough of quarterly reports, company-by-company spending, or a stack of numerical evidence. Avoid paragraphs whose main function is enumerating multiple companies and figures.
+
+Anti-patterns:
+
+* “Alphabet spent X, Microsoft spent Y, Amazon spent Z...” as the backbone of a paragraph
+* repeated financial figures used to prove direction when a summary or one representative example would suffice
+
+Preferred patterns:
+
+* “Major providers are still increasing infrastructure spending. Microsoft’s latest quarter is one example...”
+* “The pattern matters more than the complete company comparison.”
+
+The rule is selective evidence, not evidence avoidance. Concise does not mean unsupported. Uncertainty should remain specific, and counterarguments should identify real counterpressure rather than provide token balance.
 
 Internal workflow language must not appear as public editorial framing. This includes labels such as:
 

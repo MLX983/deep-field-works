@@ -410,7 +410,7 @@ A field report should have:
 * larger pattern
 * what to watch next
 * one central thesis or distinction
-* 3–5 major sections by default
+* 2–4 substantive points by default, regardless of heading count
 * one meaningful counterargument or counterpressure when appropriate
 * representative evidence rather than a source inventory
 
@@ -431,7 +431,7 @@ Research can be extensive in the internal dossier. The public field report shoul
 
 Use for developed arguments, durable distinctions, and larger conceptual pieces.
 
-Target length: 800–2,000 words.
+Target length: approximately 700–1,000 words by default. More than approximately 1,200 words requires a clear editorial reason.
 
 ```md
 ---
@@ -506,15 +506,19 @@ An essay should have:
 
 * clear opening question or tension
 * structured argument
+* 2–4 substantive points by default, regardless of heading count
 * concrete example
 * reader payoff
 * strong ending
+* one meaningful counterargument or counterpressure when appropriate
 
 An essay does not need:
 
 * exhaustive coverage
 * academic proof
 * false certainty
+
+Comprehensive research may remain in the internal dossier. Use representative evidence in the public essay rather than reproducing the research process.
 
 ---
 
