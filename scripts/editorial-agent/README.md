@@ -123,8 +123,12 @@ list `exemplars` and `aiAdoptionContext` records. Each requires `id`, `path`,
 exports. Record why a negative exemplar fails inside its text. Approval is a
 human assertion for this editorial use, not inferred by the harness. Blank
 approval fields, invalid dates, duplicate IDs and non-Markdown paths are rejected.
-The controller only reads these files and records content hashes. Records join selective retrieval;
-they are not all injected. No synchronization or writable KB integration exists.
+The controller only reads these files and records content hashes. Exemplars join
+selective retrieval as whole approved samples. AI Adoption exports are divided at
+second-level Markdown headings; each section carries the full-source hash,
+section heading/index and section hash. Sections join the same lexical shortlist
+and Astra selection step, so unrelated portions are not injected. No
+synchronization or writable KB integration exists.
 
 Local KB inspection found an existing `system/chatgpt-project-views.json` manifest
 and `tools/build-chatgpt-project-views.py` exporter. Its AI Adoption view comprises

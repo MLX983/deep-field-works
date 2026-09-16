@@ -84,16 +84,18 @@ test('phase defaults are Low/Medium, High requires explicit choice and invalid l
 
 test('approved exports and both exemplar polarities remain selective read-only context', () => {
   const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'dfw-context-test-')));
-  const p=path.join(root,'export.md');fs.writeFileSync(p,'A working model of judgment');
+  const p=path.join(root,'export.md');fs.writeFileSync(p,'# Working models\n\n## Judgment\n\nA working model of judgment.\n\n## Authority\n\nA separate model of authority.');
   const entry={id:'model',path:p,source:'Fixture source',approvedBy:'Fixture reviewer',approvedAt:'2026-09-16'};
   const config={aiAdoptionContext:[entry],exemplars:[{...entry,id:'positive',polarity:'positive'},{...entry,id:'negative',polarity:'negative'}]};
   const before=fs.readFileSync(p,'utf8');
   const items=optionalContext(config);
-  assert.equal(items.length,3);
+  assert.equal(items.length,4);
   assert.equal(items[0].provenance.polarity,'positive');
   assert.equal(items[1].provenance.polarity,'negative');
-  const selected=chosenContext({selected:[{id:'ai-adoption-read-only-export:model',reason:'Relevant'}],editorialQuestions:[]},shortlist('judgment',items));
-  assert.equal(selected.length,1);assert.equal(selected[0].body,before);
+  const judgment=items.find(item=>item.provenance.sectionHeading==='Judgment');
+  const selected=chosenContext({selected:[{id:judgment.id,reason:'Relevant'}],editorialQuestions:[]},shortlist('judgment',items));
+  assert.equal(selected.length,1);assert.match(selected[0].body,/working model of judgment/);assert.doesNotMatch(selected[0].body,/separate model of authority/);
+  assert.equal(selected[0].provenance.sourceSha256,items.at(-1).provenance.sourceSha256);
   assert.equal(fs.readFileSync(p,'utf8'),before);
   assert.throws(()=>optionalContext({aiAdoptionContext:[{...entry,approvedBy:''}]}));
   assert.throws(()=>optionalContext({exemplars:[entry]}));

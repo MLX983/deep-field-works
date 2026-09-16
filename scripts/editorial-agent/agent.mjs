@@ -101,6 +101,7 @@ function repoContext(repo) {
 }
 export function optionalContext(config) {
   const out = [];
+  const seen = new Set();
   for (const [key, kind] of [['exemplars', 'exemplar'], ['aiAdoptionContext', 'ai-adoption-read-only-export']]) {
     if (config[key] !== undefined && !Array.isArray(config[key])) throw new Error('Context lists must be arrays');
     for (const entry of config[key] ?? []) {
@@ -108,9 +109,30 @@ export function optionalContext(config) {
       if (Number.isNaN(Date.parse(entry.approvedAt))) throw new Error('Context approval date must be valid');
       if (!path.isAbsolute(entry.path) || !entry.path.endsWith('.md') || !fs.statSync(entry.path).isFile()) throw new Error('Context must reference an absolute Markdown file');
       if (kind === 'exemplar' && !['positive','negative'].includes(entry.polarity)) throw new Error('Exemplar polarity required');
-      if (out.some(item => item.id === `${kind}:${entry.id}`)) throw new Error('Duplicate context ID');
+      const baseId = `${kind}:${entry.id}`;
+      if (seen.has(baseId)) throw new Error('Duplicate context ID');
+      seen.add(baseId);
       const body = fs.readFileSync(entry.path, 'utf8');
-      out.push({ id: `${kind}:${entry.id}`, title: entry.title ?? entry.id, body, kind, provenance: { ...entry, sha256: hash(body) } });
+      const sourceSha256 = hash(body);
+      if (kind === 'exemplar') {
+        out.push({ id: baseId, title: entry.title ?? entry.id, body, kind, provenance: { ...entry, sha256: sourceSha256 } });
+        continue;
+      }
+      const starts = [...body.matchAll(/^##\s+(.+)$/gm)];
+      const sections = starts.length ? starts.map((match,index) => ({
+        heading: match[1].trim(),
+        body: body.slice(match.index, starts[index+1]?.index ?? body.length).trim(),
+      })) : [{ heading: entry.title ?? entry.id, body: body.trim() }];
+      sections.forEach((section,index) => {
+        const slug = section.heading.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,64) || `section-${index+1}`;
+        out.push({
+          id: `${baseId}:${String(index+1).padStart(2,'0')}-${slug}`,
+          title: `${entry.title ?? entry.id} — ${section.heading}`,
+          body: section.body,
+          kind,
+          provenance: { ...entry, sourceSha256, sectionHeading: section.heading, sectionIndex: index+1, sectionSha256: hash(section.body) },
+        });
+      });
     }
   }
   return out;
