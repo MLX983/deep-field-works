@@ -130,6 +130,12 @@ section heading/index and section hash. Sections join the same lexical shortlist
 and Astra selection step, so unrelated portions are not injected. No
 synchronization or writable KB integration exists.
 
+Approved exemplar records may carry `editorialFunction`, `failureMode`, `lesson`
+and `restrictions`. This small metadata set always reaches the editorial phase;
+full exemplar prose reaches it only when context selection chooses that exemplar.
+This makes anti-pattern guidance available without indiscriminately loading every
+sample. The role prohibits copying wording, cadence, structure or conceptual shape.
+
 Local KB inspection found an existing `system/chatgpt-project-views.json` manifest
 and `tools/build-chatgpt-project-views.py` exporter. Its AI Adoption view comprises
 `baseline/current-context.md` and `topics/ai-systems-and-institutions.md`.

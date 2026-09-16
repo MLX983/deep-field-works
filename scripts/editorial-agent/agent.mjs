@@ -137,6 +137,17 @@ export function optionalContext(config) {
   }
   return out;
 }
+export function exemplarGuidance(items) {
+  return items.filter(item => item.kind === 'exemplar').map(item => ({
+    id: item.id,
+    title: item.title,
+    polarity: item.provenance.polarity,
+    editorialFunction: item.provenance.editorialFunction ?? '',
+    failureMode: item.provenance.failureMode ?? '',
+    lesson: item.provenance.lesson ?? '',
+    restrictions: item.provenance.restrictions ?? '',
+  }));
+}
 export function reasoningPolicy(selection = 'low', editorial = 'medium') {
   if (!['low','high'].includes(selection) || !['medium','high'].includes(editorial)) throw new Error('Selection reasoning must be low|high; editorial reasoning must be medium|high');
   return { selection, editorial };
@@ -232,7 +243,7 @@ export async function main(argv = process.argv.slice(2)) {
     write('role.md', role);
     const selection = invoke(root,run,'selection', `${role}\n\nSelect zero to six context IDs whose full text would materially improve this seed. Explain each selection. Do not choose the final artifact yet. No research in this selection phase.\nSEED:\n${seed}\nCATALOG:\n${JSON.stringify(catalog.map(({body,...item})=>({...item,excerpt:body.slice(0,1400)})))}`, selectionSchema,false,bin,reasoning.selection);
     const context = chosenContext(selection,catalog); write('context.json',context);
-    const result = invoke(root,run,'editorial', `${role}\n\nResearch tools: ${research}. ${research === 'disabled' ? 'Research unavailable; disclose limitations.' : 'Independently research when evidence could change the piece.'}\nReturn the editorial contract. draft is reader-facing Markdown including title, or empty if no piece is worthwhile yet. Preserve internal notes separately.\nSEED (${source.url}, ${source.createdAt}):\n${seed}\nSELECTED FULL CONTEXT:\n${JSON.stringify(context)}\nYOUR EDITORIAL QUESTIONS:\n${JSON.stringify(selection.editorialQuestions)}`,resultSchema,research==='live',bin,reasoning.editorial);
+    const result = invoke(root,run,'editorial', `${role}\n\nResearch tools: ${research}. ${research === 'disabled' ? 'Research unavailable; disclose limitations.' : 'Independently research when evidence could change the piece.'}\nReturn the editorial contract. draft is reader-facing Markdown including title, or empty if no piece is worthwhile yet. Preserve internal notes separately.\nSEED (${source.url}, ${source.createdAt}):\n${seed}\nAPPROVED EXEMPLAR FUNCTIONS AND ANTI-PATTERNS (guidance only; full prose appears below only when selectively chosen):\n${JSON.stringify(exemplarGuidance(approvedContext))}\nSELECTED FULL CONTEXT:\n${JSON.stringify(context)}\nYOUR EDITORIAL QUESTIONS:\n${JSON.stringify(selection.editorialQuestions)}`,resultSchema,research==='live',bin,reasoning.editorial);
     Object.assign(manifest, persistResult(root,run,result,{runId:run,sourceUrl:source.url,sourceBodySha256:manifest.sourceBodySha256}), { selectedContext:context.map(c=>c.id), completedAt:new Date().toISOString() });
     write('manifest.json',manifest);
     console.log(JSON.stringify({ ...manifest, workspace:path.join(root,'runs',run) },null,2));

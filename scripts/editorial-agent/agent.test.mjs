@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { MODEL, checkWorkspace, writePrivate, seedBody, shortlist, chosenContext, invocation, resultSchema, validate, persistResult, reasoningPolicy, optionalContext, scratchpadCandidates } from './agent.mjs';
+import { MODEL, checkWorkspace, writePrivate, seedBody, shortlist, chosenContext, invocation, resultSchema, validate, persistResult, reasoningPolicy, optionalContext, exemplarGuidance, scratchpadCandidates } from './agent.mjs';
 
 test('workspace rejects repository, publishing state, ancestors, and symlink aliases', () => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(),'dfw-editorial-test-'));
@@ -86,12 +86,16 @@ test('approved exports and both exemplar polarities remain selective read-only c
   const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'dfw-context-test-')));
   const p=path.join(root,'export.md');fs.writeFileSync(p,'# Working models\n\n## Judgment\n\nA working model of judgment.\n\n## Authority\n\nA separate model of authority.');
   const entry={id:'model',path:p,source:'Fixture source',approvedBy:'Fixture reviewer',approvedAt:'2026-09-16'};
-  const config={aiAdoptionContext:[entry],exemplars:[{...entry,id:'positive',polarity:'positive'},{...entry,id:'negative',polarity:'negative'}]};
+  const config={aiAdoptionContext:[entry],exemplars:[{...entry,id:'positive',polarity:'positive',editorialFunction:'Direct opening',restrictions:'Do not copy wording'},{...entry,id:'negative',polarity:'negative',failureMode:'Rubric leakage',lesson:'Keep structure private'}]};
   const before=fs.readFileSync(p,'utf8');
   const items=optionalContext(config);
   assert.equal(items.length,4);
   assert.equal(items[0].provenance.polarity,'positive');
   assert.equal(items[1].provenance.polarity,'negative');
+  assert.deepEqual(exemplarGuidance(items),[
+    {id:'exemplar:positive',title:'positive',polarity:'positive',editorialFunction:'Direct opening',failureMode:'',lesson:'',restrictions:'Do not copy wording'},
+    {id:'exemplar:negative',title:'negative',polarity:'negative',editorialFunction:'',failureMode:'Rubric leakage',lesson:'Keep structure private',restrictions:''},
+  ]);
   const judgment=items.find(item=>item.provenance.sectionHeading==='Judgment');
   const selected=chosenContext({selected:[{id:judgment.id,reason:'Relevant'}],editorialQuestions:[]},shortlist('judgment',items));
   assert.equal(selected.length,1);assert.match(selected[0].body,/working model of judgment/);assert.doesNotMatch(selected[0].body,/separate model of authority/);
