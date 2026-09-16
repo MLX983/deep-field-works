@@ -2,550 +2,379 @@
 
 ## Purpose
 
-Deep Field Works is a field journal, laboratory notebook, and publishing platform for exploring how humans and machines work together.
+This document defines how Deep Field Works pieces should be developed, evaluated, revised, and improved.
 
-The goal is not to build an audience, optimize for SEO, chase trends, or establish authority.
+Use it for:
 
-The goal is to document observations, develop ideas, test hypotheses, and create a public record of evolving thought.
+* drafting and revision
+* argument development
+* editorial review
+* evidence posture
+* concrete examples
+* narrative development
+* uncertainty
+* reader payoff
+* headings and structure
+* endings
+* AI-assisted prose review
 
-Deep Field Works should feel like a long-running investigation: clear enough to be useful now, honest enough to be revised later, and durable enough to remain part of the archive.
+Use `content-strategy.md` to decide what should be created.
 
----
+Use `article-templates.md` to choose an appropriate artifact structure.
 
-## Core editorial standard
+Use `voice-and-style.md` for the final language and tone pass.
 
-A publishable Deep Field Works piece should give the reader at least one of the following:
+Use the shared `prose-warning-signs.md` as a diagnostic layer for AI-assisted prose.
 
-* a sharper question
-* a useful distinction
-* a clearer model
-* a better way to see a pattern
-* a concrete example of an abstract shift
-* a checkpoint in an evolving line of thought
-
-The piece does not need to solve everything.
-
-It does need to leave the reader with a more precise understanding than they had at the start.
-
-A Deep Field Works article should not merely explain a topic. It should advance a line of inquiry.
-
----
-
-## Editorial posture
-
-Write as an observer reporting findings, not as an expert delivering final conclusions.
-
-The tone should be:
-
-* curious
-* analytical
-* grounded
-* reflective
-* direct
-
-The tone should not be:
-
-* evangelical
-* alarmist
-* promotional
-* cynical
-* overly academic
-* artificially authoritative
-
-The writing can be personal, but it should not become confessional.
-
-It can be confident, but it should not pretend to be final.
+For publishable Deep Field Works writing, apply the shared prose warning signs strongly.
 
 ---
 
-## Audience
+# Editorial posture
 
-Assume the reader is intelligent but busy.
+Deep Field Works is a field journal and working archive.
 
-Every article should be understandable without specialized domain knowledge.
+A publishable piece should sharpen at least one of:
 
-The reader may not know the history of the project, the surrounding AI discourse, or the prior prototypes. Give enough context to orient them, but do not slow the piece down with broad setup.
+* a question
+* a distinction
+* a pattern
+* a mechanism
+* an example
+* an observed signal
+* a design problem
+* a prototype finding
+* a checkpoint in evolving thought
 
-The reader should feel:
+It should not merely explain a topic.
 
-* “I understand the question.”
-* “I can see the pattern.”
-* “I understand why this matters.”
-* “I know what remains unresolved.”
+It should not merely summarize source material.
 
----
+It should not merely polish a seed.
 
-## The first job: identify the reader’s question
-
-Most pieces should begin by surfacing the question a thoughtful reader may already be carrying.
-
-Do not begin with broad context unless the context is unusually sharp.
-
-Weak opening pattern:
-
-> Artificial intelligence is rapidly changing the way organizations work.
-
-Better opening pattern:
-
-> If AI can summarize meetings, draft updates, search internal knowledge, and coordinate routine follow-up, what is left for the middle of the organization to do?
-
-The second version gives the reader a question they can feel.
-
-Good openings begin near the problem.
-
-Examples:
-
-* “The old organization chart assumes information has to travel through people.”
-* “A knowledge base is not the same thing as memory.”
-* “Most AI adoption plans quietly preserve the structure AI is supposed to change.”
-* “The interesting question is not whether agents can act. It is who authorizes the action.”
-
-Avoid openings that begin with:
-
-* “In today’s rapidly changing world...”
-* “As AI continues to evolve...”
-* “It is increasingly important to consider...”
-* “Throughout history...”
-* “We are entering a new era...”
-
-These are usually signs of generic setup.
+The reader should understand something more precisely by the end.
 
 ---
 
-## Every piece needs a central tension
+# Develop the idea
 
-A good article should usually contain a tension.
+A draft should contribute thinking beyond its source material.
 
-Examples:
+Before advancing a draft, ask:
 
-* AI can do more work, but organizations are still structured around human routing.
-* Automation promises speed, but supervision creates new overhead.
-* Personal knowledge bases preserve memory, but memory alone does not create insight.
-* Agents can act, but authority still needs to be assigned.
-* Chronological archives preserve development, but readers need thematic entry points.
-* Interfaces simplify decisions, but may hide uncertainty.
-* AI reduces some forms of labor, but creates new work around judgment, governance, and interpretation.
+> What does this draft understand that the seed did not yet say?
 
-The central tension should appear early.
+A useful answer might be:
 
-If the tension is unclear, the piece will drift.
+* a mechanism
+* a consequence
+* a distinction
+* a complication
+* a counterexample
+* a design implication
+* a connection to another observed pattern
+* a better question
+* a clearer boundary around the claim
 
----
+Rephrasing, organizing, compressing, expanding, or professionalizing the source material is not sufficient development.
 
-## Preferred article shape
+A draft can be competent and still be underdeveloped.
 
-Most essays should follow this broad structure:
+Do not try to solve an underdeveloped idea through better prose.
 
-1. **Reader question or tension**
-2. **Why the old framing is insufficient**
-3. **The clearer distinction, model, or claim**
-4. **Concrete example or scenario**
-5. **Implications**
-6. **What remains uncertain**
-7. **Clean ending or next question**
-
-This structure can be adapted, but most pieces need these functions somewhere.
-
-Shorter notes, field reports, experiments, and checkpoints may use lighter structures, but they should still contain a clear observation, reason for existing, and unresolved question or implication.
+Return it for another thinking pass.
 
 ---
 
-## Simple fallback structure
+# Find the live question
 
-When in doubt, use this structure:
+Strong pieces usually have a live question, tension, contradiction, or observation near their center.
 
-1. **Observation**
-   What is visible?
+Find it before adding structure.
 
-2. **Why it matters**
-   What pattern, shift, or tension does it reveal?
+Ask:
 
-3. **What remains unresolved**
-   What should be watched, tested, or reconsidered?
+* What prompted this piece?
+* What seems different from the expected story?
+* What does the existing framing fail to explain?
+* What changed?
+* What becomes difficult when the idea is made operational?
+* What would an intelligent reader want to understand next?
 
-This is especially useful for field notes, early ideas, and quick captures.
+Do not manufacture tension merely because an article seems to require one.
 
----
-
-## Section rules
-
-Each section should do a specific job.
-
-Before publishing, ask:
-
-* What is this section doing?
-* Does the reader need it?
-* Does it advance the argument?
-* Could two sections be combined?
-* Is this section repeating something already established?
-* Does this section answer the question implied by its heading?
-
-If a section cannot justify its existence, cut or compress it.
+Some observations are useful without becoming arguments.
 
 ---
 
-## Headings should carry the argument
+# Prefer recognition over explanation
 
-Headings should not merely label topics.
+Whenever possible, put the reader in a situation where they can recognize the phenomenon rather than explaining the phenomenon entirely in abstraction.
 
-Weak headings:
+A reader may not immediately understand:
 
-* Background
-* Implications
-* AI and Work
-* The Organization
-* Conclusion
+> Governance becomes a more durable AI skill than prompting.
 
-Better headings:
+They can understand a worker discovering that the prompting technique learned six months ago has been absorbed into the product while decisions about delegation, verification, and boundaries have become more important.
 
-* The pyramid was built to route information
-* The middle layer changes, but does not disappear
-* Shared context reduces approval drag
-* Less monotony does not mean less responsibility
-* The real shift is where judgment happens
-
-Good headings make the argument easier to skim.
-
-A reader should be able to scan the headings and understand the shape of the piece.
+Make unfamiliar systems imaginable from inside them.
 
 ---
 
-## Make the abstract concrete quickly
+# Concrete examples and narrative
 
-If a piece introduces a broad idea, ground that idea within one or two paragraphs.
+Prefer a concrete situation to an abstract model when both can communicate the idea.
 
-Use:
+Useful anchors include:
 
-* a workplace scenario
-* an interface example
-* a decision point
-* a before/after contrast
-* a small operational detail
-* a concrete human action
+* a worker doing a task
+* a manager making a decision
+* a team changing a workflow
+* a user encountering an interface
+* an agent reaching a boundary
+* an organization changing an approval process
+* a prototype exposing an interaction problem
+* a before-and-after operational situation
 
-Weak:
+## Use continuing narrative when change unfolds over time
 
-> AI will transform coordination by changing how organizational knowledge flows.
+When a piece concerns changing work, capabilities, roles, institutions, interfaces, or behavior, consider following the same person, team, task, decision, or institution through the change.
 
-Better:
+A continuing example can show:
 
-> Today, a project manager may spend half a day collecting updates, translating them into status language, and sending them upward for approval. In an AI-supported organization, that translation layer may become partly automatic. The manager’s value shifts from gathering and formatting updates to judging which signals matter.
+* what the person did before
+* what the system began doing
+* what skill or responsibility lost value
+* what the person learned or did next
+* what new judgment became necessary
+* where a new boundary or failure appeared
 
-The reader should be able to imagine the work changing.
+The narrative does not need invented dialogue or literary detail.
 
----
+Its purpose is comprehension.
 
-## Prefer vivid compression over exhaustive explanation
+Give the reader somewhere to stand inside the argument.
 
-Do not explain every surrounding issue.
+## Let examples do intellectual work
 
-Find the sentence that carries the load.
+Examples should not merely decorate an abstract claim.
 
-Strong writing often compresses a large idea into a durable sentence:
+A strong example reveals:
 
-* “The pyramid was built to route information through people.”
-* “The organization’s memory becomes less dependent on middle-layer translation.”
-* “Delegation without governance is just automation with a blind spot.”
-* “The archive is not only a record of the work. It becomes part of the work.”
+* why the phenomenon occurs
+* what changes in practice
+* what assumption breaks
+* what becomes newly possible
+* what becomes newly difficult
+* where judgment moves
+* where a proposed solution fails
 
-These sentences should be earned, not decorated.
+Whenever possible, let the example establish the pattern before explaining it.
 
-A useful compressed sentence should clarify the argument, not merely sound polished.
-
----
-
-## Long-form policy: keep it short and punchy
-
-> Research can be exhaustive. The article should not be.
-
-Long-form Deep Field Works content should surface a sharp pattern, distinction, or tension. It should not reproduce the work required to verify it.
-
-Deep Field Works is not Wikipedia, an analyst report, educational reference material, a white paper, or an exhaustive explainer.
-
-Long-form means a more developed idea, not comprehensive coverage. These are strong defaults, not mechanical limits; human editorial judgment may override them when the piece has a clear reason.
-
-For a long-form field report or essay:
-
-* Aim for approximately 700–1,000 words.
-* More than approximately 1,200 words requires a clear editorial reason.
-* Develop one central thesis or distinction.
-* Make 2–4 substantive points by default.
-* Include one meaningful counterargument or counterpressure when appropriate.
-* Use representative evidence instead of exhaustive company, statistic, or source inventories.
-* Let evidence establish the argument without dominating the reading experience.
-* Make rigor visible through careful claims. Do not repeat disclaimers until the writing becomes defensive.
-* Default to no more than one emphasized proposition and one structured visual or progression unless the content clearly requires more.
-* Make every section earn its existence. Combine aggressively.
-* End when the point lands. Do not recap the research.
-
-The default shape is:
-
-```text
-2–4 main points → one meaningful counterpoint if warranted → sharp ending
-```
-
-Points are not sections. A piece can use several headings while making only a few real claims. Structural limits should govern the thinking, not merely the number of headings.
-
-If a piece needs many more independent claims, ask whether:
-
-* the research dossier is leaking into the article
-* the piece should be split
-* the artifact type is wrong
-
-Research may be extensive internally. Public prose should synthesize it rather than reproduce it. The article is not the research dossier, and research apparatus should not leak into the reader-facing layer.
-
-Use internal research to establish confidence. Bring forward only the evidence the reader needs to understand or trust the point. One specific example is often better than five supporting statistics.
-
-Avoid statistics-heavy analysis. Do not turn the article into a walkthrough of quarterly reports, company-by-company spending, or a stack of numerical evidence. Avoid paragraphs whose main function is enumerating multiple companies and figures.
-
-Anti-patterns:
-
-* “Alphabet spent X, Microsoft spent Y, Amazon spent Z...” as the backbone of a paragraph
-* repeated financial figures used to prove direction when a summary or one representative example would suffice
-
-Preferred patterns:
-
-* “Major providers are still increasing infrastructure spending. Microsoft’s latest quarter is one example...”
-* “The pattern matters more than the complete company comparison.”
-
-The rule is selective evidence, not evidence avoidance. Concise does not mean unsupported. Uncertainty should remain specific, and counterarguments should identify real counterpressure rather than provide token balance.
-
-Internal workflow language must not appear as public editorial framing. This includes labels such as:
-
-* bounded conclusion
-* source assertion
-* claim role
-* research required
-* evidence-needed labels
-
-Use the compression test:
-
-> If removing 30% of the piece would leave the central insight intact, remove it.
-
-Punchy does not mean shallow, clickbait, artificially dramatic, stripped of uncertainty, or compressed past comprehension. It means that the piece reaches the live question quickly, establishes one useful insight, and stops before the supporting apparatus becomes the experience.
+Do not fully state an abstract framework and then repeat the same idea as an example.
 
 ---
 
-## Evidence and uncertainty
+# Examples before models
 
-Clearly distinguish between:
+Do not automatically convert observations into frameworks.
 
-* observation
-* interpretation
-* inference
-* speculation
+Avoid using:
 
-Do not present speculation as fact.
+* arrow chains
+* ladders
+* matrices
+* maturity models
+* neat progressions
+* named stages
+* taxonomies
 
-For complex claims, use this structure when useful:
+merely because they make an idea look organized.
 
-* **Observation:** What is actually visible?
-* **Inference:** What does it likely suggest?
-* **Speculation:** What might it become if the pattern continues?
+If a concrete example communicates the idea, prefer the example.
 
-Example:
+Let the reader see the pattern before naming it.
 
-* **Observation:** Teams are adding AI to existing workflows.
-* **Inference:** Many organizations are automating tasks without redesigning the surrounding structure.
-* **Speculation:** The larger ROI may come only when authority, memory, and coordination are redesigned around the new capabilities.
+Use a model when abstraction provides explanatory or retrieval value that the example cannot provide.
 
-This prevents weak signals from becoming false certainty.
+Models are more appropriate when:
 
----
+* a pattern has appeared repeatedly
+* its distinctions have become reasonably stable
+* the abstraction improves future reasoning
+* several cases need to be compared
+* the relationship itself is the subject
 
-## Preserve uncertainty honestly
+Diagrams remain appropriate when the subject is genuinely structural, including:
 
-Deep Field Works should not overclaim.
+* system architecture
+* workflow routing
+* state transitions
+* authority relationships
+* information flows
+* interface behavior
 
-Use distinctions such as:
+Do not use diagrammatic form as rhetorical decoration.
 
-* observed
-* inferred
-* speculative
-* unresolved
-* likely
-* possible
-* too early to tell
-
-However, uncertainty should not become mush.
-
-Weak:
-
-> It is difficult to know what will happen.
-
-Better:
-
-> The direction is clear enough to matter, but the organizational form is still unresolved.
-
-Also better:
-
-> The evidence is still early. The pattern to watch is whether AI reduces approval friction or simply adds another layer of review.
-
-Good uncertainty sharpens the question. It does not dissolve the argument.
+Preferring examples to pseudo-frameworks does not require avoiding established terminology. When terms such as `prompt engineering`, `context engineering`, `harness engineering`, or `agent orchestration` help an informed reader recognize the subject quickly, use them directly. Explain them only when the argument or audience requires it.
 
 ---
 
-## Claims need evidence, example, or humility
+# Short does not mean compressed
 
-A claim can be strong if it is supported.
+Deep Field Works follows the principle “Publish small.”
 
-If a claim lacks support, either add an example or soften it.
+That means choosing the smallest adequate artifact.
 
-Weak unsupported claim:
+It does not mean compressing an argument until only assertions remain.
 
-> Middle management will be transformed by AI.
+A short note may still need:
 
-Better:
+* one concrete example
+* a few sentences of mechanism
+* a complication
+* an unresolved question
 
-> Some parts of middle management are likely to change first: status collection, update translation, routine follow-up, and approval routing.
+Prefer a small idea developed adequately over a large idea reduced to aphorisms.
 
-Best:
+Do not mistake brevity for density.
 
-> The role does not disappear. But the center of gravity changes: less collecting and reformatting information, more interpreting ambiguous signals and deciding when the system should change posture.
-
----
-
-## Paint the future in operational terms
-
-When describing a future state, avoid vague inspiration.
-
-Show what changes in the work.
-
-Weak:
-
-> Work will become more creative and strategic.
-
-Better:
-
-> A manager who once spent Monday morning assembling status updates may instead review an automatically generated signal map: what changed, what looks blocked, what needs human judgment, and which decisions can move without escalation.
-
-Good future-state writing should help the reader imagine the workflow.
+Do not mistake density for insight.
 
 ---
 
-## Use examples without becoming dated
+# Look for the turn
 
-Timely examples can be useful, but avoid making the article depend on a specific announcement.
+A developed piece will often contain a moment when the inquiry advances beyond its opening premise.
 
-Prefer durable categories when possible:
+The turn might be:
 
-* large technology companies
-* enterprise platforms
-* AI-enabled workplace tools
-* project management systems
-* internal knowledge bases
-* regulated organizations
-* design and engineering teams
+* an unexpected consequence
+* a mechanism
+* a contradiction
+* a complication
+* a counterexample
+* a changed interpretation
+* a design implication
+* a new question
 
-Use company names only when necessary.
+The turn does not need to be dramatic.
 
-If a company-specific example will become stale quickly, extract the durable pattern and foreground that instead.
+But if the ending could have been predicted entirely from the seed, the draft may not have developed far enough.
 
-The site should preserve chronology, but the argument should not expire with the news cycle.
+Do not manufacture a twist.
 
----
-
-## Chronology matters
-
-Publication dates matter.
-
-The site is intended to preserve:
-
-* early ideas
-* primitive models
-* failed assumptions
-* dead ends
-* evolution of thinking
-
-Do not rewrite history to make earlier work appear more correct than it was.
-
-Use dates when they help show:
-
-* when an idea emerged
-* how thinking changed
-* what was known at the time
-* the sequence of development
-
-Do not over-explain dates in every piece. The archive structure can carry some of that weight.
+Do notice when the inquiry has not moved.
 
 ---
 
-## Visual and structural formatting
+# Evidence posture
 
-Use formatting to clarify the thought.
+Distinguish among:
 
-Use:
+## Observed
 
-* meaningful headings
-* short paragraphs
-* bullets when they improve scanning
-* diagrams when they clarify relationships
-* bold for important claims or turns
-* compact structures for models and workflows
+Something directly supported by:
 
-Avoid:
+* source material
+* research
+* product behavior
+* prototype behavior
+* documented events
+* firsthand observation
 
-* walls of text
-* decorative diagrams
-* filler bullets
-* over-bolded sections
-* generic summary blocks
+## Inferred
 
-Bullets are useful for:
+An interpretation that follows reasonably from observations but is not directly established by them.
 
-* components
-* contrasts
-* steps
-* signals
-* failure modes
-* criteria
-* examples
+## Speculative
 
-Bullets should not become filler.
+A possibility, hypothesis, or future direction that goes beyond available evidence.
 
-Weak bullet list:
+These categories do not need explicit labels in every paragraph.
 
-* AI is changing work
-* Organizations need to adapt
-* Leaders must think differently
-* The future is uncertain
+The prose should nevertheless preserve the distinction.
 
-Better bullet list:
+Do not turn:
 
-* routine translation becomes less valuable
-* judgment about ambiguous signals becomes more valuable
-* approvals can move closer to the work
-* managers spend less time collecting updates and more time shaping posture
+> This may suggest...
+
+into:
+
+> This proves...
+
+during revision.
 
 ---
 
-## Use diagrams in prose
+# Research and current claims
 
-Even without images, some sections should feel diagrammatic.
+Research claims when they materially depend on:
 
-Use arrows or compact structures when appropriate.
+* current companies
+* current products
+* public figures
+* statistics
+* historical analogies
+* institutional behavior
+* technical capabilities
+* quoted statements
+* recent events
 
-Examples:
+Prefer primary evidence when available.
 
-```text
-Signal → Interpretation → Posture → Action → Feedback
-```
+Distinguish:
 
-```text
-Raw notes → Working draft → Essay → Checkpoint → Video seed
-```
+* what a company claims
+* what has been independently demonstrated
+* what Deep Field Works infers from the evidence
 
-```text
-Observation → Inference → Speculation → What to watch next
-```
+If a claim cannot be adequately supported, narrow it, remove it, or keep the piece in research-required status.
 
-These should clarify the model, not decorate the article.
+Do not use research merely to make a piece look authoritative.
+
+Research should resolve a real editorial question.
 
 ---
 
-## Avoid generic AI language
+# Prototype notes must extract the design finding
 
-Avoid phrases such as:
+A prototype note should not stop at:
+
+> Here is the interface I would make.
+
+Ask:
+
+* What became clearer because this interface was considered?
+* What assumption did the prototype expose?
+* What distinction did the interface require?
+* What becomes difficult when the concept is made operational?
+* Where does authority sit?
+* What state must remain visible?
+* What happens at an exception?
+* What would failure recovery require?
+* Did designing the control surface change the original idea?
+
+The prototype is evidence inside a design inquiry.
+
+Use it to discover something.
+
+Do not imply that a proposed prototype has been built, tested, or observed in production unless that is true.
+
+---
+
+# Avoid generic AI writing
+
+Deep Field Works should not sound like:
+
+* a corporate AI blog
+* a LinkedIn thought-leadership post
+* a generic explainer
+* a startup manifesto
+* a consulting deck
+* a productivity newsletter
+
+Avoid generic language such as:
 
 * rapidly evolving landscape
 * unlock new possibilities
@@ -560,133 +389,107 @@ Avoid phrases such as:
 * future-proof
 * AI-powered revolution
 
-Use plainer, more specific language.
+Use plain, specific language.
+
+Prefer human actions and system behavior to abstract nouns.
 
 Instead of:
 
-> AI unlocks new possibilities for organizational efficiency.
+> AI enables the optimization of organizational communication.
 
-Write:
+Write what changes:
 
-> AI can reduce the amount of human effort spent collecting, rewriting, and forwarding information.
-
-Instead of:
-
-> Organizations must leverage AI to remain competitive.
-
-Write:
-
-> Many organizations are adding AI to existing workflows before deciding which parts of the workflow should still exist.
+> The system collects the updates that a manager used to gather from five people.
 
 ---
 
-## Avoid “ChatGPT essay voice”
+# Apply the shared prose-warning-signs pass
 
-AI-assisted drafts often have a recognizable shape:
+During editorial review, apply the shared `prose-warning-signs.md` strongly.
 
-* broad intro
-* balanced but bland middle
-* numbered list of implications
-* generic conclusion
-* too many symmetrical paragraphs
-* too many abstract nouns
-* too much “not only X, but Y”
-* polished transitions that hide weak ideas
+Pay particular attention to:
 
-Revise aggressively against this.
+* staged “not X, but Y” contrasts
+* forced symmetry
+* manufactured groups of three
+* dramatic fragments
+* self-emphasizing sentences
+* mechanical conclusions
+* polished transitions hiding weak logic
+* stacked aphorisms
+* pseudo-frameworks
+* arrow-chain models
+* premature naming
+* excessive rhetorical polish
+* repeated explanation of significance
+* generic abstraction where human action would be clearer
 
-The writing should feel argued, observed, and shaped.
+These are diagnostics, not mechanical prohibitions.
 
-Not generated.
+A rhetorical device may remain when it genuinely improves the passage.
 
----
-
-## Sentence and paragraph style
-
-Use short to medium paragraphs.
-
-Avoid dense blocks.
-
-A one-sentence paragraph is acceptable when it marks a turn in the argument.
-
-Do not overuse dramatic one-line paragraphs.
-
-The rhythm should feel controlled, not theatrical.
-
-Use direct sentences.
-
-Prefer concrete verbs.
-
-Avoid stacking abstractions.
-
-Weak:
-
-> The implementation of AI capabilities facilitates the optimization of organizational communication pathways.
-
-Better:
-
-> AI changes who has to gather, rewrite, and forward information.
+Do not replace one recognizable AI pattern with another.
 
 ---
 
-## Use of bold
+# Preserve natural irregularity
 
-Bold should be used sparingly.
+Deep Field Works should feel shaped but not manufactured.
 
-Use bold to mark:
+Paragraphs do not need equal length.
 
-* a central claim
-* a major turn
-* a key distinction
-* a sentence that anchors the piece
+Sections do not need symmetrical structures.
 
-Do not bold generic emphasis.
+Lists do not need three items.
 
-Do not bold too much.
+Every section does not need a takeaway.
 
-If everything is emphasized, nothing is.
+Every paragraph does not need a quotable final sentence.
 
----
+Every observation does not need to become a principle.
 
-## Use of first person
+Every piece does not need a conclusion.
 
-First person is allowed when it serves the piece.
-
-Good uses:
-
-* explaining why the site exists
-* marking a provisional interpretation
-* describing a prototype or experiment
-* acknowledging uncertainty
-* documenting a shift in thinking
-
-Avoid first person when it becomes self-indulgent or distracts from the idea.
-
-Deep Field Works can be personal without becoming confessional.
+Do not polish away useful roughness.
 
 ---
 
-## Endings should sharpen, not summarize mechanically
+# Headings
 
-Avoid endings that simply restate the article.
+Headings should help the reader navigate the thought.
 
-Weak ending:
+They may:
 
-> In conclusion, AI will continue to change organizations, and leaders must adapt.
+* identify a question
+* mark a change in the argument
+* introduce a concrete situation
+* name a genuine distinction
 
-Better ending:
+Do not force headings to sound clever or argumentative.
 
-> The question is not whether AI can be added to the old pyramid. It can. The question is how much value remains trapped if the pyramid itself is left untouched.
+Do not create sections merely to make a short piece appear structured.
+
+Very short notes may need no internal headings.
+
+---
+
+# Endings
+
+Do not mechanically summarize the piece.
 
 A good ending may:
 
-* return to the opening question
-* name the unresolved tension
-* identify what to watch next
-* sharpen the central distinction
-* point toward the next piece
+* stop at the strongest observation
+* return to a concrete situation
+* expose an unresolved problem
+* sharpen a question
+* identify what to watch
+* complicate the initial interpretation
+* point toward another inquiry
 
-The ending should leave the reader with a clearer question, distinction, or model than they had at the beginning.
+Do not append a rhetorical question simply because the piece needs an ending.
+
+If the argument has landed, stop.
 
 ---
 
@@ -694,266 +497,301 @@ The ending should leave the reader with a clearer question, distinction, or mode
 
 ## Note
 
-A note is a short capture of an idea, question, signal, or distinction.
+A note captures a useful observation, question, signal, or distinction.
 
 Must have:
 
 * a clear observation or question
-* enough context to revisit later
+* enough context to understand it
 * a reason it belongs in the archive
+
+May remain exploratory.
 
 Does not need:
 
-* full argument
-* polished ending
-* broad reader framing
+* a complete argument
+* a model
+* a formal conclusion
+* multiple sections
 
-Use notes when the idea is worth preserving but not ready to become an essay.
-
----
+If the idea requires substantial explanation to become useful, it may not actually be a note.
 
 ## Field report
 
-A field report captures an observed signal and interprets its possible meaning.
-
-Field reports remain observations and interpretations of signals. They are not complete topic education.
+A field report begins with an observed external signal.
 
 Must have:
 
-* observed signal
-* interpretation
-* uncertainty
-* what to watch next
+* the signal
+* adequate evidence
+* an interpretation
+* a reason the signal may matter
+* uncertainty or something to watch
 
-Does not need:
-
-* final conclusion
-* comprehensive research
-* exhaustive proof
-* academic treatment
-* complete topic education
-* polished thesis
-
-Recommended structure:
-
-1. **Signal**
-2. **Why it may matter**
-3. **What is still unclear**
-4. **What to watch next**
-
----
+It should add something beyond summarizing the source.
 
 ## Essay
 
-An essay develops a clearer argument, model, or distinction.
+An essay develops an argument or inquiry.
 
 Must have:
 
-* clear opening question or tension
-* structured argument
-* concrete example
-* reader payoff
-* strong ending
+* a meaningful question, observation, or tension
+* developed reasoning
+* concrete grounding
+* evidence appropriate to its claims
+* movement beyond the initial premise
+* a useful ending
 
-Does not need:
-
-* exhaustive coverage
-* academic proof
-* false certainty
-
-Recommended structure:
-
-1. **Reader question or tension**
-2. **Why the old framing is insufficient**
-3. **Clearer model or claim**
-4. **Concrete example**
-5. **Implications**
-6. **Unresolved questions**
-7. **Sharp ending**
-
----
+It does not need exhaustive coverage or artificial certainty.
 
 ## Experiment
 
-An experiment documents something built, tested, prototyped, or tried.
+An experiment documents something built, tested, or tried.
 
-Must have:
+Must distinguish:
 
-* purpose
-* what was built or tested
-* what it demonstrates
+* what was actually done
+* what happened
+* what was learned
 * what remains unresolved
 
-Does not need:
+## Prototype note
 
-* production polish
-* complete solution
-* broad theory unless relevant
+A prototype note may describe a proposed or implemented design exploration.
 
-Recommended structure:
+Must make its status clear.
 
-1. **Purpose**
-2. **What was tested**
-3. **What it shows**
-4. **What it does not solve**
-5. **Next iteration**
+It should identify the design finding, not merely describe the screen.
 
----
+## Concept document
+
+A concept document establishes vocabulary intended for reuse.
+
+Do not create one merely because an observation can be named.
+
+A concept should have demonstrated recurrence or durable explanatory value.
 
 ## Checkpoint
 
-A checkpoint summarizes accumulated thinking at a point in time.
+A checkpoint records accumulated thinking at a point in time.
 
-Must have:
+It should show:
 
-* summary of accumulated thinking
+* what has become clearer
 * what changed
-* current working model
-* open questions
-* next directions
+* what remains uncertain
+* what previous framing has weakened or been superseded
+* what deserves continued observation
 
-Does not need:
+---
 
-* brand-new argument
-* polished essay structure
+# Editorial dispositions
 
-Recommended structure:
+An editorial review should end with one of these dispositions.
 
-1. **Current state**
-2. **What changed**
-3. **Working model**
-4. **Open questions**
-5. **Next directions**
+## READY FOR HUMAN REVIEW
+
+The idea is adequately developed.
+
+The evidence posture is sound.
+
+A mechanical scan confirms that the publishable prose contains no Unicode em dash character (`—`).
+
+Remaining work is primarily human editorial judgment.
+
+## REVISE
+
+The idea is developed enough, but the draft has identifiable problems that can be addressed through revision.
+
+Examples:
+
+* weak opening
+* unclear structure
+* repetitive prose
+* missing example
+* unsupported phrasing
+* generic AI voice
+
+## DEVELOP FURTHER
+
+The prose is not the main problem.
+
+The underlying thinking has not advanced sufficiently beyond the source material.
+
+Use when:
+
+* the draft merely restates or polishes the seed
+* the argument consists mostly of assertions
+* a framework substitutes for explanation
+* the example does not reveal a mechanism
+* the piece has no meaningful turn
+* the prototype is described without extracting a design finding
+
+Return to the idea before polishing the prose.
+
+## RESEARCH REQUIRED
+
+A material factual or evidentiary question blocks responsible development.
+
+Identify exactly what must be verified.
+
+Do not generate a polished draft around unresolved evidence.
+
+## KEEP AS SEED
+
+The idea is worth preserving but does not yet justify development into a public artifact.
+
+This is a successful outcome.
+
+Not every seed needs publication.
 
 ---
 
 # Editorial review checklist
 
-Before publishing, evaluate the piece against these questions.
+## Development
 
-## Core idea
+* What does the draft understand that the source material did not yet say?
+* Has the inquiry moved?
+* Is there a mechanism, consequence, complication, or design finding?
+* Is this the right artifact size for the idea?
+* Is a model substituting for development?
 
-* What is the central question?
-* What is the central tension?
-* What does the reader understand by the end?
-* Is the idea specific enough to be memorable?
-* Does the piece advance a line of inquiry?
+## Grounding
+
+* Can the reader picture what is happening?
+* Is there a concrete human, operational, interface, or institutional situation?
+* Would a continuing narrative make the change easier to understand?
+* Is the example doing intellectual work?
+
+## Evidence
+
+* What is observed?
+* What is inferred?
+* What is speculative?
+* Are current or historical claims adequately supported?
+* Are company claims distinguished from demonstrated evidence?
 
 ## Structure
 
-* Does the opening create momentum?
-* Do the headings carry the argument?
-* Does each section do a necessary job?
-* Are there redundant sections?
-* Does the piece move from question to insight?
-
-## Clarity
-
-* Is the abstract made concrete?
-* Are examples specific enough?
-* Are key distinctions clear?
-* Are claims supported or appropriately qualified?
-* Is the reader payoff obvious?
+* Does the opening begin near the live question or signal?
+* Does each section have a necessary job?
+* Has structure been imposed merely for neatness?
+* Could any section disappear without loss?
 
 ## Voice
 
-* Does it avoid generic AI language?
-* Does it sound like Deep Field Works?
-* Is it punchy without becoming simplistic?
-* Is it thoughtful without becoming academic?
-* Is it confident without pretending to be final?
-* Does it avoid ChatGPT essay voice?
+* Does a mechanical scan confirm that the publishable prose contains no Unicode em dash character (`—`)?
+* Does the piece sound generated?
+* Are there staged contrasts, artificial symmetry, stacked aphorisms, or pseudo-frameworks?
+* Is the prose more polished than the thought deserves?
+* Has natural irregularity been preserved?
+* Is the reader being over-explained to?
 
-## Fit
+## Ending
 
-* Does it belong on the site?
-* Is it a note, field report, essay, experiment, or checkpoint?
-* Should it be shorter?
-* Should it be split into multiple pieces?
-* Could it become future video material?
+* Does the ending add something?
+* Is a summary unnecessary?
+* Is an unresolved question genuine rather than templated?
+* Would stopping one paragraph earlier be stronger?
 
 ---
 
 # Common revision moves
 
-## If the piece feels too broad
-
-* Find the real question and move it to the top.
-* Cut background.
-* Narrow the claim.
-* Replace general context with a concrete tension.
-
-## If the piece feels too long
-
-* Apply the compression test: if removing 30% would leave the central insight intact, remove it.
-* Convert sections into sharper headings.
-* Compress repeated ideas.
-* Use bullets for components or contrasts.
-* Cut generic implications.
-* Decide whether it should become two pieces.
-
 ## If the piece feels too abstract
 
-* Add a concrete workplace, interface, prototype, or decision scenario.
-* Show what changes in practice.
-* Add a before/after contrast.
-* Replace abstract nouns with human actions.
+Do not immediately invent a model.
 
-## If the piece feels too cautious
+Find a person, task, decision, interface, workflow, or institution through which the change can be seen.
 
-* State the working thesis more clearly.
-* Then mark what remains uncertain.
-* Separate “directionally likely” from “not yet proven.”
+If the change unfolds over time, follow the same example through it.
 
-## If the piece feels too confident
+## If the piece feels too compressed
 
-* Separate observation, inference, and speculation.
-* Add the signal that would change the conclusion.
-* Replace universal claims with scoped claims.
+Add mechanism rather than more claims.
 
-## If the piece sounds too much like AI
+Show what happened between the opening observation and the conclusion.
 
-* Cut broad setup.
-* Replace generic phrases with concrete verbs.
-* Make headings more argumentative.
-* Add a sharper human or operational example.
-* Vary paragraph length.
-* Remove fake symmetry.
-* Remove polished transitions that hide weak ideas.
+## If the piece feels too polished
+
+Remove rhetorical packaging.
+
+Look for:
+
+* symmetry
+* slogans
+* transitions
+* arrow models
+* quotable endings
+* unnecessary contrasts
+
+Restore ordinary language where it is stronger.
+
+## If the piece feels generic
+
+Return to the originating signal.
+
+Find the detail that made this observation worth preserving.
+
+Ask what Deep Field Works sees here that a generic AI article would not.
+
+## If the prototype note feels thin
+
+Stop describing controls.
+
+Ask what designing those controls revealed about authority, state, policy, thresholds, exceptions, escalation, reversibility, or failure recovery.
+
+## If the piece feels finished but unimportant
+
+Return to development.
+
+Polish is not evidence of insight.
 
 ---
 
-# Agent drafting instructions
+# Agent drafting and review instructions
 
-When using this document to draft or revise Deep Field Works content, follow this order of operations:
+When drafting or revising Deep Field Works content:
 
-1. Identify the likely reader question.
-2. Identify the central tension.
-3. Decide the piece type: note, field report, essay, experiment, or checkpoint.
-4. Choose the appropriate structure.
-5. Draft with concrete examples early.
-6. Separate observation, inference, and speculation where needed.
-7. Remove generic AI language.
-8. Compress repeated ideas.
-9. Strengthen headings so they carry the argument.
-10. End by sharpening the question, distinction, model, or unresolved tension.
+1. Identify the source signal or seed.
+2. Identify what is already known or stated.
+3. Find the live question or tension.
+4. Decide the smallest adequate artifact type.
+5. Look for a concrete situation that can carry the idea.
+6. Prefer narrative to abstraction when the idea concerns change over time.
+7. Develop the idea beyond the source material.
+8. Research material factual claims where necessary.
+9. Preserve observation, inference, and speculation.
+10. Use models only when they add explanatory value that examples cannot.
+11. Apply the shared prose-warning-signs pass.
+12. Remove rhetorical polish that exceeds the strength of the thinking.
+13. Choose an editorial disposition.
+14. Stop for human judgment when required.
 
 Do not optimize for volume.
 
 Do not pad.
 
-Do not over-polish.
+Do not manufacture frameworks.
+
+Do not force every idea into publication.
 
 Do not turn uncertainty into vague balance.
 
-The goal is not to produce a complete-looking article. The goal is to produce a useful entry in an evolving body of work.
+Do not make provisional thinking look settled merely because a clean formulation is available.
 
 ---
 
 # Final editorial principle
 
-Deep Field Works should document the transition while participating in it.
+The purpose of editing is not to make the draft look finished.
 
-The archive is not only a record of the work.
+It is to make the thinking easier to see.
 
-It becomes part of the work.
+When a concrete situation can carry the idea, let it.
+
+When the inquiry is unfinished, preserve that.
+
+When the thought has not developed far enough, keep working on the thought.

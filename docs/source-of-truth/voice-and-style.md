@@ -51,6 +51,49 @@ Not performing certainty.
 
 ---
 
+# First voice test: would you say it aloud?
+
+> If a sentence contains wording you would never use in conversation, rewrite it before doing anything else.
+
+This is a primary Deep Field Works voice test.
+
+* Prefer words a thoughtful person would naturally say aloud.
+* If a phrase sounds like a report, white paper, analyst note, corporate strategy document, or academic explanation, rewrite it in ordinary language.
+* Prefer verbs and concrete nouns over abstract noun phrases.
+* Rewrite formal constructions such as “traditional organizational structures,” “apparent consistency of the conversational interface,” or “unequal leverage” when simpler conversational wording carries the idea.
+
+Conversational does not mean simplistic or casual. Deep Field Works can discuss complex ideas in intelligent, natural language without sounding institutional or academic.
+
+---
+
+# Mechanical rule: no em dashes
+
+> Do not use em dashes in publishable Deep Field Works prose.
+
+The Unicode em dash character `—` is prohibited. Replace it with a period, comma, colon, parentheses, or a rewritten sentence.
+
+This is a hard readiness rule, not a warning sign or stylistic preference. A draft containing an em dash is not ready for human review.
+
+---
+
+# Use established terminology directly
+
+When the intended reader is likely to know an established term, use it directly. Do not paraphrase familiar AI terminology into longer generic descriptions merely to sound accessible.
+
+Use terms such as `prompt engineering`, `context engineering`, `harness engineering`, and `agent orchestration` when they name the thing more clearly than an expanded explanation would.
+
+Explain a term when the argument or audience requires it. Do not explain it automatically. Plain language should make the writing clearer without making recognizable ideas harder to recognize.
+
+---
+
+# Commentary before explanation
+
+Let the reader notice the pattern before the article interprets it. Prefer noticing, showing, contrasting, and pointing something out before explaining what it means.
+
+When an example or contrast already carries the argument, do not immediately repeat it in abstract language. Avoid repeatedly stepping outside the observation to tell the reader why it matters.
+
+---
+
 # What the voice is not
 
 Deep Field Works should not sound like:
@@ -161,8 +204,6 @@ Keep it short and punchy.
 
 The writing should be punchy, but not artificially dramatic. A developed piece should feel selected and argued, not comprehensive. Deep research may sit behind the prose without becoming the prose.
 
-Research discipline should mostly be invisible in the reading experience. Evidence should support the point without making the piece read like a research memo.
-
 Punchy means:
 
 * the point arrives quickly
@@ -189,6 +230,27 @@ Internal research and workflow labels belong in development records, not in the 
 
 ---
 
+# Select, sharpen, compress
+
+Source material is raw material, not a completeness requirement. A Seed may contain several future pieces.
+
+For a short artifact:
+
+* find the strongest useful idea
+* select only the material that supports it
+* leave unrelated good material for later
+* make the result sharper and shorter than the source
+
+Do not summarize the entire source merely because it exists, or paraphrase it into cleaner prose. Select the strongest idea, sharpen it, and compress the result. Do not default to summarizing, organizing, and explaining everything in the source.
+
+Stop when the point has landed. Do not add another implication, qualification, explanatory paragraph, or mechanical conclusion merely to make the piece feel complete. A short note is allowed to be short.
+
+If the source contains a useful contrast, distinction, or compact list, preserve and sharpen it rather than flattening it into explanatory prose. Preserve a ladder or model only when the structure itself adds explanatory value.
+
+Deks are bridges, not thesis summaries. Keep them short. Headings are optional in short notes; use them only when they improve the reading or carry part of the argument.
+
+---
+
 # Open with the live question
 
 Strong pieces often begin by naming the question the reader may already be wondering about.
@@ -197,7 +259,7 @@ Examples:
 
 * “If AI can do more of the coordination work, what happens to the structure built around coordination?”
 * “What does a personal knowledge base become when it can generate new artifacts from its own archive?”
-* “The question is not whether agents can act. The question is who decides when they should.”
+* “Agents can act. Who decides when they should?”
 * “A chronological archive preserves history. But does it help a new reader understand where to begin?”
 
 This style is better than broad setup.
@@ -219,6 +281,32 @@ Show:
 > A manager who once spent Monday morning collecting status updates may instead review a signal map: what changed, what appears blocked, what can proceed automatically, and what still needs judgment.
 
 The voice should make abstract systems visible through concrete situations.
+
+---
+
+# Let the reader inhabit the change
+
+When an idea develops over time, a continuing narrative example can be stronger than a sequence of abstractions.
+
+Follow the same worker, team, task, decision, interface, or institution when doing so helps the reader understand what changed.
+
+Show:
+
+* what happened before
+* what the system began doing
+* what the person did next
+* what became easier
+* what became harder
+* where judgment or responsibility moved
+
+Do not turn the example into a fictional story for its own sake.
+
+The purpose is recognition.
+
+A reader should be able to imagine occupying the situation.
+
+Whenever possible, let the situation reveal the pattern before the prose names it.
+
 
 ---
 
@@ -248,7 +336,7 @@ Good excitement:
 
 * “A more interesting possibility emerges...”
 * “This is where the structure starts to change.”
-* “The real shift is not the tool. It is the routing of judgment.”
+* “Judgment starts moving to a different part of the system.”
 * “That turns the archive from storage into infrastructure.”
 
 Bad excitement:
@@ -284,15 +372,28 @@ Be explicit where uncertainty remains.
 
 # Preferred rhythm
 
-Use a mix of:
+Use a natural mix of:
 
 * short declarative sentences
 * medium explanatory paragraphs
 * occasional compact lists
-* occasional diagram-like structures
 * selective one-line turns
+* concrete narrative passages when they help the reader inhabit a situation
 
-Avoid long, dense paragraphs unless the idea truly requires it.
+Avoid:
+
+* repeated dramatic fragments
+* paragraphs engineered to end with a maxim
+* suspiciously symmetrical sections
+* repeated three-part structures
+* stacked quotable sentences
+* diagram-like prose used mainly for rhetorical effect
+
+Do not use arrow chains or compact conceptual diagrams as a default writing device.
+
+Diagrams remain appropriate when the subject itself is structural, for example system architecture, workflow routing, state transitions, authority relationships, or information flows.
+
+When explaining conceptual change, prefer showing what happens to a person, task, team, interface, or institution.
 
 The rhythm should feel thoughtful and controlled.
 
@@ -301,6 +402,9 @@ Not breathless.
 Not academic.
 
 Not mechanically polished.
+
+Not optimized for quotation.
+
 
 ---
 
@@ -313,8 +417,8 @@ Prefer:
 * “The pyramid was built to route information through people.”
 * “The role changes before it disappears.”
 * “The archive becomes part of the work.”
-* “The interface is not just a control surface. It is a governance surface.”
-* “The first value is not automation. It is shared context.”
+* “A governance surface shows what the system may do and when it must stop.”
+* “Shared context creates the first useful change.”
 
 Avoid:
 
@@ -405,7 +509,7 @@ Look for the structure under the surface event.
 
 Example:
 
-> The issue is not that managers send too many updates. It is that the organization still depends on people to translate local reality into upward-facing summaries.
+> Managers send so many updates because the organization still depends on people to translate local reality into upward-facing summaries.
 
 ## Separate confused ideas
 
@@ -433,7 +537,7 @@ Example:
 
 ## Compress without flattening
 
-Find the durable sentence, but do not erase nuance.
+Remove repetition without forcing the idea into a slogan.
 
 Example:
 
@@ -623,7 +727,7 @@ Problem: generic and inflated.
 
 ## Stronger
 
-> The useful interface may not be the one that says what to do. It may be the one that shows why the system thinks the situation has changed.
+> A useful interface shows why the system thinks the situation has changed.
 
 Why better: concrete, interface-aware, and more specific.
 
@@ -652,13 +756,13 @@ Prefer:
 
 Examples:
 
-> The question is not whether AI can be added to the old pyramid. It can. The question is how much value remains trapped if the pyramid itself is left untouched.
+> AI can be added to the old pyramid. How much value remains trapped if the pyramid itself is left untouched?
 
-> A field journal does not prove that every observation will matter. It preserves the conditions under which some of them eventually might.
+> A field journal preserves the conditions under which an observation may eventually matter.
 
 > The archive starts as memory. If it is structured well enough, it becomes a collaborator.
 
-> The interface is not only where the user acts. It is where the system explains what it thinks is changing.
+> The interface shows the user what the system thinks is changing.
 
 ---
 
@@ -666,15 +770,17 @@ Examples:
 
 Before publishing, ask:
 
+* Does a mechanical scan confirm that the prose contains no Unicode em dash character (`—`)?
 * Does the piece start near the live question?
 * Does it avoid generic AI language?
+* Does it use established AI terminology directly where the intended reader is likely to know it?
 * Does it make at least one useful distinction?
 * Does it become concrete quickly?
 * Does it preserve uncertainty honestly?
 * Does it make the reader’s understanding sharper?
 * Does it sound like a field journal, not a corporate essay?
 * Does it avoid over-polished AI cadence?
-* Does it have at least one sentence worth remembering?
+* Does at least one passage carry the central idea clearly?
 * Does the ending sharpen rather than merely summarize?
 * Does it show changed work, changed judgment, or changed structure?
 * Does it maintain professional optionality rather than sounding like a pitch?

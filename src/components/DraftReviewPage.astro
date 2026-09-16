@@ -4,6 +4,7 @@ import BackLink from './BackLink.astro';
 import BackToTop from './BackToTop.astro';
 import { resolveEntryDomain } from '../data/domains';
 import { formatDomainLabel } from '../utils/formatDomainLabel';
+import { entryChronologyDate } from '../utils/entryChronologyDate';
 import type { CollectionEntry } from 'astro:content';
 import { render } from 'astro:content';
 import type { PresentationCollection, PresentationPlan } from '../presentation/presentationPlan';
@@ -37,6 +38,12 @@ const dek = plan.dek
   : undefined;
 const domain = resolveEntryDomain(entry.data);
 const domainLabel = domain?.title ?? entry.data.domainPath?.[0] ?? entry.data.theme;
+const displayDate = entryChronologyDate(entry.data);
+const monthYear = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(displayDate);
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
@@ -65,6 +72,7 @@ const withBase = (path: string) =>
 
   <article class="article" data-draft-review-root>
     <header class="article__header">
+      <h1 class="article__title">{pageTitle}</h1>
       <p class="article__meta">
         <span>{typeLabels[entry.data.documentType]}</span>
         {domainLabel && (
@@ -79,8 +87,9 @@ const withBase = (path: string) =>
             )}
           </>
         )}
+        <span class="article__meta-sep"> · </span>
+        <span>{monthYear}</span>
       </p>
-      <h1 class="article__title">{pageTitle}</h1>
       {dek && <p class="article__dek">{dek}</p>}
     </header>
 
@@ -360,7 +369,7 @@ const withBase = (path: string) =>
   }
 
   .article__title {
-    margin-bottom: var(--space-100);
+    margin-bottom: var(--space-50);
   }
 
   .article__meta {
@@ -380,6 +389,10 @@ const withBase = (path: string) =>
     font-size: var(--font-size-subheader);
     font-weight: var(--font-weight-light);
     line-height: var(--line-height-heading);
+  }
+
+  .article__body :global(> p:first-child) {
+    margin-top: 0;
   }
 
   .article__body :global(.review-pull-quote) {
@@ -410,10 +423,6 @@ const withBase = (path: string) =>
     font-weight: var(--font-weight-light);
     line-height: var(--line-height-body);
     overflow-wrap: break-word;
-  }
-
-  .article__body :global(h2) {
-    margin-top: var(--space-600);
   }
 
   .article__body :global(a[data-citation]) {

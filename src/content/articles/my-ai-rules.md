@@ -1,13 +1,13 @@
 ---
-title: My AI Rules
-description: The control surface must make AI authority legible without exposing the machinery as a technical permission system.
+title: From Chatbot to Personal AI
+description: An AI that knows how you want things done.
 draftDate: 2026-07-14
 updatedDate:
 draft: true
 documentType: prototype-note
 theme: supervision-interfaces
-status: draft
-sourceNote: "Intake issue #17 — https://github.com/MLX983/dfw-intake/issues/17"
+status: review
+sourceNote: "Intake issue #17: https://github.com/MLX983/dfw-intake/issues/17"
 domainPath:
   - "Interfaces for Judgment"
 relatedConcepts:
@@ -16,49 +16,23 @@ relatedPieces: []
 canonical: false
 ---
 
-# My AI Rules
+Most chat AI waits for a request. Users open a conversation, explain what is going on, ask for something, and receive a response. The next task often begins with another conversation and another round of context.
 
-## The design problem
+A personal AI would remember users' preferences and ongoing projects, use the services they already rely on, and handle routine actions without being prompted each time.
 
-A personal AI can know things, use services, and act across several parts of a person's life. The controls for that authority need to be understandable at a glance. The problem is not exposing every permission or technical dependency. It is helping a person see what is allowed, what requires permission, and what is off-limits without managing the AI like a system administrator.
+Users shouldn't have to keep supplying the same background or starting every small task. Connections, preferences, and limits can be set in advance, and the AI can proceed because its mission has already been defined.
 
-## The interaction choice
+For a consumer product, those settings need to stay simple, focused on four things:
 
-The proposed screen is called My AI Rules. It frames control as a set of ordinary-language house rules. The user describes what the AI may know, use, and do, then identifies the situations where it must stop and ask. The interface keeps those boundaries visible instead of burying them in a general settings system.
+- what the AI knows about them
+- what information, tools, or services it can use
+- what it may do independently
+- where its authority stops
 
-## How the control surface is grouped
+Take a hypothetical dentist appointment. I have already allowed the AI to use my calendar, contact ordinary service providers, and reschedule routine appointments. When a conflict appears, it moves the appointment and records what changed. There is no reason to interrupt me for permission I have already given.
 
-### What my AI knows
+The limits show up when the task changes. Cancelling an important appointment, paying a large fee, or sharing medical details may go beyond what I allowed. That is when the AI should stop and bring the decision back to me.
 
-- Name, family, projects, schedule, likes, and writing style use three states: Keep, Ask first, or Forget.
+A future settings page could make these standing instructions easy to set, review, and change. It would also need to show which instruction led to an action. The exact settings and behavior would need to be designed and tested.
 
-### What my AI can use
-
-- Calendar, email, notes, photos, location, and contacts use three states: Yes, Ask me, or No.
-
-### What my AI can do
-
-- Helping the user think, drafting messages, creating reminders, organizing things, suggesting plans, and talking to other apps use three states: Always okay, Ask first, or Never.
-
-### Before you act, ask me if
-
-- The action concerns money, family, health, or work.
-- The action contacts another person or changes or deletes something.
-
-## Why it matters
-
-The control surface must make AI authority legible without exposing the machinery as a technical permission system.
-
-The larger design move is from configuring machinery to teaching a helper the house rules. The language is direct, and the boundaries remain visible. That does not remove the underlying complexity. It gives the user a legible surface for authority and a basis for checking whether the AI complied.
-
-## Current state
-
-This is a proposed control-surface structure drawn from the intake issue. It has not been implemented or tested. The labels, state distinctions, and compliance feedback still require interaction design and user review.
-
-## Remaining questions
-
-Would people understand the difference between Ask first and Ask me across knowledge, access, and action?
-
-How should the interface show that the AI complied with a rule after an action occurs?
-
-Which sensitive actions need categories beyond the proposed money, family, health, work, contact, change, and deletion boundaries?
+The AI should know how users want ordinary things handled and take care of them on its own. It should also know when something is important enough to bring back to them.
