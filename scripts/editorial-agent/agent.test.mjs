@@ -101,6 +101,13 @@ test('approved exports and both exemplar polarities remain selective read-only c
   assert.deepEqual(optionalContext({}),[]);
 });
 
+test('role keeps private KB context out of public prose and canonical KB state', () => {
+  const role=fs.readFileSync(new URL('./role.md',import.meta.url),'utf8');
+  assert.match(role,/Never quote or publicly cite its prose/);
+  assert.match(role,/Verify public factual claims with appropriate external evidence/);
+  assert.match(role,/Do not write back to the Knowledge Base/);
+});
+
 test('independent evaluation excludes prior scratchpad without altering it', () => {
   const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'dfw-scratch-test-')));
   const p=writePrivate(root,'scratchpad/old.json','{"entries":["Prior experimental discovery"]}');
