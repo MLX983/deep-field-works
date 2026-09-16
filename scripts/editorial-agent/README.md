@@ -130,11 +130,13 @@ Local KB inspection found an existing `system/chatgpt-project-views.json` manife
 and `tools/build-chatgpt-project-views.py` exporter. Its AI Adoption view comprises
 `baseline/current-context.md` and `topics/ai-systems-and-institutions.md`.
 Those project views are not themselves approval to use private KB material in
-DFW. No DFW-approved export was identified, so v0.1 attaches none. Once a specific
-Markdown export is approved, point an `aiAdoptionContext` record at that existing
-export; no second exporter or synchronization process is needed. Prefer a small
-topic excerpt over a whole personal baseline. The KB exporter is never invoked
-by this harness, and no KB source is modified.
+DFW. The owner has separately approved only the generated
+`AI Adoption/ai-systems-and-institutions.md` view for Editorial Agent use. Its
+attachment record lives in the private operator configuration outside this
+repository; the checked-in example stays empty. `current-context.md` and all
+other private KB material remain excluded. This uses the existing export, so no
+second exporter or synchronization process is needed. The KB exporter is never
+invoked by this harness, and no KB source is modified.
 
 ## Limits and verification
 
