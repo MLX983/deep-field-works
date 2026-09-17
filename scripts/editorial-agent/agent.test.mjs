@@ -170,4 +170,5 @@ test('controller has no publishing imports, baseline reads, or mutation commands
   assert.ok(!source.includes("['commit'"));
   assert.ok(!source.includes("['issue', 'edit'"));
   assert.ok(!source.includes('backlog-process.mjs'));
+  assert.ok(!source.includes('approval-package.mjs'));
 });

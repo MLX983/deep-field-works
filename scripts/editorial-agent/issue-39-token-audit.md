@@ -78,3 +78,24 @@ The role, seed, six exemplar functions, research policy, and output contracts
 remain intact. Web research was not artificially capped because the preserved
 run does not provide enough evidence to choose a lower safe limit. Future runs
 can compare their saved prompt sizes and usage totals against this baseline.
+
+## v0.3 bounded-context dry run against preserved Sol output
+
+The v0.3 passage selector was applied in memory to the preserved Sol issue #39
+run `editorial-v0.2-2026-09-17T04-30-07-034Z-926f408b`. This diagnostic did not
+invoke a model, create a run, or alter the preserved files.
+
+The original selection contained six sources and 41,467 characters of source
+material. At the 24,000-character default, v0.3 would supply seven passages from
+five sources totaling 23,949 source characters and omit nine passages. That is a
+17,518-character, or 42.2%, reduction in selected source material. The fully
+serialized bounded passage records are larger because they retain source IDs,
+headings, roles, hashes and selection reasons.
+
+Replacing the old full-context block in the preserved prompt with those bounded
+records yields an estimated prompt size of 46,410 characters, down from 61,618:
+a reduction of 15,208 characters, or 24.7%. These are character comparisons, not
+model token or billing measurements. The dry run excluded one selected AI
+Adoption section in full and retained relevant passages from the other five
+sources; a live invocation could still differ because the new selector would be
+fed a new selection response.

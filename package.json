@@ -29,6 +29,8 @@
     "notify:review:fixtures": "node scripts/run-review-notification-fixtures.mjs",
     "notify:loop1-review": "node scripts/notify-loop1-review.mjs",
     "notify:loop1-review:fixtures": "node scripts/run-loop1-review-notification-fixtures.mjs",
+    "editorial:test": "node --test scripts/editorial-agent/*.test.mjs",
+    "editorial:approve": "node scripts/editorial-agent/approval-package.mjs",
     "preview": "astro preview",
     "review:drafts": "astro dev --open /review-drafts",
     "astro": "astro"

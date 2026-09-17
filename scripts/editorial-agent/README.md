@@ -1,4 +1,4 @@
-# DFW Editorial Agent v0.2
+# DFW Editorial Agent v0.3
 
 An isolated editorial experiment. It ends at human editorial review, before the
 publishing workflow begins. No existing Loop 1/2 entry point is changed.
@@ -38,11 +38,22 @@ catalog item with merged roles, aliases, and provenance records. A 16-item
 lexical pool and a 12-item concept-group pool are combined and deduplicated into
 at most 24 records. The conceptual pool admits at most four sections from one
 underlying source so a long export cannot occupy the pool. Catalog excerpts are
-capped at 700 characters. The selection
-call chooses up to six IDs. The controller supplies their full text to a fresh
-editorial invocation. The agent decides framing,
+capped at 700 characters. The selection call chooses up to six IDs. A second,
+deterministic stage divides those sources at Markdown headings and paragraph
+boundaries, ranks passages against the seed, selection reasons and editorial
+questions, and supplies only the highest-value passages that fit the editorial
+context budget. Source identity, heading, role, provenance and source hash remain
+attached to each excerpt. The agent decides framing,
 research, artifact type, and whether anything is worth developing. This small
 two-call design is selective retrieval, not an autonomous context crawler.
+
+The default selected-source text allowance is 24,000 characters. The source seed is sent
+separately and does not count against it. `--editorial-context-chars N` sets an
+explicit per-run override from 1,000 through 250,000 characters. Invalid values
+fail before a run is created, and the controller never adds a passage that would
+cross the limit. Categories have no reserved quota: no KB context or no exemplar
+prose remains a valid result. Extremely long prose is split only after heading,
+paragraph and then sentence boundaries have been tried.
 
 Both calls explicitly pin their own runtime and do not inherit the desktop
 selector. The default is `gpt-5.6-sol` Low for selection and `gpt-5.6-sol`
@@ -111,13 +122,20 @@ from starting, so it is not part of v0. Native model execution remains read-only
 
 ## Workspace and output
 
-Each unique `runs/editorial-v0.2-.../` contains source JSON, seed, catalog,
-selected full context, role, prompts, schemas, raw responses, JSONL tool events,
-stderr, execution records, draft.md, result.json, research.json,
+Each unique `runs/editorial-v0.3-.../` contains source JSON, seed, catalog,
+selected full context, bounded `editorial-context.json`, role, prompts, schemas,
+raw responses, JSONL tool events, stderr, execution records, `draft.md`,
+`result.json`, `research.json`,
 development.json, branches.json, design-connections.json, kb-proposals.json and
 manifest.json (or failure.json), plus a human-facing run-report.json.
 Only a validated result gets `awaiting-human-editorial-review`. It never gets
 approval. Preserve generated text even when it warrants revision.
+
+`editorial-context.json` is private diagnostic evidence. It records candidate
+and selected-source counts, available and supplied characters, total and
+budget-caused omissions, included and excluded sources/passages, the configured limit and whether an
+operator override was used. The manifest carries compact totals. These records
+are never reader-facing content.
 
 The contract separates the source premise, editorial assessment (judgment,
 rationale, primary development), and main draft. A worthwhile premise should
@@ -179,12 +197,56 @@ other private KB material remain excluded. This uses the existing export, so no
 second exporter or synchronization process is needed. The KB exporter is never
 invoked by this harness, and no KB source is modified.
 
-## Cost audit and future handoff
+## Human editorial approval package
+
+Human approval is a separate explicit command. The Editorial Agent cannot invoke
+it and cannot approve itself. The command consumes a completed run at
+`awaiting-human-editorial-review` and writes an immutable
+`EditorialApprovalPackage` below the same private workspace:
+
+```sh
+npm run editorial:approve -- \
+  --workspace /Users/danowens/Documents/dfw-editorial-private \
+  --source-run editorial-v0.3-... \
+  --artifact-id visible-recovery \
+  --artifact-type note \
+  --approved-by "Reviewer identity" \
+  --approval-marker editorial-approved \
+  --approve-current-draft
+```
+
+`--approve-current-draft` explicitly confirms the preserved model title and
+draft. For edited approval, omit it and supply both `--title` and `--body-file`.
+Optional `--references-file` and `--relationships-file` point to JSON arrays
+containing only references and DFW relationships the human selected. The command
+never substitutes model text for a missing edited field.
+
+Packages use `editorial-approval-package.v1` and live at
+`approvals/<editorial-artifact-id>/`. One source run or intake issue can produce
+zero, one or many artifact IDs. Reapproving one artifact creates the next
+revision; package files are created owner-read-only and never overwritten by the
+command. Domain and theme are
+intentionally absent until future publishing classification.
+
+The content SHA-256 covers deterministic JSON containing exactly the document
+type, title, body, sorted approved external-reference set and sorted approved
+DFW-connection set. It excludes paths, timestamps, reviewer metadata and
+revision, so identical publication content has the same content fingerprint.
+The package SHA-256 additionally binds schema version, package/artifact IDs,
+revision, source provenance, approval metadata and the content fingerprint.
+
+Private KB excerpts, scratchpad entries, research notes/pages, unused context,
+prompts, reasoning, exemplar material, unapproved branches/connections and token
+or selection diagnostics are not copied into a package. They remain available
+through the preserved source run. Text a human explicitly places in the approved
+reader-facing body or approved lists is publication input.
+
+## Cost audit and future publishing handoff
 
 The measured issue #39 prompt/token analysis is in `issue-39-token-audit.md`.
-The future Editorial Agent to human approval to publishing-operator boundary is
-defined in `handoff-contract.md`. Neither document enables the handoff or changes
-the publishing processor.
+The human approval to future publishing-operator boundary is defined in
+`handoff-contract.md`. The package mechanism does not enable publishing, invoke
+Loop 1/2, or change the publishing processor.
 
 ## Limits and verification
 
@@ -199,7 +261,7 @@ are saved; do not confuse successful JSON validation with editorial quality.
 No notification, publishing integration, polling or scheduled processing exists.
 
 ```sh
-node --test scripts/editorial-agent/agent.test.mjs
+npm run editorial:test
 npm run build
 ```
 

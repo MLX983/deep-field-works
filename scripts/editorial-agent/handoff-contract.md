@@ -1,83 +1,86 @@
-# Future Editorial Agent handoff contract
+# Editorial approval and future publishing handoff
 
-This document defines a boundary for a future integration. It does not connect
-the Editorial Agent to the bounded publishing processor, create an approval, or
-authorize Loop 2 or publication.
+This boundary is implemented only through human editorial approval. It does not
+connect the Editorial Agent to the bounded publishing processor, invoke Loop 1 or
+Loop 2, change canonical content, or authorize publication.
 
-## Boundary
+## Separate authorities
 
-The Editorial Agent produces a provisional editorial run and stops at
-`awaiting-human-editorial-review`. Its result, draft, classifications, research,
-and proposed connections remain recommendations. Model success, schema validity,
-and editorial quality do not constitute approval.
+The Editorial Agent may retrieve approved context, research, develop a seed,
+draft prose, and propose branches or design/system connections. It stops at
+`awaiting-human-editorial-review` with `approvalGranted: false`. It may not
+approve or publish.
 
-A future handoff requires two separate records:
+The human editorial reviewer may edit, approve, reject, or preserve a draft. The
+reviewer may split one seed into multiple editorial artifacts, decide that it
+produces none, and create the authoritative `EditorialApprovalPackage` for each
+approved artifact. Approval is an explicit operator command, never an inference
+from model output or silence.
 
-1. An immutable proposal generated from the completed Editorial Agent run.
-2. A human decision bound to the proposal and its source fingerprints.
+A future publishing operator may transform a verified package into canonical
+publication artifacts. It may verify integrity, create the canonical file and
+frontmatter, classify domain/theme when needed, attach approved provenance,
+create or update a presentation plan, render a review page, run schema/build
+validation, and prepare a publication commit. It may not materially rewrite the
+approved title or body. An editorial change returns to human editorial review
+and produces a new package revision.
 
-The publishing operator may consume the human-approved fields only after an
-adapter validates both records. It must continue to honor the canonical bounded
-publishing contracts and stop boundaries in
-`docs/workflows/bounded-publishing-operator-runbook.md`.
+Final human publication approval is a separate authority that permits public
+release. Editorial approval alone does not.
 
-## Proposal record
+## EditorialApprovalPackage
 
-Proposed contract name: `dfw-editorial-handoff-proposal.v0`.
+The implemented schema is `editorial-approval-package.v1`. Each package contains:
 
-Required fields:
+- package schema/version and package ID;
+- stable editorial artifact ID and append-only revision number;
+- intake repository, issue, URL and source-body fingerprint;
+- source Editorial Agent run ID;
+- approved artifact type, title and reader-facing body;
+- explicitly approved external references and DFW connections;
+- human approval identity, marker and timestamp;
+- deterministic content and package fingerprints;
+- `editorialApprovalGranted: true`.
 
-| Field | Purpose |
-| --- | --- |
-| `contractVersion` | Exact proposal contract identifier. |
-| `runId` and `agentVersion` | Identify the preserved Editorial Agent run. |
-| `runPath` | Absolute private path to the preserved run. |
-| `issueNumber`, `sourceUrl`, `sourceBodySha256` | Bind the proposal to the intake source. |
-| `repositoryCommit` | Record the repository state used by the experiment. |
-| `resultPath`, `resultSha256` | Bind the structured recommendation. |
-| `draftPath`, `draftSha256` | Bind the proposed prose without approving it. |
-| `manifestPath`, `manifestSha256` | Bind runtime and model evidence. |
-| `modelPolicy` and `fallbackOccurred` | Surface requested and actual phase runtimes. |
-| `recommendationProposal` | A provisional mapping to the existing reviewed-recommendation fields. |
-| `humanApprovalStatus` | Must be `pending` in an agent-created proposal. |
+Domain and theme are excluded to keep the editorial authority surface small.
+They remain future publishing-classification responsibilities. A single intake
+ID or Editorial Agent run can appear in multiple packages with different
+editorial artifact IDs. Each artifact has its own independent revision history.
 
-`recommendationProposal` may propose `disposition`, `suggestedArtifact`,
-`primaryDomain`, `themeOrCluster`, `rationale`, `relatedMaterial`,
-`researchRequirements`, `nextAction`, and `uncertaintyOrReviewFlag`. It must not
-contain `reviewedBy`, `reviewedAt`, or an approved status.
+The content fingerprint binds deterministic JSON for document type, title, body,
+approved external references and approved DFW connections. Reference and
+connection sets are normalized, deduplicated and sorted. Revision, timestamps,
+reviewer data and filesystem paths do not participate, so identical approved
+content retains the same content fingerprint. The package fingerprint binds the
+remaining immutable record, including source and approval metadata and revision.
 
-Do not include private KB prose, unselected exemplar prose, prompts, model traces,
-scratchpad entries, research-page captures, or hidden reasoning in the handoff.
-Those artifacts remain available to the human reviewer by their bound run path.
+Packages do not automatically contain AI Adoption KB excerpts or terminology,
+scratchpad entries, research notes/pages, unused context, prompts, reasoning,
+negative exemplars, unapproved branches or design/system connections, or token
+and selection diagnostics. The preserved source run supplies private audit
+provenance without making those materials future publication inputs.
 
-## Human decision record
+## Creation and immutability
 
-Proposed contract name: `dfw-editorial-human-decision.v0`.
+`npm run editorial:approve -- ...` requires a completed, still-unapproved source
+run, stable artifact ID, artifact type, approval identity and marker. The human
+must either pass `--approve-current-draft` or supply both a final `--title` and
+`--body-file`. Optional approved reference/relationship lists are explicit JSON
+inputs. Earlier package files use exclusive creation and are never overwritten.
+They are made owner-read-only after creation. Later approval for the same artifact increments its revision and changes its
+package fingerprint; changed approved content also changes its content
+fingerprint.
 
-It must contain the proposal path and SHA-256, repeat the source/result/draft
-fingerprints, identify the reviewer and review time, and record one decision:
-`approved`, `rejected`, or `revise`. An approved decision must include a complete
-human-reviewed recommendation conforming to
-`loop1-reviewed-recommendation.v1`; rejected and revise decisions must not.
+## Future publishing input
 
-The reviewer must compare the complete source, result, draft, selected context,
-research basis, uncertainties, and model report. The reviewer owns every approved
-recommendation field. A mechanical copy of the agent proposal is insufficient.
+A future publishing integration should treat a verified package as authoritative
+editorial input. It should fail closed for an unknown schema, fingerprint
+mismatch, missing explicit approval, or mutated package. Its work should be
+limited to publication construction and validation. It should stop for final
+human publication approval before release.
 
-## Publishing adapter requirements
-
-A future adapter must fail closed unless all fingerprints match, the source issue
-is unchanged, the repository state satisfies the operator runbook, the decision
-is explicitly approved, and `fallbackOccurred` is false. It must reject unknown
-fields or contract versions and preserve both input records unchanged.
-
-The current processor also requires a Loop 1 review packet and a
-`backlog-loop1-review-envelope.v2` bound to the Loop 1 result and processing
-commits. Until the canonical workflow is explicitly changed, an Editorial Agent
-decision cannot replace those records. A future adapter would have to translate
-the approved recommendation into the existing envelope only after the normal
-Loop 1 binding values exist and a human confirms the translation.
-
-The adapter must never publish directly, mutate the intake issue, infer approval
-from silence, run beyond the operator's requested stop, or send a notification as
-a side effect of handoff creation.
+The existing publishing implementation still requires its current Loop 1 review
+and later workflow records. This change does not adapt, simplify, bypass, or
+replace those requirements. Whether `EditorialApprovalPackage` eventually
+replaces part of Loop 1 remains a later architecture decision after the package
+boundary has been evaluated.

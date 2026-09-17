@@ -5,10 +5,11 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
+import { buildBoundedEditorialContext, editorialContextPromptView, parseContextBudget } from './context-budget.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_MODEL = 'gpt-5.6-sol';
-export const VERSION = 'v0.2';
+export const VERSION = 'v0.3';
 export const DEFAULT_MODEL_POLICY = Object.freeze({
   selection: Object.freeze({ model: DEFAULT_MODEL, reasoning: 'low' }),
   editorial: Object.freeze({ model: DEFAULT_MODEL, reasoning: 'medium' }),
@@ -243,18 +244,6 @@ function catalogView(items, includeProvenanceRecords = false) {
     excerpt: body.slice(0, CATALOG_EXCERPT_CHARS),
   }));
 }
-function editorialContextView(items) {
-  return items.map(item => ({
-    id: item.id,
-    canonicalId: item.canonicalId,
-    aliases: item.aliases,
-    title: item.title,
-    kind: item.kind,
-    roles: item.roles,
-    body: item.body,
-    selectionReason: item.selectionReason,
-  }));
-}
 function modelChoice(choice, fallback) {
   const model = choice?.model ?? fallback.model;
   const reasoning = choice?.reasoning ?? fallback.reasoning;
@@ -358,7 +347,7 @@ export function persistResult(root, run, result, provenance) {
 export async function main(argv = process.argv.slice(2)) {
   const args = {};
   for (let i=0; i<argv.length; i+=2) {
-    if (!['--workspace','--repo-path','--issue-number','--context-config','--model-config','--research','--selection-model','--selection-reasoning','--editorial-model','--editorial-reasoning','--scratchpad-context'].includes(argv[i]) || !argv[i+1]) throw new Error('Expected --workspace PATH --repo-path PATH --issue-number N [--context-config JSON] [--model-config JSON] [--selection-model MODEL] [--selection-reasoning LEVEL] [--editorial-model MODEL] [--editorial-reasoning LEVEL] [--research live|disabled] [--scratchpad-context enabled|disabled]');
+    if (!['--workspace','--repo-path','--issue-number','--context-config','--model-config','--research','--selection-model','--selection-reasoning','--editorial-model','--editorial-reasoning','--scratchpad-context','--editorial-context-chars'].includes(argv[i]) || !argv[i+1]) throw new Error('Expected --workspace PATH --repo-path PATH --issue-number N [--context-config JSON] [--model-config JSON] [--selection-model MODEL] [--selection-reasoning LEVEL] [--editorial-model MODEL] [--editorial-reasoning LEVEL] [--editorial-context-chars N] [--research live|disabled] [--scratchpad-context enabled|disabled]');
     args[argv[i]] = argv[i+1];
   }
   const issue = Number(args['--issue-number']);
@@ -374,6 +363,8 @@ export async function main(argv = process.argv.slice(2)) {
   });
   const scratchpadContext = args['--scratchpad-context'] ?? 'enabled';
   if (!['enabled','disabled'].includes(scratchpadContext)) throw new Error('Unknown scratchpad context mode');
+  const editorialContextChars = parseContextBudget(args['--editorial-context-chars']);
+  const contextBudgetOverrideUsed = args['--editorial-context-chars'] !== undefined;
   const approvedContext = optionalContext(config);
   const root = checkWorkspace(args['--workspace'], repo, [...(config.exemplars ?? []), ...(config.aiAdoptionContext ?? [])].map(x => x.path));
   fs.mkdirSync(root, { recursive: true, mode: 0o700 });
@@ -387,7 +378,7 @@ export async function main(argv = process.argv.slice(2)) {
     fallbackOccurred: false,
     status: 'pending',
   }]));
-  const manifest = { runId: run, version: VERSION, modelPolicy: phaseRuntime, fallbackOccurred: false, modelConfigPath: args['--model-config'] ? path.resolve(args['--model-config']) : null, scratchpadContext, issueNumber: issue, status: 'running', research, approvalGranted: false, startedAt: new Date().toISOString() };
+  const manifest = { runId: run, version: VERSION, modelPolicy: phaseRuntime, fallbackOccurred: false, modelConfigPath: args['--model-config'] ? path.resolve(args['--model-config']) : null, scratchpadContext, contextBudget: { configuredChars: editorialContextChars, operatorOverrideUsed: contextBudgetOverrideUsed }, issueNumber: issue, status: 'running', research, approvalGranted: false, startedAt: new Date().toISOString() };
   write('started.json', manifest);
   try {
     const bin = process.env.CODEX_BIN || 'codex';
@@ -412,7 +403,21 @@ export async function main(argv = process.argv.slice(2)) {
     const selection = selectionRun.value;
     Object.assign(manifest.modelPolicy.selection, { actualModel: selectionRun.execution.actualModel, actualReasoning: selectionRun.execution.actualReasoning, fallbackOccurred: selectionRun.execution.fallbackOccurred, status: 'completed' });
     const context = chosenContext(selection,catalog); write('context.json',context);
-    const editorialRun = invoke(root,run,'editorial', `${role}\n\nResearch tools: ${research}. ${research === 'disabled' ? 'Research unavailable; disclose limitations.' : 'Independently research when evidence could change the piece.'}\nReturn the editorial contract. draft is reader-facing Markdown including title, or empty if no piece is worthwhile yet. Preserve internal notes separately.\nSEED (${source.url}, ${source.createdAt}):\n${seed}\nAPPROVED EXEMPLAR FUNCTIONS AND ANTI-PATTERNS (guidance only; full prose appears below only when selectively chosen):\n${JSON.stringify(exemplarGuidance(approvedContext))}\nSELECTED FULL CONTEXT:\n${JSON.stringify(editorialContextView(context))}\nYOUR EDITORIAL QUESTIONS:\n${JSON.stringify(selection.editorialQuestions)}`,resultSchema,research==='live',bin,runtimePolicy.editorial);
+    const boundedContext = buildBoundedEditorialContext({ seed, selectedSources: context, editorialQuestions: selection.editorialQuestions, budgetChars: editorialContextChars, operatorOverrideUsed: contextBudgetOverrideUsed, candidateCount: catalog.length });
+    write('editorial-context.json', boundedContext);
+    manifest.contextBudget = {
+      configuredChars: boundedContext.configuredBudgetChars,
+      operatorOverrideUsed: boundedContext.operatorOverrideUsed,
+      candidateCount: boundedContext.candidateCount,
+      selectedSourceCount: boundedContext.selectedSourceCount,
+      availableSelectedSourceChars: boundedContext.availableSelectedSourceChars,
+      suppliedContextChars: boundedContext.suppliedContextChars,
+      omittedContextChars: boundedContext.omittedContextChars,
+      omittedBecauseBudgetChars: boundedContext.omittedBecauseBudgetChars,
+      includedPassageCount: boundedContext.includedPassages.length,
+      excludedPassageCount: boundedContext.excludedPassages.length,
+    };
+    const editorialRun = invoke(root,run,'editorial', `${role}\n\nResearch tools: ${research}. ${research === 'disabled' ? 'Research unavailable; disclose limitations.' : 'Independently research when evidence could change the piece.'}\nReturn the editorial contract. draft is reader-facing Markdown including title, or empty if no piece is worthwhile yet. Preserve internal notes separately.\nSEED (${source.url}, ${source.createdAt}):\n${seed}\nAPPROVED EXEMPLAR FUNCTIONS AND ANTI-PATTERNS (guidance only; full prose appears below only when selectively chosen):\n${JSON.stringify(exemplarGuidance(approvedContext))}\nSELECTED BOUNDED CONTEXT PASSAGES:\n${JSON.stringify(editorialContextPromptView(boundedContext))}\nYOUR EDITORIAL QUESTIONS:\n${JSON.stringify(selection.editorialQuestions)}`,resultSchema,research==='live',bin,runtimePolicy.editorial);
     const result = editorialRun.value;
     Object.assign(manifest.modelPolicy.editorial, { actualModel: editorialRun.execution.actualModel, actualReasoning: editorialRun.execution.actualReasoning, fallbackOccurred: editorialRun.execution.fallbackOccurred, status: 'completed' });
     Object.assign(manifest, persistResult(root,run,result,{runId:run,sourceUrl:source.url,sourceBodySha256:manifest.sourceBodySha256}), { selectedContext:context.map(c=>c.id), completedAt:new Date().toISOString() });
