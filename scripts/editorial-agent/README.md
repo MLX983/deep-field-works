@@ -1,4 +1,4 @@
-# DFW Editorial Agent v0.1
+# DFW Editorial Agent v0.2
 
 An isolated editorial experiment. It ends at human editorial review, before the
 publishing workflow begins. No existing Loop 1/2 entry point is changed.
@@ -15,7 +15,8 @@ reason to fall back to another model.
 node scripts/editorial-agent/agent.mjs \
   --repo-path /Users/danowens/Documents/deep-field-works \
   --workspace /Users/danowens/Documents/dfw-editorial-private \
-  --issue-number 16
+  --issue-number 16 \
+  --context-config /absolute/private/path/approved-context.json
 ```
 
 Use an absolute private workspace outside the repository, publishing state and
@@ -32,27 +33,56 @@ agent. No publishing registry, Loop 1 result, or reviewed recommendation is read
 
 It builds a catalog from up to 100 intake issues, tracked articles/field notes/
 concepts, canonical domain sections, optional approved exports/exemplars, and up
-to 20 prior scratchpad files.
-A simple term overlap shortlist limits the catalog to 24 title/excerpt records.
-An Astra selection call chooses up to six IDs. The controller supplies their
-full text to a fresh Astra editorial invocation. The agent decides framing,
+to 20 prior scratchpad files. Sources with identical canonical content are one
+catalog item with merged roles, aliases, and provenance records. A 16-item
+lexical pool and a 12-item concept-group pool are combined and deduplicated into
+at most 24 records. The conceptual pool admits at most four sections from one
+underlying source so a long export cannot occupy the pool. Catalog excerpts are
+capped at 700 characters. The selection
+call chooses up to six IDs. The controller supplies their full text to a fresh
+editorial invocation. The agent decides framing,
 research, artifact type, and whether anything is worth developing. This small
 two-call design is selective retrieval, not an autonomous context crawler.
 
-Both calls explicitly use `--model gpt-6-astra`. Selection uses
-`-c model_reasoning_effort="low"`; research/drafting uses
-`-c model_reasoning_effort="medium"`. High is available only with an explicit
-`--selection-reasoning high` and/or `--editorial-reasoning high` operator override.
-Other reasoning levels are rejected; no retry changes the model or effort.
-The exact model, effort and arguments are retained in each execution record.
-The writer
-uses `-c web_search="live"`; `--research disabled` is an explicit offline option.
+Both calls explicitly pin their own runtime and do not inherit the desktop
+selector. The default is `gpt-5.6-sol` Low for selection and `gpt-5.6-sol`
+Medium for research/drafting. Per-run flags are `--selection-model`,
+`--selection-reasoning`, `--editorial-model`, and `--editorial-reasoning`.
+Astra remains available through an explicit model flag. No automatic routing or
+retry changes the model or effort.
+
+An optional private `--model-config PATH` may contain the same selection and
+editorial policy; start from `model-policy.example.json`. CLI flags override the
+file, and built-in defaults apply below both. Unknown config fields, malformed
+model names, unsupported reasoning labels, CLI failures, and detected fallback
+signals fail the run. `started.json` records requested values before execution.
+Each phase execution record and the final `manifest.json`/`run-report.json`
+record requested and actual model/effort, fallback status, and the evidence used
+for the actual value. A successful explicitly pinned invocation with no fallback
+signal is the available runtime evidence; the model is never asked to identify
+itself.
+The writer uses `-c web_search="live"`; `--research disabled` is an explicit offline option.
 Desktop model selection does not control these calls. No manual app selection
-is necessary. Evidence of model availability comes from the installed model
-catalog and actual invocation, not the model's self-identification.
+is necessary. The controller records the explicit CLI arguments and whether the
+invocation succeeded without a fallback signal; it does not rely on the model's
+self-identification.
 
 The CLI supports these flags in local `codex exec --help`. Public configuration
 reference: https://learn.chatgpt.com/docs/config-file/config-reference
+
+For an explicit Astra editorial escalation while retaining Sol selection:
+
+```sh
+node scripts/editorial-agent/agent.mjs \
+  --repo-path /Users/danowens/Documents/deep-field-works \
+  --workspace /Users/danowens/Documents/dfw-editorial-private \
+  --issue-number 16 \
+  --context-config /absolute/private/path/approved-context.json \
+  --selection-model gpt-5.6-sol \
+  --selection-reasoning low \
+  --editorial-model gpt-6-astra \
+  --editorial-reasoning medium
+```
 
 ## Runtime boundaries
 
@@ -81,11 +111,11 @@ from starting, so it is not part of v0. Native model execution remains read-only
 
 ## Workspace and output
 
-Each unique `runs/editorial-v0.1-.../` contains source JSON, seed, catalog,
+Each unique `runs/editorial-v0.2-.../` contains source JSON, seed, catalog,
 selected full context, role, prompts, schemas, raw responses, JSONL tool events,
 stderr, execution records, draft.md, result.json, research.json,
 development.json, branches.json, design-connections.json, kb-proposals.json and
-manifest.json (or failure.json).
+manifest.json (or failure.json), plus a human-facing run-report.json.
 Only a validated result gets `awaiting-human-editorial-review`. It never gets
 approval. Preserve generated text even when it warrants revision.
 
@@ -126,8 +156,9 @@ approval fields, invalid dates, duplicate IDs and non-Markdown paths are rejecte
 The controller only reads these files and records content hashes. Exemplars join
 selective retrieval as whole approved samples. AI Adoption exports are divided at
 second-level Markdown headings; each section carries the full-source hash,
-section heading/index and section hash. Sections join the same lexical shortlist
-and Astra selection step, so unrelated portions are not injected. No
+section heading/index and section hash. Sections join the combined lexical and
+conceptual candidate pools and the configured selection step, so unrelated
+portions are not injected merely because the KB is available. No
 synchronization or writable KB integration exists.
 
 Approved exemplar records may carry `editorialFunction`, `failureMode`, `lesson`
@@ -148,9 +179,19 @@ other private KB material remain excluded. This uses the existing export, so no
 second exporter or synchronization process is needed. The KB exporter is never
 invoked by this harness, and no KB source is modified.
 
+## Cost audit and future handoff
+
+The measured issue #39 prompt/token analysis is in `issue-39-token-audit.md`.
+The future Editorial Agent to human approval to publishing-operator boundary is
+defined in `handoff-contract.md`. Neither document enables the handoff or changes
+the publishing processor.
+
 ## Limits and verification
 
-Retrieval is a small lexical shortlist and can miss conceptually relevant work.
+Concept groups are a small deterministic retrieval aid, not embeddings or an
+ontology. They can miss relevant material and can surface false positives. The
+selection model remains responsible for choosing zero to six useful sources,
+and selecting no KB context is valid.
 Selection is a single pass; research is limited to tools exposed by Codex web
 search, with a 20-minute process timeout and preserved failure logs. A source
 citation is an agent claim until human verification. Research events and notes
@@ -162,12 +203,15 @@ node --test scripts/editorial-agent/agent.test.mjs
 npm run build
 ```
 
-An opt-in, real-Astra boundary test attempts one patch to a disposable canary
+An opt-in, real-model boundary test attempts one patch to a disposable canary
 outside the agent working directory and asserts rejection plus unchanged bytes:
 
 ```sh
 node scripts/editorial-agent/boundary-smoke.mjs
 ```
+
+Set `EDITORIAL_BOUNDARY_MODEL` and `EDITORIAL_BOUNDARY_REASONING` to test a
+specific explicit combination. The defaults are Sol/Low.
 
 This test retains its private test workspace and logs for inspection. The normal
 fixture suite makes no network calls and never runs the publishing processor.

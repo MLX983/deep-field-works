@@ -1,0 +1,10 @@
+{
+  "selection": {
+    "model": "gpt-5.6-sol",
+    "reasoning": "low"
+  },
+  "editorial": {
+    "model": "gpt-5.6-sol",
+    "reasoning": "medium"
+  }
+}

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { MODEL, checkWorkspace, writePrivate, seedBody, shortlist, chosenContext, invocation, resultSchema, validate, persistResult, reasoningPolicy, optionalContext, exemplarGuidance, scratchpadCandidates } from './agent.mjs';
+import { DEFAULT_MODEL, DEFAULT_MODEL_POLICY, checkWorkspace, writePrivate, seedBody, shortlist, canonicalizeCandidates, chosenContext, invocation, resultSchema, validate, persistResult, reasoningPolicy, modelPolicy, optionalContext, exemplarGuidance, scratchpadCandidates } from './agent.mjs';
 
 test('workspace rejects repository, publishing state, ancestors, and symlink aliases', () => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(),'dfw-editorial-test-'));
@@ -41,9 +41,9 @@ test('selective retrieval returns full source only for known chosen IDs', () => 
   assert.throws(()=>chosenContext({selected:[{id:'a',reason:'x'},{id:'a',reason:'y'}],editorialQuestions:[]},catalog));
 });
 
-test('invocation pins Astra with read-only execution, no shell/apps/hooks/plugins, configurable research', () => {
+test('invocation pins the requested model with read-only execution and no fallback machinery', () => {
   const args = invocation('/private/editorial','schema','response',true);
-  assert.equal(args[args.indexOf('--model')+1],MODEL);
+  assert.equal(args[args.indexOf('--model')+1],DEFAULT_MODEL);
   assert.equal(args[args.indexOf('--sandbox')+1],'read-only');
   for (const item of ['--ignore-user-config','--ignore-rules','--ephemeral','approval_policy="never"','web_search="live"']) assert.ok(args.includes(item));
   for (const feature of ['shell_tool','apps','plugins','hooks','multi_agent','computer_use']) assert.equal(args[args.indexOf(feature)-1],'--disable');
@@ -70,16 +70,56 @@ test('contract persists scratchpad and KB proposals separately, always stops una
   assert.deepEqual(fs.readdirSync(root).sort(),['runs','scratchpad']);
 });
 
-test('phase defaults are Low/Medium, High requires explicit choice and invalid levels fail', () => {
+test('phase model defaults and operator overrides are explicit and fail closed', () => {
+  assert.deepEqual(DEFAULT_MODEL_POLICY,{selection:{model:'gpt-5.6-sol',reasoning:'low'},editorial:{model:'gpt-5.6-sol',reasoning:'medium'}});
   assert.deepEqual(reasoningPolicy(),{selection:'low',editorial:'medium'});
-  for (const [phase,effort] of Object.entries(reasoningPolicy())) {
-    assert.ok(invocation('x','s','o',phase==='editorial',effort).includes(`model_reasoning_effort="${effort}"`));
-  }
-  assert.deepEqual(reasoningPolicy('high','high'),{selection:'high',editorial:'high'});
-  assert.ok(invocation('x','s','o',true,'high').includes('model_reasoning_effort="high"'));
-  assert.throws(()=>reasoningPolicy('medium','medium'));
-  assert.throws(()=>reasoningPolicy('low','low'));
-  assert.throws(()=>invocation('x','s','o',true,'unknown'));
+  const configured=modelPolicy({selection:{model:'gpt-6-astra',reasoning:'low'}},{editorial:{model:'gpt-6-astra',reasoning:'high'}});
+  assert.deepEqual(configured,{selection:{model:'gpt-6-astra',reasoning:'low'},editorial:{model:'gpt-6-astra',reasoning:'high'}});
+  const overridden=modelPolicy({selection:{model:'gpt-6-astra',reasoning:'high'}},{selection:{model:'gpt-5.6-sol',reasoning:'low'}});
+  assert.deepEqual(overridden.selection,{model:'gpt-5.6-sol',reasoning:'low'});
+  const args=invocation('x','s','o',true,'gpt-6-astra','xhigh');
+  assert.equal(args[args.indexOf('--model')+1],'gpt-6-astra');
+  assert.ok(args.includes('model_reasoning_effort="xhigh"'));
+  assert.throws(()=>modelPolicy({}, {selection:{model:'bad model'}}));
+  assert.throws(()=>modelPolicy({}, {editorial:{reasoning:'unknown'}}));
+  assert.throws(()=>invocation('x','s','o',true,'gpt-5.6-sol','unknown'));
+});
+
+test('canonical context deduplication preserves every role and provenance record', () => {
+  const body='# Shared source\n\nSame prose.';
+  const items=canonicalizeCandidates([
+    {id:'src/content/note.md',title:'Shared',body,kind:'DFW context, not approved exemplar',provenance:{path:'src/content/note.md'}},
+    {id:'exemplar:shared',title:'Shared',body,kind:'exemplar',provenance:{path:'/private/note.md',polarity:'positive'}},
+  ]);
+  assert.equal(items.length,1);
+  assert.deepEqual(items[0].aliases,['src/content/note.md','exemplar:shared']);
+  assert.deepEqual(items[0].roles,['ordinary context','exemplar','positive-exemplar']);
+  assert.equal(items[0].provenanceRecords.length,2);
+  assert.throws(()=>canonicalizeCandidates([{id:'a',canonicalId:'same',title:'A',body:'one'},{id:'b',canonicalId:'same',title:'B',body:'two'}]));
+});
+
+test('hybrid retrieval adds conceptual candidates without requiring KB context', () => {
+  const candidates=[
+    {id:'literal',title:'Assistant outage',body:'An assistant outage left tasks unfinished.',kind:'intake'},
+    {id:'kb',title:'Delegated authority',body:'Institutional resilience requires recovery and continuity for delegated work.',kind:'ai-adoption-read-only-export'},
+    {id:'unrelated-kb',title:'Market categories',body:'Procurement taxonomy and vendor segmentation.',kind:'ai-adoption-read-only-export'},
+  ];
+  const result=shortlist('The assistant went silent and delegated tasks stopped during the outage.',candidates);
+  assert.ok(result.find(item=>item.id==='kb').retrievalPools.includes('conceptual'));
+  assert.ok(!result.find(item=>item.id==='unrelated-kb').retrievalPools.includes('conceptual'));
+});
+
+test('conceptual retrieval limits one multi-section source without forcing it', () => {
+  const sections=Array.from({length:8},(_,index)=>({
+    id:`kb:${index}`,
+    canonicalId:`section:shared:${index}`,
+    title:`Delegated authority ${index}`,
+    body:'Institutional resilience, recovery, continuity, governance, and delegated work.',
+    kind:'ai-adoption-read-only-export',
+    provenance:{sourceSha256:'shared-source'},
+  }));
+  const result=shortlist('An assistant outage interrupted delegated tasks and organizational workflows.',sections);
+  assert.equal(result.filter(item=>item.retrievalPools.includes('conceptual')).length,4);
 });
 
 test('approved exports and both exemplar polarities remain selective read-only context', () => {
