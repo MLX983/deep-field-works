@@ -53,12 +53,14 @@ test('invocation pins the requested model with read-only execution and no fallba
 
 test('contract persists scratchpad and KB proposals separately, always stops unapproved', () => {
   const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'dfw-editorial-test-')));
-  const branch={idea:'Adjacent idea',howItEmerged:'Evidence',relationshipToSeed:'Different question',suggestedNextAction:'Research'};
+  const branch={idea:'Adjacent idea',premiseOrQuestion:'What changes?',howItEmerged:'Evidence',relationshipToSeed:'Different question',reasonForSeparation:'Combining it would blur both premises.',likelyArtifactType:'note',supportingMaterial:['Evidence'],suggestedNextAction:'Research'};
   const design={designQuestion:'Can this be tested?',relationshipToSeed:'Operational implication',suggestedNextAction:'Sketch'};
-  const result={sourcePremise:'Original idea',editorialAssessment:{judgment:'Develop as written',rationale:'Useful',primaryDevelopment:'Test the premise'},recommendation:'develop',whyWorthPublishing:'Distinction',proposedArtifact:{documentType:'note',workingTitle:'Title',coreObservation:'Observe',scope:'Small'},draft:'# Title\n\nProse',researchBasis:[],developmentNotes:{candidateFramings:[],revisionNotes:[],researchNotes:''},unresolvedEdge:[],connections:[],scratchpadAdditions:['Next idea'],proposedKbUpdates:['Potential insight'],discoveredBranches:[branch],designPrototypeConnections:[design]};
+  const observation={title:'A useful byproduct',body:'A separate observation.',whyMayMatter:'It may connect to later evidence.',preservationRationale:'Losing it would remove a distinct operational signal.',originType:'editorial-analysis',sourceReferences:[],themes:['governance'],concepts:['delegation'],entities:[],editorialSignals:{question:'How does delegated authority stay visible?',tension:'Automation hides authority.',concreteExample:'A task changes owner silently.',counterpressure:'Visibility can create noise.',changedSignificance:''}};
+  const result={sourcePremise:'Original idea',editorialAssessment:{judgment:'Develop as written',rationale:'Useful',primaryDevelopment:'Test the premise'},recommendation:'develop',seedDisposition:'split-into-multiple-artifacts',primaryDevelopment:{status:'drafted',premise:'Primary premise',relationshipToSeed:'Direct',proposedArtifactType:'note',workingTitle:'Title',contributingSourceIds:['seed']},whyWorthPublishing:'Distinction',proposedArtifact:{documentType:'note',workingTitle:'Title',coreObservation:'Observe',scope:'Small'},draft:'# Title\n\nProse',researchBasis:[],developmentNotes:{candidateFramings:[],revisionNotes:[],researchNotes:''},unresolvedEdge:[],connections:[],scratchpadAdditions:[],scratchpadObservations:[observation],proposedKbUpdates:['Potential insight'],discoveredBranches:[branch],designPrototypeConnections:[design]};
   const stop=persistResult(root,'run',result,{runId:'run',sourceUrl:'https://example.test/16'});
   assert.equal(stop.status,'awaiting-human-editorial-review'); assert.equal(stop.approvalGranted,false);
   assert.equal(JSON.parse(fs.readFileSync(path.join(root,'scratchpad/run.json'))).runId,'run');
+  assert.equal(stop.scratchpadItemIds.length,1);
   assert.equal(JSON.parse(fs.readFileSync(path.join(root,'runs/run/kb-proposals.json'))).canonical,false);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'scratchpad/run.json'))).discoveredBranches,[branch]);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'runs/run/design-connections.json'))).connections,[design]);
@@ -152,6 +154,9 @@ test('role keeps private KB context out of public prose and canonical KB state',
   assert.match(role,/Never quote or publicly cite its prose/);
   assert.match(role,/Verify public factual claims with appropriate external evidence/);
   assert.match(role,/Do not write back to the Knowledge Base/);
+  assert.match(role,/seed is editorial input, not a promise of one public artifact/);
+  assert.match(role,/Do not preserve routine leftovers/);
+  assert.match(role,/Public prose must read as a normal Deep Field Works artifact/);
 });
 
 test('independent evaluation excludes prior scratchpad without altering it', () => {

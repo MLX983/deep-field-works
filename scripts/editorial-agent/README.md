@@ -1,4 +1,4 @@
-# DFW Editorial Agent v0.3
+# DFW Editorial Agent v0.4
 
 An isolated editorial experiment. It ends at human editorial review, before the
 publishing workflow begins. No existing Loop 1/2 entry point is changed.
@@ -32,8 +32,8 @@ the full source with metadata separately and extracts the original body for the
 agent. No publishing registry, Loop 1 result, or reviewed recommendation is read.
 
 It builds a catalog from up to 100 intake issues, tracked articles/field notes/
-concepts, canonical domain sections, optional approved exports/exemplars, and up
-to 20 prior scratchpad files. Sources with identical canonical content are one
+concepts, canonical domain sections, optional approved exports/exemplars, compact
+structured scratchpad items, and preserved legacy scratchpad entries. Sources with identical canonical content are one
 catalog item with merged roles, aliases, and provenance records. A 16-item
 lexical pool and a 12-item concept-group pool are combined and deduplicated into
 at most 24 records. The conceptual pool admits at most four sections from one
@@ -122,7 +122,7 @@ from starting, so it is not part of v0. Native model execution remains read-only
 
 ## Workspace and output
 
-Each unique `runs/editorial-v0.3-.../` contains source JSON, seed, catalog,
+Each unique `runs/editorial-v0.4-.../` contains source JSON, seed, catalog,
 selected full context, bounded `editorial-context.json`, role, prompts, schemas,
 raw responses, JSONL tool events, stderr, execution records, `draft.md`,
 `result.json`, `research.json`,
@@ -137,23 +137,26 @@ budget-caused omissions, included and excluded sources/passages, the configured 
 operator override was used. The manifest carries compact totals. These records
 are never reader-facing content.
 
-The contract separates the source premise, editorial assessment (judgment,
-rationale, primary development), and main draft. A worthwhile premise should
-remain recognizable in the draft; a substantially different discovery belongs
-in a branch. Challenging or abandoning a weak premise remains allowed.
-It contains recommendation (`develop | preserve | defer`), editorial
-judgment, proposed type/title/observation/scope, draft, research basis, candidate
-framings/revision notes, unresolved edge, connections, scratchpad additions and
-noncanonical KB proposals. Optional discovered branches record idea, emergence,
-relationship to the seed and next action; optional design/prototype connections
-record a design question, relationship and next action. Empty lists are valid.
-These private outputs do not force a design project or extra prose section.
-No publication frontmatter is required.
+The contract treats a seed as editorial input, not a one-artifact promise. It
+records a private seed disposition, at most one primary development, zero or more
+discovered branches, and zero or more scratchpad observations. A branch requires
+its own premise and a reason combining it with the primary piece would weaken
+both. A scratchpad observation requires an explicit preservation rationale.
+Empty lists and an empty public draft are valid. The primary draft, when present,
+must remain meaningfully connected to its contributing material.
 
-Persistent `scratchpad/<run-id>.json` records loose ideas and source/run provenance
-separately, including discovered branches and design/prototype connections.
-No scratchpad entry creates an issue or public content automatically.
-KB proposals are only suggestions saved in the run; no KB write connection exists.
+The private seed dispositions are `develop-now`, `develop-with-other-material`,
+`split-into-multiple-artifacts`, `scratchpad`, `research-needed`,
+`supporting-material`, `duplicate-or-overlap`, and `decline`. They are not public
+metadata and never mutate the source issue.
+
+Legacy `scratchpad/<run-id>.json` summaries remain append-only for run continuity.
+New observations are also stored as immutable structured records under
+`scratchpad/items/<item-id>/rNNNN.json`. A normal run checks explicit structured
+relationships for possible coalescence and records unverified signals inside the
+run. It does not create a synthesis candidate until the separate synthesis pass
+checks existing DFW coverage. KB proposals remain suggestions saved in the run;
+no KB write connection exists.
 
 For an independent repeat evaluation, add `--scratchpad-context disabled`.
 This omits earlier scratchpad material from retrieval while still persisting new
@@ -197,6 +200,99 @@ other private KB material remain excluded. This uses the existing export, so no
 second exporter or synchronization process is needed. The KB exporter is never
 invoked by this harness, and no KB source is modified.
 
+## Private Editorial Scratchpad
+
+The scratchpad is a provisional editorial memory layer inside the existing
+owner-private Editorial Agent workspace. It is neither DFW intake nor public DFW
+content, and it is not a second canonical AI Adoption Knowledge Base.
+
+Each `editorial-scratchpad-item.v1` record has a stable ID, append-only revision,
+timestamps, concise observation, optional importance note, origin and provenance,
+relationships to seeds/runs/artifacts/items, source references, retrieval labels,
+editorial signals, lifecycle status, and deterministic source/content/record
+fingerprints. Statuses are `unformed`, `accumulating`, `candidate`, `promoted`,
+`absorbed`, and `discarded`. Earlier revisions remain owner-read-only.
+
+Normal seed development retrieves compact scratchpad records through the same
+hybrid shortlist and bounded passage stage as other sources. Discarded and
+absorbed records are not offered as normal context. No scratchpad category is
+mandatory, and the editorial selector may choose none. Legacy run-level
+scratchpads are parsed into concise observations/branches without injecting the
+whole JSON file.
+
+Add a human observation explicitly:
+
+```sh
+npm run editorial:scratchpad:add -- \
+  --workspace /Users/danowens/Documents/dfw-editorial-private \
+  --title "Observation title" \
+  --body-file /absolute/private/note.md \
+  --origin human-added-note \
+  --themes agent-governance,interfaces \
+  --concepts authority,visibility
+```
+
+Optional flags accept an importance note, provenance/reference JSON files,
+related seeds/runs/artifacts/items, entities, and initial status. The input body
+file is operator-provided; the command does not treat it as an intake issue.
+
+Review scratchpad metadata without changing it:
+
+```sh
+npm run editorial:scratchpad:review -- \
+  --workspace /Users/danowens/Documents/dfw-editorial-private \
+  --status accumulating \
+  --theme agent-governance \
+  --include-candidates true
+```
+
+Filters also support origin, related seed, and recent-day window. The report is
+private JSON and omits full internal source material by default.
+
+## Coalescence and autonomous synthesis
+
+`EditorialSynthesisCandidate` is private, append-only metadata for a possible
+coalesced idea. It records its premise, participating items/seeds/runs/artifacts,
+source types, why the material belongs together, what made it salient, maturity,
+questions, counterpressure, research need, existing-work check, artifact type,
+criteria, status, and fingerprints. Statuses are `emerging`, `research-needed`,
+`draft-worthy`, `drafted`, `human-reviewed`, `dismissed`, and `absorbed`.
+
+The synthesis command deliberately separates detection from development:
+
+```sh
+npm run editorial:synthesize -- \
+  --workspace /Users/danowens/Documents/dfw-editorial-private \
+  --repo-path /Users/danowens/Documents/deep-field-works \
+  --context-config /absolute/private/path/approved-context.json
+```
+
+Stage 1 uses the normal Sol/Low selection policy. It sees at most 200 compact
+active scratchpad index records and a hybrid shortlist of related intake, DFW,
+approved exemplar, approved AI Adoption, and prior editorial-memory records. It
+does not draft. A candidate can proceed only when it has at least two
+observations, a distinct question/tension, support from multiple directions, a
+stronger combined meaning, a concrete case, counterpressure, and no substantial
+existing DFW duplicate. Shared keywords or frequent themes are insufficient.
+
+Stage 2 uses the normal Sol/Medium editorial policy for at most one strong
+candidate per pass. It retrieves only participating observations and explicitly
+selected sources, applies the existing 24,000-character context budget, performs
+focused research when enabled, writes a normal DFW draft, and stops at
+`awaiting-human-editorial-review` with approval false. A pass that produces
+`completed-no-draft` is successful. Astra remains an explicit override only;
+there is no routing, fallback, or escalation.
+
+Synthesis runs live under `synthesis/runs/`; candidate revisions live under
+`synthesis/candidates/`. Private diagnostics record source types searched,
+candidate membership, considered and selected records, duplicate checks,
+research, budget use, and drafting decisions. Public drafts cannot mention the
+scratchpad, clustering, retrieval, or editorial system.
+
+The command is intentionally unscheduled. It can be called manually, after a
+meaningful research run, or later by a weekly/biweekly scheduler after its value
+has been observed. This revision creates no recurring task.
+
 ## Human editorial approval package
 
 Human approval is a separate explicit command. The Editorial Agent cannot invoke
@@ -207,7 +303,7 @@ it and cannot approve itself. The command consumes a completed run at
 ```sh
 npm run editorial:approve -- \
   --workspace /Users/danowens/Documents/dfw-editorial-private \
-  --source-run editorial-v0.3-... \
+  --source-run editorial-v0.4-... \
   --artifact-id visible-recovery \
   --artifact-type note \
   --approved-by "Reviewer identity" \

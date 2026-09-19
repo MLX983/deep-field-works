@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "editorial-scratchpad-item.v1",
+  "title": "EditorialScratchpadItem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "itemId", "revision", "createdAt", "lastUpdatedAt", "observation", "origin", "relationships", "sourceReferences", "retrieval", "editorialSignals", "status", "fingerprints"],
+  "properties": {
+    "schemaVersion": { "const": "editorial-scratchpad-item.v1" },
+    "itemId": { "type": "string", "pattern": "^sp-[a-z0-9][a-z0-9-]{5,79}$" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "lastUpdatedAt": { "type": "string", "format": "date-time" },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "body", "whyMayMatter"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 },
+        "whyMayMatter": { "type": "string" }
+      }
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "provenance"],
+      "properties": {
+        "type": { "enum": ["intake-seed", "editorial-analysis", "live-research", "ai-adoption-context", "existing-dfw-artifact", "discovered-branch", "autonomous-synthesis-review", "human-added-note"] },
+        "provenance": { "type": "object" }
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seeds", "runs", "artifacts", "scratchpadItems"],
+      "properties": {
+        "seeds": { "$ref": "#/$defs/stringSet" },
+        "runs": { "$ref": "#/$defs/stringSet" },
+        "artifacts": { "$ref": "#/$defs/stringSet" },
+        "scratchpadItems": { "$ref": "#/$defs/stringSet" }
+      }
+    },
+    "sourceReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "id"],
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "fingerprint": { "type": "string" }
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["themes", "concepts", "entities"],
+      "properties": {
+        "themes": { "$ref": "#/$defs/stringSet" },
+        "concepts": { "$ref": "#/$defs/stringSet" },
+        "entities": { "$ref": "#/$defs/stringSet" }
+      }
+    },
+    "editorialSignals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "tension", "concreteExample", "counterpressure", "changedSignificance"],
+      "properties": {
+        "question": { "type": "string" },
+        "tension": { "type": "string" },
+        "concreteExample": { "type": "string" },
+        "counterpressure": { "type": "string" },
+        "changedSignificance": { "type": "string" }
+      }
+    },
+    "status": { "enum": ["unformed", "accumulating", "candidate", "promoted", "absorbed", "discarded"] },
+    "fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contentSha256", "sourceSha256", "recordSha256"],
+      "properties": {
+        "contentSha256": { "$ref": "#/$defs/sha256" },
+        "sourceSha256": { "$ref": "#/$defs/sha256" },
+        "recordSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  },
+  "$defs": {
+    "stringSet": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

@@ -806,6 +806,11 @@ Seeds do not need to be public.
 
 Target length: as short as needed.
 
+A seed is source material, not a one-artifact commitment. It may remain private,
+support another artifact, split into genuinely distinct developments, or combine
+with other seeds. Keep those provenance and development decisions in private
+editorial records rather than forcing them into public frontmatter or prose.
+
 ```md
 ---
 title: ""

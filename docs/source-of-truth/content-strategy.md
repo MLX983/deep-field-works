@@ -384,6 +384,51 @@ They may live in an inbox or working folder until reviewed.
 
 ---
 
+# Seeds and editorial development
+
+A seed is editorial input, not a contract for one public artifact.
+
+One seed may produce:
+
+* no public artifact
+* one artifact
+* several distinct artifacts
+* a prose artifact and a prototype or design exploration
+* supporting material for another artifact
+* provisional observations worth retaining privately
+* a deferred research lead
+
+The inverse is also valid: several seeds or provisional observations may
+eventually contribute to one coherent artifact. Preserve provenance across these
+relationships. Do not assume one intake item equals one article.
+
+During development, distinguish the strongest primary development from a
+discovered branch and a provisional scratchpad observation. A branch needs its
+own premise or question and a reason combining it with the primary artifact
+would weaken or blur both. A scratchpad observation is useful material that does
+not yet justify an artifact. Do not split a source merely because it contains
+several supporting points.
+
+Deep Field Works may use an owner-private editorial scratchpad as provisional
+memory. It is distinct from intentionally submitted intake, public artifacts,
+and the canonical AI Adoption Knowledge Base. Scratchpad material may be messy,
+contradictory, accumulated, promoted, absorbed, discarded, or left to decay. It
+should retain provenance without copying private source prose unnecessarily.
+
+Several provisional observations become interesting as a possible synthesis
+when they reveal a distinct question or tension, support it from different
+directions, gain force when combined, include a concrete case, retain meaningful
+counterpressure, and are not already adequately covered. Note count, keyword
+overlap, or theme frequency is not evidence of maturity. Prefer no draft to a
+weak synthesis.
+
+An editorial system may autonomously connect material, research a strong
+candidate, and compose a draft. The draft remains provisional. Human editorial
+judgment decides what represents the owner, human approval creates authoritative
+editorial input, and final human publication approval authorizes release.
+
+---
+
 # Content lifecycle
 
 Deep Field Works content should move through stages.

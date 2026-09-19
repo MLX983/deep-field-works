@@ -19,6 +19,7 @@ function fixture() {
   fs.writeFileSync(path.join(run, 'draft.md'), '# Current model title\n\nApproved public prose.\n');
   fs.writeFileSync(path.join(run, 'context.json'), JSON.stringify({ privateSecret: 'NEVER_PACKAGE_THIS_CONTEXT' }));
   fs.writeFileSync(path.join(run, 'research.json'), JSON.stringify({ privateSecret: 'NEVER_PACKAGE_THIS_RESEARCH' }));
+  fs.writeFileSync(path.join(run, 'coalescence-signals.json'), JSON.stringify({ privateSecret: 'NEVER_PACKAGE_THIS_SYNTHESIS' }));
   fs.mkdirSync(path.join(workspace, 'scratchpad'));
   fs.writeFileSync(path.join(workspace, 'scratchpad', `${sourceRunId}.json`), JSON.stringify({ privateSecret: 'NEVER_PACKAGE_THIS_SCRATCHPAD' }));
   return { workspace, sourceRunId };
@@ -79,7 +80,7 @@ test('approval packages include only explicitly approved publication inputs', ()
     relatedDfwConnections: [{ reference: 'src/content/articles/related.md', note: 'Explicit relationship' }],
   });
   const serialized = JSON.stringify(created.package);
-  for (const secret of ['NEVER_PACKAGE_THIS_CONTEXT','NEVER_PACKAGE_THIS_RESEARCH','NEVER_PACKAGE_THIS_SCRATCHPAD']) assert.doesNotMatch(serialized, new RegExp(secret));
+  for (const secret of ['NEVER_PACKAGE_THIS_CONTEXT','NEVER_PACKAGE_THIS_RESEARCH','NEVER_PACKAGE_THIS_SCRATCHPAD','NEVER_PACKAGE_THIS_SYNTHESIS']) assert.doesNotMatch(serialized, new RegExp(secret));
   for (const forbidden of ['context','scratchpad','researchNotes','prompts','tokenDiagnostics','selectionDiagnostics','discoveredBranches','designPrototypeConnections','domain','theme']) assert.ok(!Object.hasOwn(created.package, forbidden));
   assert.deepEqual(created.package.approvedArtifact.externalReferences, [{ url: 'https://example.test/source', title: 'Public source' }]);
   assert.deepEqual(created.package.approvedArtifact.relatedDfwConnections, [{ reference: 'src/content/articles/related.md', note: 'Explicit relationship' }]);

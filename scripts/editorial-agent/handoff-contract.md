@@ -6,16 +6,18 @@ Loop 2, change canonical content, or authorize publication.
 
 ## Separate authorities
 
-The Editorial Agent may retrieve approved context, research, develop a seed,
-draft prose, and propose branches or design/system connections. It stops at
-`awaiting-human-editorial-review` with `approvalGranted: false`. It may not
-approve or publish.
+The Editorial Agent may retrieve approved context, preserve provisional
+observations, connect material across source types, detect possible coalescence,
+research, develop a seed, and autonomously draft a mature synthesis. It may also
+propose branches or design/system connections. Any draft stops at
+`awaiting-human-editorial-review` with `approvalGranted: false`. It may not decide
+what represents the owner, approve, or publish.
 
 The human editorial reviewer may edit, approve, reject, or preserve a draft. The
-reviewer may split one seed into multiple editorial artifacts, decide that it
-produces none, and create the authoritative `EditorialApprovalPackage` for each
-approved artifact. Approval is an explicit operator command, never an inference
-from model output or silence.
+reviewer may split one seed into multiple editorial artifacts, combine several
+seeds into one artifact, decide that a seed produces none, and create the
+authoritative `EditorialApprovalPackage` for each approved artifact. Approval is
+an explicit operator command, never an inference from model output or silence.
 
 A future publishing operator may transform a verified package into canonical
 publication artifacts. It may verify integrity, create the canonical file and
@@ -59,6 +61,12 @@ scratchpad entries, research notes/pages, unused context, prompts, reasoning,
 negative exemplars, unapproved branches or design/system connections, or token
 and selection diagnostics. The preserved source run supplies private audit
 provenance without making those materials future publication inputs.
+
+Scratchpad records and `EditorialSynthesisCandidate` revisions are private
+editorial memory, not approval records. An autonomous synthesis draft cannot
+create a package or invoke this command for itself. The current package command
+continues to consume completed ordinary Editorial Agent runs; connecting a
+multi-source synthesis run to approval remains a future explicit integration.
 
 ## Creation and immutability
 

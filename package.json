@@ -31,6 +31,9 @@
     "notify:loop1-review:fixtures": "node scripts/run-loop1-review-notification-fixtures.mjs",
     "editorial:test": "node --test scripts/editorial-agent/*.test.mjs",
     "editorial:approve": "node scripts/editorial-agent/approval-package.mjs",
+    "editorial:scratchpad:add": "node scripts/editorial-agent/scratchpad.mjs add",
+    "editorial:scratchpad:review": "node scripts/editorial-agent/scratchpad.mjs review",
+    "editorial:synthesize": "node scripts/editorial-agent/synthesis.mjs",
     "preview": "astro preview",
     "review:drafts": "astro dev --open /review-drafts",
     "astro": "astro"

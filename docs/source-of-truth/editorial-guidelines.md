@@ -648,6 +648,47 @@ Not every seed needs publication.
 
 ---
 
+# Separate editorial outcomes
+
+Treat the source seed as input rather than an artifact specification.
+
+During development, keep these outcomes distinct:
+
+## Primary development
+
+The strongest artifact that most directly develops the current seed. A run
+should not produce several competing primary drafts.
+
+## Discovered branch
+
+A separate premise or question with enough substance to plausibly become its
+own artifact. Record why it should not be folded into the primary piece, its
+likely artifact type when identifiable, its provenance, and useful supporting
+material. Do not create a branch for every secondary point.
+
+## Scratchpad observation
+
+A half-formed idea, contradiction, analogy, example, research lead, weak signal,
+or connection that may matter later but does not yet justify an artifact. Retain
+it only when losing it would meaningfully reduce future editorial or analytical
+value. Routine leftovers should disappear.
+
+Several seeds or scratchpad observations may later support one artifact. Before
+developing that synthesis, ask whether the combined material has become more
+coherent, supportable, consequential, or interesting than any item was alone.
+Require a real question or tension, support from more than one direction, a
+concrete case, counterpressure or uncertainty, and a check against existing Deep
+Field Works coverage. Repetition and shared terminology are insufficient.
+
+Autonomously synthesized drafts follow the same editorial standard as any other
+draft. Their public prose must not mention retrieval, clustering, scratchpad
+contents, or the editorial system. Private review material should explain why
+the synthesis became salient, its contributing source categories, provenance,
+existing-work check, and unresolved gaps. The draft still stops for human
+editorial judgment and cannot approve or publish itself.
+
+---
+
 # Editorial review checklist
 
 ## Development

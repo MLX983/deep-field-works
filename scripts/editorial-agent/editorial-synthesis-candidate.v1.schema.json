@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "editorial-synthesis-candidate.v1",
+  "title": "EditorialSynthesisCandidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "candidateId", "revision", "createdAt", "lastUpdatedAt", "workingPremise", "participants", "sourceTypes", "rationale", "criteria", "candidateArtifactType", "status", "fingerprints"],
+  "properties": {
+    "schemaVersion": { "const": "editorial-synthesis-candidate.v1" },
+    "candidateId": { "type": "string", "pattern": "^syn-[a-z0-9][a-z0-9-]{5,79}$" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "lastUpdatedAt": { "type": "string", "format": "date-time" },
+    "workingPremise": { "type": "string", "minLength": 1 },
+    "participants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scratchpadItemIds", "seeds", "runs", "artifacts", "sourceReferences"],
+      "properties": {
+        "scratchpadItemIds": { "$ref": "#/$defs/stringSet" },
+        "seeds": { "$ref": "#/$defs/stringSet" },
+        "runs": { "$ref": "#/$defs/stringSet" },
+        "artifacts": { "$ref": "#/$defs/stringSet" },
+        "sourceReferences": { "$ref": "#/$defs/stringSet" }
+      }
+    },
+    "sourceTypes": { "$ref": "#/$defs/stringSet" },
+    "rationale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["whyTogether", "salienceNow", "confidenceMaturity", "unresolvedQuestions", "counterpressure", "researchNeeded", "duplicateCheck"],
+      "properties": {
+        "whyTogether": { "type": "string", "minLength": 1 },
+        "salienceNow": { "type": "string" },
+        "confidenceMaturity": { "type": "string" },
+        "unresolvedQuestions": { "$ref": "#/$defs/stringSet" },
+        "counterpressure": { "$ref": "#/$defs/stringSet" },
+        "researchNeeded": { "type": "boolean" },
+        "duplicateCheck": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["checked", "overlapFound", "references", "assessment"],
+          "properties": {
+            "checked": { "type": "boolean" },
+            "overlapFound": { "type": "boolean" },
+            "references": { "$ref": "#/$defs/stringSet" },
+            "assessment": { "type": "string" }
+          }
+        }
+      }
+    },
+    "criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distinctQuestionOrTension", "multipleDirections", "strongerTogether", "concreteExample", "counterpressure", "notAlreadyCovered", "changedSignificance"],
+      "properties": {
+        "distinctQuestionOrTension": { "type": "boolean" },
+        "multipleDirections": { "type": "boolean" },
+        "strongerTogether": { "type": "boolean" },
+        "concreteExample": { "type": "boolean" },
+        "counterpressure": { "type": "boolean" },
+        "notAlreadyCovered": { "type": "boolean" },
+        "changedSignificance": { "type": "boolean" }
+      }
+    },
+    "candidateArtifactType": { "enum": ["seed", "note", "field-report", "essay", "experiment", "prototype-note", "concept", "checkpoint", "project-log", "undetermined"] },
+    "status": { "enum": ["emerging", "research-needed", "draft-worthy", "drafted", "human-reviewed", "dismissed", "absorbed"] },
+    "fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contentSha256", "recordSha256"],
+      "properties": {
+        "contentSha256": { "$ref": "#/$defs/sha256" },
+        "recordSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  },
+  "$defs": {
+    "stringSet": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
