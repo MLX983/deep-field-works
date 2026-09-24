@@ -1245,6 +1245,40 @@ items require investigation before they can be planned.
   `docs/source-of-truth/content-schema.md`;
   `docs/workflows/publishing-workflow.md`; DFW-BL-006
 
+### DFW-BL-028 — Complete favicon and social-sharing metadata implementation
+
+- **Category:** developer experience
+- **Status:** completed
+- **Priority:** low
+- **Discovered during:** favicon and social-sharing implementation, 2026-09-24
+- **Problem or observation:** Production still served the Astro favicon because
+  the replacement existed only locally. The complete asset and shared metadata
+  update is now deployed. The owner reports that the new DFW favicon was
+  validated in Safari and the default social-sharing card was validated in real
+  sharing previews.
+- **Current safeguard:** `BaseLayout.astro` implements favicon, Open Graph,
+  Twitter/X, canonical URL, and default metadata behavior. Page-specific title
+  and description overrides are preserved. Production favicon and social-card
+  assets were verified byte-for-byte against local source; live homepage
+  metadata matched the verified build.
+- **Desired improvement:** Implementation is complete; any further work on
+  these assets is visual refinement only.
+- **Reason deferred:** Maintenance observations only: empty checkpoints
+  collection warning, GitHub Actions Node 20 deprecation notices, and the
+  upcoming Ubuntu runner migration. No warning fixes are included or authorized
+  by this checkpoint.
+- **Dependencies or prerequisites:** None for the completed implementation.
+- **Validation criteria:** Build, draft-production-exclusion check, and
+  `git diff --check` passed. Generated homepage metadata and a representative
+  article's source title/description overrides were verified. At checkpoint
+  start, the working tree was clean and `main` and the successful production
+  deployment both referenced `df62012af67e895915f96d6114dfa05bd4f2d0bc`.
+- **Relevant references:** Implementation commit
+  `df62012af67e895915f96d6114dfa05bd4f2d0bc`;
+  [successful Pages deployment](https://github.com/MLX983/deep-field-works/actions/runs/36071650015);
+  `public/favicon.svg`; `public/images/dfw-social-card.png`;
+  `src/layouts/BaseLayout.astro`.
+
 ## Maintenance rules
 
 - Add this observation to the DFW development backlog. Check for an existing related item before creating a new ID. Do not implement it.
