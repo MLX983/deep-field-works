@@ -1279,6 +1279,37 @@ items require investigation before they can be planned.
   `public/favicon.svg`; `public/images/dfw-social-card.png`;
   `src/layouts/BaseLayout.astro`.
 
+### DFW-BL-029 — Review remaining framework and image-tooling advisories
+
+- **Category:** safety, technical debt
+- **Status:** proposed
+- **Priority:** high
+- **Discovered during:** repository maintenance audit, 2026-09-24
+- **Problem or observation:** Targeted compatible transitive dependency updates
+  reduced `npm audit` from 11 affected packages to three: Astro (critical),
+  sharp (high), and esbuild (low). Astro remains at 6.4.2. The remaining fixes
+  require a framework update or dependencies outside its current ranges.
+- **Current safeguard:** Production serves static files on GitHub Pages, without
+  an Astro application server. This does not resolve the advisories or remove
+  the need to assess build-time image processing and development-server exposure.
+  The maintenance pass preserved all 22 intended generated files byte-for-byte
+  and passed all 13 existing validation suites.
+- **Desired improvement:** Assess applicability and plan a bounded, supported
+  framework/toolchain security update, with output and publishing-pipeline
+  regression checks.
+- **Reason deferred:** The maintenance scope explicitly prohibited changing
+  Astro. Forced transitive overrides were not justified as compatible fixes.
+- **Dependencies or prerequisites:** Approval for a separate framework security
+  update; review upstream advisories and supported dependency versions.
+- **Validation criteria:** Re-run `npm audit`, the normal build and draft
+  exclusions, and all existing validation suites. Verify public output and
+  production behavior; document any remaining findings rather than suppressing
+  the audit.
+- **Relevant references:** `package-lock.json`;
+  [Astro AVIF advisory](https://github.com/advisories/GHSA-26w7-cxv4-gfx2);
+  [sharp advisory](https://github.com/advisories/GHSA-rgj7-g3m4-5g8c);
+  [esbuild advisory](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr).
+
 ## Maintenance rules
 
 - Add this observation to the DFW development backlog. Check for an existing related item before creating a new ID. Do not implement it.

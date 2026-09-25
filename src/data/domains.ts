@@ -71,9 +71,6 @@ export const domains: Domain[] = [
   },
 ];
 
-export const getDomainBySlug = (slug: string): Domain | undefined =>
-  domains.find((domain) => domain.slug === slug);
-
 export const getDomainByTitle = (title: string): Domain | undefined =>
   domains.find(
     (domain) => domain.title.toLowerCase() === title.trim().toLowerCase(),
