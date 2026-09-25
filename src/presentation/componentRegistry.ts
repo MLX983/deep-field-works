@@ -19,6 +19,7 @@ export type PresentationEntryId =
   | "intro"
   | "page-title"
   | "metadata-wrapper"
+  | "dek"
   | "section-heading"
   | "subheading-block"
   | "subheading"
@@ -158,7 +159,7 @@ export interface PresentationEntryDefinition {
 }
 
 const FIGMA_FILE_KEY = "9BPDDO9m33ffYpkMNWSFYW";
-const FIGMA_CAPTURED_AT = "2026-07-18";
+const FIGMA_CAPTURED_AT = "2026-09-25";
 
 function figmaReference(
   componentName: string | null,
@@ -293,6 +294,29 @@ export const presentationRegistry = {
       "Displayed values must come from canonical artifact metadata.",
       "Draft state must only appear when applicable.",
       "Metadata must not replace the page title.",
+    ],
+  },
+
+  dek: {
+    id: "dek",
+    name: "Dek",
+    kind: "component",
+    category: "article-introduction",
+    htmlRole: "p",
+    productionAvailability: "production-and-review",
+    purpose: "Provide optional orientation after the title and metadata.",
+    sourceTextBehavior: "metadata-derived",
+    allowedPlacements: ["article-intro", "before-article-body"],
+    optional: true,
+    minimumPerArtifact: 0,
+    maximumPerArtifact: 1,
+    contains: [],
+    renderer: "src/components/DraftReviewPage.astro (.article__dek; review only)",
+    figma: figmaReference("DFW / Article / Dek", "8126:341"),
+    constraints: [
+      "The presentation plan may reuse the description or supply reviewed text.",
+      "It must not introduce claims absent from the artifact.",
+      "Current rendering support is limited to draft review; this mapping does not add production output.",
     ],
   },
 
@@ -439,7 +463,7 @@ export const presentationRegistry = {
     renderer: null,
     figma: figmaReference(
       "DFW / Article / Operational Callout",
-      "8046:412",
+      "8126:240",
     ),
     constraints: [
       "Its content must be concise and editorially reviewed.",

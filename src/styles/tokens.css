@@ -15,8 +15,8 @@
   /* Text */
   --color-text-body: #3c3c3c;
   --color-text-header: #685149;
-  --color-text-muted: #8a8178; /* (derived) footnote / metadata */
-  --color-text-dek: var(--color-text-muted);
+  --color-text-muted: var(--color-text-body); /* Compatibility alias; no separate muted color. */
+  --color-text-dek: var(--color-text-header);
 
   /* Accent */
   --color-text-link: #80341a;

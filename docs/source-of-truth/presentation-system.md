@@ -80,9 +80,18 @@ Approved update, September 25, 2026: the web implementation follows the OS/brows
 
 ## Automatic color preference
 
-Shared semantic tokens in `src/styles/tokens.css` retain the existing light palette. Screen styles override those tokens inside `@media screen and (prefers-color-scheme: dark)`. The `color-scheme` declaration follows the active palette so browser-native UI renders appropriately.
+Shared semantic tokens in `src/styles/tokens.css` define the canonical light palette. Screen styles override those tokens inside `@media screen and (prefers-color-scheme: dark)`. The `color-scheme` declaration follows the active palette so browser-native UI renders appropriately.
 
 There is no manual theme toggle, preferences UI, JavaScript theme state, localStorage, cookie, or stored preference. Print retains the light palette. Favicons, static images, and social-sharing assets do not change with the screen preference.
+
+## Canonical light text roles
+
+Parity correction, September 25, 2026: the Figma audit confirmed that light deks use Accent Rust (`#685149`) and non-link metadata uses body gray (`#3C3C3C`). This corrects the earlier implementation-derived description of a shared muted color.
+
+- `--color-text-dek` aliases `--color-text-header` in both modes.
+- Article metadata and equivalent entry-list/review metadata use the body color. `--color-text-muted` remains only as a compatibility alias to `--color-text-body`, not a separate palette role.
+- Back-navigation arrows and labels both use `--color-text-link`: `#80341A` in light mode and `#F2E2C2` in dark mode. Existing label underlines remain.
+- Inter 300 is loaded for existing light-weight text roles; other family and weight assignments are unchanged.
 
 ## Approved dark color roles
 
@@ -101,7 +110,7 @@ There is no manual theme toggle, preferences UI, JavaScript theme state, localSt
 
 The secondary dark surface is reserved for the Operational Callout. Callout body copy uses the body token; headings and links retain their own roles. Review-only warnings use the primary dark surface and a visible border, without adding a new dark color.
 
-Metadata stays subordinate through its existing size and placement. Deks receive a separate semantic token because they share the metadata color in light mode but use the emphasized text color in dark mode. Borders reuse the approved body color rather than introducing another shade. All existing light color values remain unchanged.
+Metadata stays subordinate through size and placement while using the body color. Deks use the header color in each mode: Accent Rust in light mode and emphasized pale text in dark mode. Borders retain the previously approved dark body-color mapping; this does not approve additional rule treatments.
 
 For normal-sized text, the approved contrast levels are:
 
@@ -124,6 +133,8 @@ These rules apply in both color modes and at desktop and mobile sizes.
 ---
 
 # Page Structure
+
+Parity correction, September 25, 2026: at the canonical 390px mobile width, the content rail is 358px with 16px horizontal gutters. The web override applies only to screens at or below 390px; larger-width and print behavior are unchanged. Chronology months indent 8px, entries indent a further 8px, and the month-to-links gap is 4px. Field-note and checkpoint metadata follows the title and uses the canonical 11px size.
 
 ## Masthead
 
@@ -216,7 +227,7 @@ After the masthead and global navigation, before the article body.
 
 - Appears once per artifact page.
 - Does not include body content.
-- May be extended later if the approved article template adds a dek.
+- An optional Dek follows the title and metadata when supported by the renderer and selected by the presentation plan. Current web support is limited to draft review; production templates do not add deks automatically.
 
 ---
 
@@ -269,6 +280,34 @@ Orient the reader with essential artifact information.
 - Displayed information must come from canonical artifact metadata.
 - Metadata should not compete visually with the page title.
 - Draft state must only appear in review contexts when applicable.
+
+---
+
+## Dek
+
+### Semantic ID
+
+`dek`
+
+### Figma Name
+
+`DFW / Article / Dek` (`8126:341`).
+
+### Type
+
+Component.
+
+### Purpose
+
+Provide optional orientation after the title and metadata, before body content.
+
+### Guidance
+
+- May reuse the description or contain reviewed text, as defined in the presentation plan.
+- Must not introduce claims absent from the artifact.
+- Uses Newsreader Light, 20px, with the header color for the active mode.
+- `DraftReviewPage.astro` currently renders `.article__dek`. Registry mapping records that support; it does not implement a production dek or add content to published entries.
+- Line-height translation and component spacing remain deferred pending a separate decision.
 
 ---
 

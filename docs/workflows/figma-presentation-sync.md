@@ -216,14 +216,16 @@ Text/Body — #3c3c3c
 
 # Last Verified Figma Source
 
-The following source was inspected through Figma MCP on 2026-07-18.
+The component and token inventory was refreshed from the Figma MCP parity audit on 2026-09-25. The initial article examples below retain their 2026-07-18 verification record.
 
 | Item | Verified value |
 |---|---|
 | Figma file key | `9BPDDO9m33ffYpkMNWSFYW` |
 | Design Tokens page | `0:1` |
 | Interface Components section | `2054:113` |
-| Interface examples section | `2054:82` |
+| Colors / Fonts / Spacing | `1:2` / `1:3` / `1:5` |
+| Index / Domain / Chronology | `8019:688` / `8076:211` / `8019:736` |
+| Representative article / dark article | `8126:278` / `8148:388` |
 
 ## Canonical component definitions
 
@@ -241,11 +243,17 @@ of article presentation components.
 | Section Heading | `DFW / Article / Section Heading` | `8045:30` |
 | Main Link | `DFW / Article / Main Link` | `8046:34` |
 | Subheading | `DFW / Article / Subheading` | `8046:40` |
-| Operational Callout | `DFW / Article / Operational Callout` | `8046:412` |
+| Operational Callout (component set) | `DFW / Article / Operational Callout` | `8126:240` |
+| Dek | `DFW / Article / Dek` | `8126:341` |
+| Sources Link (inventory only) | `DFW / Article / Sources Link` | `8127:380` |
+| Related Links (inventory only) | `DFW / Article / Related Links` | `8126:250` |
 | Footer Utility Link | `DFW / Article / Footer Utility Link` | `8085:269` |
 
-Entries without a standalone Figma component remain unmapped in the component
-registry rather than receiving an inferred node ID.
+The Operational Callout set contains `Title=False` (`8046:412`) and `Title=True` (`8126:241`). The registry points to the set; this does not implement titled-callout semantics.
+
+The Dek maps to the existing draft-review renderer. Its presence in the registry does not add a production renderer or new published content.
+
+Sources Link and Related Links are verified visual inventory only. Sources behavior and the relationship between Related Links and repository relationship data remain deferred. Their registry semantics are not inferred from names alone. Entries without an unambiguous semantic mapping remain unmapped.
 
 ## Canonical article composition examples
 
@@ -284,13 +292,28 @@ automatic synchronization.
 | `Surface/Secondary` | `#f0efed` |
 | `Text/Header` | `#685149` |
 | `Text/Body` | `#3c3c3c` |
-| `Text/Link` | `#80341a` |
+| `Text/Link` | `#80341a`; back-navigation arrow and label |
+| Dek light color | `Text/Header`, `#685149` |
+| Non-link metadata light color | `Text/Body`, `#3c3c3c` |
+| `Dark Surface/Primary` | `#3c3c3c` |
+| `Dark Surface/Secondary` | `#4d4949`; Operational Callout |
+| `Dark Text/Body` | `#ccc9c2`; body and non-link metadata |
+| `Dark Text/Header` | `#faf9f7`; headings, deks, pull quotes |
+| `Dark Text/Link` | `#f2e2c2`; links including back arrows |
 | `Spacing/50` | 4px |
 | `Spacing/100` | 8px |
 | `Spacing/200` | 16px |
 | `Spacing/300` | 24px |
 | Newsreader | Article titles and headings |
-| Inter | Body, navigation, and utility text |
+| Inter | Body, navigation, and utility text; 300 loaded for existing Light roles |
+| Mobile page gutters | `Spacing/200`, 16px; 358px rail at 390px |
+| Chronology month / entry indentation | `Spacing/100`, 8px at each level |
+| Chronology month-to-links gap | `Spacing/50`, 4px |
+| Field-note / checkpoint metadata | 11px, after title |
+
+`--color-text-muted` is a compatibility alias to the body token, not a separate Figma color. `--color-text-dek` aliases the header token in both modes. OS preference, browser color-scheme, screen-only dark overrides, and keyboard focus remain documented web behavior.
+
+Serif line-height translation, heading-role mapping, decorative rules, pull-quote spacing, prose lists, desktop rail width, masthead guidance, and review-only experiments remain outside this parity correction.
 
 Only verified mappings are recorded here. Unused Figma tokens do not need to
 be added to the web implementation solely because they exist in the design

@@ -53,26 +53,31 @@ const monthAnchor = withBase(
 <BaseLayout title={`${entry.data.title} — Deep Field Works`} description={entry.data.description}>
   <BackLink />
   <article>
-    <p>
-      <small>
-        {typeLabels[entry.data.documentType]}
-        {domainLabel && (
-          <>
-            {' · '}
-            {domain ? (
-              <a href={withBase(`domains/${domain.slug}`)}>{formatDomainLabel(domain.title)}</a>
-            ) : (
-              <span>{domainLabel}</span>
-            )}
-          </>
-        )}
-        {' · '}
-        <a href={monthAnchor}>{monthYear}</a>
-      </small>
-    </p>
     <h1>{entry.data.title}</h1>
+    <p class="article__meta">
+      {typeLabels[entry.data.documentType]}
+      {domainLabel && (
+        <>
+          {' · '}
+          {domain ? (
+            <a href={withBase(`domains/${domain.slug}`)}>{formatDomainLabel(domain.title)}</a>
+          ) : (
+            <span>{domainLabel}</span>
+          )}
+        </>
+      )}
+      {' · '}
+      <a href={monthAnchor}>{monthYear}</a>
+    </p>
     <Content />
   </article>
 
   <BackToTop />
 </BaseLayout>
+
+<style>
+  .article__meta {
+    font-size: var(--font-size-footnote);
+    color: var(--color-text-body);
+  }
+</style>

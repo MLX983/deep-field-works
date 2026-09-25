@@ -57,7 +57,7 @@ const withBase = (path: string) =>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:wght@300;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:wght@300;500&display=swap"
       rel="stylesheet"
     />
     <title>{title}</title>
@@ -85,6 +85,14 @@ const withBase = (path: string) =>
     font-family: var(--font-sans);
     font-size: var(--font-size-body);
     line-height: var(--line-height-body);
+  }
+
+  /* Canonical 390px mobile frames use a 358px rail and 16px gutters. */
+  @media screen and (max-width: 390px) {
+    body {
+      padding-right: var(--space-200);
+      padding-left: var(--space-200);
+    }
   }
 
   h1,
