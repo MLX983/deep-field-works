@@ -41,8 +41,8 @@ Start here:
 
 * AGENTS.md
 * docs/development-backlog.md
-* docs/editorial-guidelines.md
-* docs/content-types.md
+* docs/source-of-truth/editorial-guidelines.md
+* docs/source-of-truth/content-schema.md
 * docs/workflows/publishing-workflow.md
 
 These files describe the purpose, structure, and operating principles of the project.

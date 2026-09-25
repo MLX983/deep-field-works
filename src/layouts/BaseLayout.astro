@@ -4,16 +4,25 @@ import '../styles/tokens.css';
 interface Props {
   title?: string;
   description?: string;
-  canonicalURL?: string | URL;
+  canonicalURL?: string | URL | null;
   socialImage?: string | URL;
+  socialImageWidth?: number;
+  socialImageHeight?: number;
+  socialImageAlt?: string;
   noindex?: boolean;
 }
 
+const defaultSocialImage = 'https://deepfieldworks.com/images/dfw-social-card.png';
 const {
   title = 'Deep Field Works',
   description = 'Field notes on AI, systems, design, and emerging forms of work',
   canonicalURL = new URL(Astro.url.pathname, Astro.site),
-  socialImage = 'https://deepfieldworks.com/images/dfw-social-card.png',
+  socialImage = defaultSocialImage,
+  socialImageWidth = socialImage.toString() === defaultSocialImage ? 1200 : undefined,
+  socialImageHeight = socialImage.toString() === defaultSocialImage ? 630 : undefined,
+  socialImageAlt = socialImage.toString() === defaultSocialImage
+    ? 'Deep Field Works — field notes on AI, systems, design, and emerging forms of work'
+    : undefined,
   noindex = false,
 } = Astro.props;
 
@@ -29,17 +38,21 @@ const withBase = (path: string) =>
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     {description && <meta name="description" content={description} />}
-    <link rel="canonical" href={canonicalURL} />
+    {canonicalURL && <link rel="canonical" href={canonicalURL} />}
     <meta property="og:site_name" content="Deep Field Works" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={socialImage.toString()} />
-    <meta property="og:url" content={canonicalURL.toString()} />
+    {socialImageWidth && <meta property="og:image:width" content={socialImageWidth.toString()} />}
+    {socialImageHeight && <meta property="og:image:height" content={socialImageHeight.toString()} />}
+    {socialImageAlt && <meta property="og:image:alt" content={socialImageAlt} />}
+    {canonicalURL && <meta property="og:url" content={canonicalURL.toString()} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage.toString()} />
+    {socialImageAlt && <meta name="twitter:image:alt" content={socialImageAlt} />}
     {noindex && <meta name="robots" content="noindex, nofollow, noarchive" />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
