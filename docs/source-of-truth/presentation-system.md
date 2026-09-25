@@ -74,6 +74,55 @@ The final editor may reposition, remove, or replace optional treatments.
 
 ---
 
+# Web Color and Link Rules
+
+Approved update, September 25, 2026: the web implementation follows the OS/browser color preference automatically. These rules extend the existing presentation system without changing component structure, typography, or layout.
+
+## Automatic color preference
+
+Shared semantic tokens in `src/styles/tokens.css` retain the existing light palette. Screen styles override those tokens inside `@media screen and (prefers-color-scheme: dark)`. The `color-scheme` declaration follows the active palette so browser-native UI renders appropriately.
+
+There is no manual theme toggle, preferences UI, JavaScript theme state, localStorage, cookie, or stored preference. Print retains the light palette. Favicons, static images, and social-sharing assets do not change with the screen preference.
+
+## Approved dark color roles
+
+| Role | Token | Dark value |
+|---|---|---|
+| Main page background | `--color-surface-primary` | `#3C3C3C` |
+| Operational Callout background | `--color-surface-secondary` | `#4D4949` |
+| Body copy | `--color-text-body` | `#CCC9C2` |
+| Headings and pull quotes | `--color-text-header` | `#FAF9F7` |
+| Dek | `--color-text-dek` | `--color-text-header` |
+| Metadata and utility text | `--color-text-muted` | `--color-text-body` |
+| Links | `--color-text-link` | `#F2E2C2` |
+| Borders and rules | `--color-border` | `--color-text-body` |
+| Review-only editorial warning surface | `--color-editorial-surface` | `--color-surface-primary` |
+| Review-only editorial warning border | `--color-editorial-border` | `--color-text-link` |
+
+The secondary dark surface is reserved for the Operational Callout. Callout body copy uses the body token; headings and links retain their own roles. Review-only warnings use the primary dark surface and a visible border, without adding a new dark color.
+
+Metadata stays subordinate through its existing size and placement. Deks receive a separate semantic token because they share the metadata color in light mode but use the emphasized text color in dark mode. Borders reuse the approved body color rather than introducing another shade. All existing light color values remain unchanged.
+
+For normal-sized text, the approved contrast levels are:
+
+| Text | On `#3C3C3C` | On `#4D4949` |
+|---|---|---|
+| `#CCC9C2` | WCAG AA | WCAG AA |
+| `#FAF9F7` | WCAG AAA | WCAG AAA |
+| `#F2E2C2` | WCAG AAA | WCAG AA |
+
+## Link affordances
+
+These rules apply in both color modes and at desktop and mobile sizes.
+
+- Inline links in running prose are always underlined. Color alone is insufficient.
+- Standalone or contextual links may omit default underlines when wording, grouping, or layout clearly identifies navigation. This includes metadata, Sources and references, Related entries, Back to top, index/back navigation, and grouped link lists. Existing underlines may remain.
+- Hover may add an underline or strengthen an affordance on devices that support hover. It is only an enhancement; links must be discoverable without it.
+- Keyboard focus must remain visibly marked by an outline or an equally clear non-color-only treatment. The shared web layout uses a two-pixel outline with an offset for focused links.
+- Mobile default states must remain understandable without hover. Do not weaken inline-link or keyboard-focus affordances at smaller widths.
+
+---
+
 # Page Structure
 
 ## Masthead

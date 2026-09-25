@@ -7,6 +7,7 @@
  */
 
 :root {
+  color-scheme: light;
   /* Surface / background */
   --color-surface-primary: #faf9f7;
   --color-surface-secondary: #f0efed;
@@ -15,12 +16,15 @@
   --color-text-body: #3c3c3c;
   --color-text-header: #685149;
   --color-text-muted: #8a8178; /* (derived) footnote / metadata */
+  --color-text-dek: var(--color-text-muted);
 
   /* Accent */
   --color-text-link: #80341a;
 
   /* Borders / dividers */
   --color-border: #e7e1d9; /* (derived) subtle warm divider */
+  --color-editorial-surface: #f6f0e5;
+  --color-editorial-border: #c9a66b;
 
   /* Font families */
   --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
@@ -58,4 +62,22 @@
 
   /* Radius (none observed in the article frame) */
   --radius: 0;
+}
+
+/* Approved web color roles: docs/source-of-truth/presentation-system.md.
+   Screen-only so OS preference does not alter printed output. */
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-surface-primary: #3c3c3c;
+    --color-surface-secondary: #4d4949;
+    --color-text-body: #ccc9c2;
+    --color-text-header: #faf9f7;
+    --color-text-muted: var(--color-text-body);
+    --color-text-dek: var(--color-text-header);
+    --color-text-link: #f2e2c2;
+    --color-border: var(--color-text-body);
+    --color-editorial-surface: var(--color-surface-primary);
+    --color-editorial-border: var(--color-text-link);
+  }
 }

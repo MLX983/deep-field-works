@@ -76,10 +76,6 @@ const withBase = (path: string) =>
     box-sizing: border-box;
   }
 
-  html {
-    color-scheme: light;
-  }
-
   body {
     max-width: var(--content-width);
     margin: 0 auto;
@@ -123,6 +119,11 @@ const withBase = (path: string) =>
   a {
     color: var(--color-text-link);
     text-decoration: underline;
+  }
+
+  a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
   }
 
   ul {
