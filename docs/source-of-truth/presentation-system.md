@@ -132,6 +132,38 @@ These rules apply in both color modes and at desktop and mobile sizes.
 
 ---
 
+# Web Typography Roles
+
+Typography parity update, September 25, 2026: font size and line height are explicit pixel metrics. A shared serif multiplier or inferred Figma AUTO translation is not the canonical rule. Metrics are identical in light and dark modes.
+
+| Visual role / Figma text style | Family | Weight | Size / line height | Web tokens |
+|---|---|---|---|---|
+| Masthead | Newsreader | Light 300 | 32px / 37px | `--font-size-title`, `--line-height-title` |
+| Page title | Newsreader | Medium 500 | 32px / 37px | `--font-size-title`, `--line-height-title` |
+| Section Heading component → Heading text | Newsreader | Medium 500 | 24px / 28px | `--font-size-heading`, `--line-height-heading` |
+| Subheading component → Subheader | Newsreader | Medium 500 | 20px / 23px | `--font-size-subheader`, `--line-height-subheader` |
+| Light subheading / Dek / Pull Quote → Subheader light | Newsreader | Light 300 | 20px / 23px | `--font-size-subheader`, `--line-height-subheader` |
+| Body regular | Inter | Regular 400 | 14px / 20px | `--font-size-body`, `--line-height-body` |
+| Body light | Inter | Light 300 | 14px / 20px | `--font-size-body`, `--line-height-body` |
+| Body strong | Inter | Semibold 600 | 14px / 20px | `--font-size-body`, `--line-height-body` |
+| Footnote / metadata / utility | Inter | Regular 400 | 11px / 13px | `--font-size-footnote`, `--line-height-footnote` |
+
+The web font import loads Newsreader 300 and 500, and Inter 300, 400, and 600. No current canonical role requires Newsreader 400 or Inter 500. Browser/system fallback families remain unchanged.
+
+## Semantic HTML and visual roles
+
+Heading levels express document structure; component names and Figma text-style names express visual roles. They are not interchangeable.
+
+- Page titles use `h1` and Page title metrics. The homepage `h1.masthead` uses the Masthead weight.
+- `.section-head` explicitly selects the Section Heading appearance for homepage groups and Chronology years.
+- Existing article Markdown `h2` headings, including draft-review article sections, retain Subheader (20/23 Medium). The representative article uses Subheading instances for these sections; it does not justify promoting every `h2` to Section Heading. Existing entry-list titles and review-related headings retain their current Subheader treatment.
+- The `h3` fallback retains Subheader light (20/23 Light). Chronology `.chrono-month__label` explicitly selects Medium at the same size and line height. Current article Markdown has no `h3` instances; a future nested heading must select its visual role from composition evidence rather than its tag alone.
+- The registry's `htmlRole` expresses a semantic heading level, not a universal CSS mapping. No heading levels or content are changed by this typography correction.
+- Canonical article/review/entry-list metadata and Back/Back to top utilities use 11/13 Regular. Entry-list `<small>` inherits the explicit metadata size instead of the browser default.
+- Review-only warnings and experimental evidence, timing, and citation treatments retain their existing typography. They are not canonical Footnote components merely because some labels use 11px.
+
+---
+
 # Page Structure
 
 Parity correction, September 25, 2026: at the canonical 390px mobile width, the content rail is 358px with 16px horizontal gutters. The web override applies only to screens at or below 390px; larger-width and print behavior are unchanged. Chronology months indent 8px, entries indent a further 8px, and the month-to-links gap is 4px. Field-note and checkpoint metadata follows the title and uses the canonical 11px size.
@@ -305,9 +337,9 @@ Provide optional orientation after the title and metadata, before body content.
 
 - May reuse the description or contain reviewed text, as defined in the presentation plan.
 - Must not introduce claims absent from the artifact.
-- Uses Newsreader Light, 20px, with the header color for the active mode.
+- Uses Subheader light: Newsreader Light 300, 20px / 23px, with the header color for the active mode.
 - `DraftReviewPage.astro` currently renders `.article__dek`. Registry mapping records that support; it does not implement a production dek or add content to published entries.
-- Line-height translation and component spacing remain deferred pending a separate decision.
+- Component spacing remains deferred; the canonical line height is explicit.
 
 ---
 
@@ -341,6 +373,7 @@ Within the article body.
 - Describes the section’s function, subject, or argument.
 - Must not be used merely to emphasize an isolated sentence.
 - Maps to the primary section-heading level below the page title.
+- Uses the Figma text style `Heading text`: Newsreader Medium 500, 24px / 28px; component name and text-style name are distinct.
 
 ---
 
@@ -407,6 +440,7 @@ Within a Subheading Block or equivalent subsection structure.
 - Represents a meaningful subdivision.
 - Must not be used merely to style or emphasize a sentence.
 - Maps to the next heading level below the Section Heading.
+- Uses the Figma text style `Subheader`: Newsreader Medium 500, 20px / 23px. Existing article compositions may use this appearance for semantic `h2` sections.
 
 ---
 

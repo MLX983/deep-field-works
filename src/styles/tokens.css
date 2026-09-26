@@ -34,7 +34,7 @@
   --font-size-footnote: 11px;
   --font-size-body: 14px;
   --font-size-subheader: 20px;
-  --font-size-header: 24px; /* Figma "Header" — section / topic-block headers */
+  --font-size-heading: 24px; /* Figma "Heading text" — Section Heading component */
   --font-size-title: 32px;
 
   /* Font weights */
@@ -44,8 +44,11 @@
   --font-weight-semibold: 600;
 
   /* Line heights */
-  --line-height-body: 20px; /* 14px body text */
-  --line-height-heading: 1.15; /* (derived from Figma 100% + breathing room) */
+  --line-height-title: 37px;
+  --line-height-heading: 28px;
+  --line-height-subheader: 23px;
+  --line-height-body: 20px;
+  --line-height-footnote: 13px;
 
   /* Spacing scale (Figma Spacing/*) */
   --space-0: 0;

@@ -304,16 +304,25 @@ automatic synchronization.
 | `Spacing/100` | 8px |
 | `Spacing/200` | 16px |
 | `Spacing/300` | 24px |
-| Newsreader | Article titles and headings |
-| Inter | Body, navigation, and utility text; 300 loaded for existing Light roles |
+| Newsreader | 300 and 500; Masthead 32/37 Light, Page title 32/37 Medium |
+| Inter | 300, 400, 600; body 14/20, Footnote 11/13 Regular |
 | Mobile page gutters | `Spacing/200`, 16px; 358px rail at 390px |
 | Chronology month / entry indentation | `Spacing/100`, 8px at each level |
 | Chronology month-to-links gap | `Spacing/50`, 4px |
-| Field-note / checkpoint metadata | 11px, after title |
+| Field-note / checkpoint metadata | Inter Regular 400, 11px / 13px, after title |
 
 `--color-text-muted` is a compatibility alias to the body token, not a separate Figma color. `--color-text-dek` aliases the header token in both modes. OS preference, browser color-scheme, screen-only dark overrides, and keyboard focus remain documented web behavior.
 
-Serif line-height translation, heading-role mapping, decorative rules, pull-quote spacing, prose lists, desktop rail width, masthead guidance, and review-only experiments remain outside this parity correction.
+Typography metrics were checked again against Fonts (`1:3`), Interface Components (`2054:113`), and the representative light/dark articles (`8126:278`, `8148:388`) on 2026-09-25. The explicit pixel metrics and contextual HTML mappings are recorded in `presentation-system.md` under Web Typography Roles.
+
+- Section Heading component (`8045:30`) → `Heading text`: Newsreader Medium 500, 24/28, using `--font-size-heading` and `--line-height-heading`.
+- Subheading component (`8046:40`) → `Subheader`: Newsreader Medium 500, 20/23.
+- Dek (`8126:341`), Pull Quote (`8043:6804`), and light-subheading roles → `Subheader light`: Newsreader Light 300, 20/23.
+- Title and Masthead line height is 37px; body is 20px; canonical Footnote/metadata/utility is 13px. These replace the inferred shared serif multiplier and inherited body line height on footnote roles.
+- After the author's Figma correction, the Fonts example (`2:366`), its annotation, and Section Heading text (`8045:27`) all confirm `Heading text` at 24/28. Both text nodes bind to style `S:50a78a3bdb7a89c3732de73a97b0af8dff3a861b,`. The earlier 22/23 annotation and accidental Subheader assignment are superseded by this live verification.
+- Article `h2` remains visually Subheader, while `.section-head` selects Section Heading. Chronology `h3` month labels explicitly select Medium. Semantic tags are not a global visual-role mapping.
+
+Decorative rules, pull-quote spacing, prose lists, desktop rail width, masthead guidance, and review-only experiments remain outside this typography correction.
 
 Only verified mappings are recorded here. Unused Figma tokens do not need to
 be added to the web implementation solely because they exist in the design

@@ -57,7 +57,7 @@ const withBase = (path: string) =>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:wght@300;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Newsreader:wght@300;500&display=swap"
       rel="stylesheet"
     />
     <title>{title}</title>
@@ -100,22 +100,26 @@ const withBase = (path: string) =>
   h3 {
     font-family: var(--font-serif);
     color: var(--color-text-header);
-    line-height: var(--line-height-heading);
     font-weight: var(--font-weight-medium);
   }
 
   h1 {
     font-size: var(--font-size-title);
+    line-height: var(--line-height-title);
     margin: 0 0 var(--space-200);
   }
 
+  /* Existing prose and entry titles use Subheader, not Section Heading. */
   h2 {
     font-size: var(--font-size-subheader);
+    line-height: var(--line-height-subheader);
     margin: var(--space-300) 0 var(--space-50);
   }
 
+  /* Light-subheader fallback; contextual components may select Medium. */
   h3 {
     font-size: var(--font-size-subheader);
+    line-height: var(--line-height-subheader);
     font-weight: var(--font-weight-light);
     margin: var(--space-300) 0 var(--space-100);
   }
@@ -150,7 +154,7 @@ const withBase = (path: string) =>
     font-family: var(--font-serif);
     font-weight: var(--font-weight-light);
     font-size: var(--font-size-subheader);
-    line-height: var(--line-height-heading);
+    line-height: var(--line-height-subheader);
     color: var(--color-text-header);
   }
 
@@ -170,16 +174,16 @@ const withBase = (path: string) =>
     font-family: var(--font-serif);
     font-weight: var(--font-weight-light);
     font-size: var(--font-size-title);
-    line-height: var(--line-height-heading);
+    line-height: var(--line-height-title);
     color: var(--color-text-header);
   }
 
-  /* Section / topic-block header (Figma: Newsreader Medium 24). */
+  /* Section Heading → Heading text (Newsreader Medium 24/28). */
   .section-head {
     margin: 0 0 var(--space-100);
     font-family: var(--font-serif);
     font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-header);
+    font-size: var(--font-size-heading);
     line-height: var(--line-height-heading);
     color: var(--color-text-header);
   }
