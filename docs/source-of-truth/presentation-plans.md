@@ -119,7 +119,7 @@ A presentation plan may specify:
 - source sentence(s)
 - placement
 
-Pull quotes always reference existing article text.
+Pull quotes always reference existing article text. Use the canonical 24px inset, 4px padding, 16px flow gaps, and no-rule treatment in production and review.
 
 ---
 
@@ -127,19 +127,19 @@ Pull quotes always reference existing article text.
 
 Presentation plans may insert approved callout components.
 
-Callouts must contain reviewed editorial content.
+Callouts must contain reviewed editorial content. The existing optional `label` is a title above the body, separated by 4px. Do not generate or require a title for every callout.
 
 ---
 
 ## Related Concepts
 
-Presentation plans may choose which concepts are displayed.
+Concepts remain internal relationship data; do not render unresolved names as public links.
 
 ---
 
 ## Related Pieces
 
-Presentation plans may choose which related work appears.
+Production Related Links uses ordered, explicitly reviewed `relatedPieces` entry metadata. Review plans may preview explicit references using the same public-target resolver; they cannot expose draft targets. Sources use entry-scoped `sources` and optional `sourcesDescription`, not inferred citations or plan-generated evidence.
 
 ---
 

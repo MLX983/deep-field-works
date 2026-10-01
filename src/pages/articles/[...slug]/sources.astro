@@ -1,0 +1,9 @@
+---
+import SourcesPage from '../../../components/SourcesPage.astro';
+import { sourcePaths } from '../../../utils/entryReferences';
+export async function getStaticPaths() {
+  return sourcePaths('articles');
+}
+const { entry } = Astro.props;
+---
+<SourcesPage entry={entry} />

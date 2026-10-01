@@ -38,6 +38,13 @@ const baseSchema = z
     canonical: z.boolean().optional(),
     relatedConcepts: z.array(z.string()).optional(),
     relatedPieces: z.array(z.string()).optional(),
+    sources: z.array(z.object({
+      label: z.string().trim().min(1),
+      url: z.string().url().refine((value) => /^https?:\/\//.test(value), {
+        message: 'Source URLs must use http or https',
+      }),
+    })).optional(),
+    sourcesDescription: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if ((!data.draft || data.status === 'published') && !data.pubDate) {

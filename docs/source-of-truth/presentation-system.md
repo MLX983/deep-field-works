@@ -156,7 +156,7 @@ Heading levels express document structure; component names and Figma text-style 
 
 - Page titles use `h1` and Page title metrics. The homepage `h1.masthead` uses the Masthead weight.
 - `.section-head` explicitly selects the Section Heading appearance for homepage groups and Chronology years.
-- Existing article Markdown `h2` headings, including draft-review article sections, retain Subheader (20/23 Medium). The representative article uses Subheading instances for these sections; it does not justify promoting every `h2` to Section Heading. Existing entry-list titles and review-related headings retain their current Subheader treatment.
+- Existing article Markdown `h2` headings, including draft-review article sections, retain Subheader (20/23 Medium). The representative article uses Subheading instances for these sections; it does not justify promoting every `h2` to Section Heading. Existing entry-list titles retain their current Subheader treatment. Related entries uses Body strong, as specified below.
 - The `h3` fallback retains Subheader light (20/23 Light). Chronology `.chrono-month__label` explicitly selects Medium at the same size and line height. Current article Markdown has no `h3` instances; a future nested heading must select its visual role from composition evidence rather than its tag alone.
 - The registry's `htmlRole` expresses a semantic heading level, not a universal CSS mapping. No heading levels or content are changed by this typography correction.
 - Canonical article/review/entry-list metadata and Back/Back to top utilities use 11/13 Regular. Entry-list `<small>` inherits the explicit metadata size instead of the browser default.
@@ -188,12 +188,12 @@ Identify Deep Field Works as the publishing context for the page.
 
 ### Placement
 
-At the top of the article page.
+At the top of the homepage/index only.
 
 ### Guidance
 
-- Appears once per page.
-- Remains visually subordinate to the artifact title.
+- Appears once on the homepage/index.
+- Interior pages do not repeat the masthead; they use Back to Index and their own title/intro.
 - Does not contain article-specific claims or metadata.
 
 ---
@@ -253,7 +253,7 @@ Orient the reader by presenting the artifact title and its essential metadata as
 
 ### Placement
 
-After the masthead and global navigation, before the article body.
+After global navigation, before the article body. The article navigation line box and title composition have a 16px gap; other interior templates retain their own verified spacing.
 
 ### Guidance
 
@@ -515,6 +515,9 @@ Emphasize an important sentence already present in the artifact.
 - Useful for creating emphasis or visual rhythm in longer pieces.
 - Removing it must not change the meaning of the artifact.
 - Its source sentence remains in the canonical article text unless the approved renderer explicitly handles extraction without loss.
+- Newsreader Light 300, 20px / 23px, active-mode header color.
+- 24px horizontal inset, including mobile; 4px internal padding above and below; 16px article-flow separation before and after.
+- No border, background, or decorative rules. Nested Markdown paragraph margins must not add bottom padding.
 
 ---
 
@@ -555,6 +558,10 @@ Highlight a design principle, operational insight, practical implication, or dur
 - Optional.
 - Use when the artifact contains a distinct operational implication worth separating from the surrounding prose.
 - Ordinary body text should not be converted into a callout solely for visual variety.
+- Untitled and titled variants share 8px padding, square corners, no border/shadow, and the existing secondary surface/body colors in both modes.
+- Titles are optional editorial choices, never automatically generated. Use a short title only when it materially improves comprehension.
+- A supplied title sits above the body with a 4px gap: Inter 600 title, Inter 300 body, both 14px / 20px. No inline label/colon treatment.
+- `OperationalCallout.astro` renders the reusable composition. The draft plan's existing optional `label` supplies the same title role; it does not require a title.
 
 ---
 
@@ -657,7 +664,9 @@ After the article body and other article-specific content.
 
 # Semantic Lists
 
-Lists are semantic HTML structures styled by the article renderer. They do not currently require separate canonical Figma components.
+Lists are semantic HTML structures styled by the article renderer, not separate visual components.
+
+Both `ul` and `ol` use Inter 400, 14px / 20px, outside markers with a 21px text indent, wrapped lines aligned with item text, and zero per-item margins. A paragraph immediately introducing a list has no extra bottom gap. Lists have a 16px gap to following prose; nested lists and paragraphs within items add no extra item gaps. These rules apply to `.prose`, preserving navigation-list styling.
 
 ## Ordered List
 
@@ -697,7 +706,7 @@ Present related items without implying sequence or priority.
 
 # Archive Relationships
 
-The following structures may exist in article data or templates even when they do not yet have dedicated Figma components.
+The canonical Related Links component renders explicit reviewed entry relationships. Concept metadata remains data until it resolves to a separately approved public destination.
 
 ## Related Concepts
 
@@ -721,7 +730,7 @@ After the article body.
 
 ---
 
-## Related Pieces
+## Related Links (Related Pieces data)
 
 ### Semantic ID
 
@@ -738,14 +747,34 @@ After the article body.
 ### Guidance
 
 - Generic topical similarity is insufficient.
-- Unpublished pieces must not be exposed unintentionally.
+- Unpublished pieces must not be exposed.
 - Keep the selection selective.
+- Heading: Related entries; Inter 600, 14px / 20px, active header color.
+- 16px flow separation plus 16px component top padding; 8px heading-to-list and between links. Links use Inter 400, 14px / 20px. No rules or uppercase treatment.
+- Resolve the ordered `relatedPieces` references using the rules in `content-schema.md`. Omit the component when no public targets resolve.
+- Standalone links may omit underlines but retain visible keyboard focus.
+
+---
+
+# Sources and References
+
+`Sources Link` (`sources-link`) is an optional standalone contextual link after the body, labelled **Sources and references**. It uses Inter 400, 11px / 13px, active link color, and 16px flow separation. It need not be underlined at rest; shared visible focus remains required.
+
+The entry-specific Sources page (`sources-page`) uses the existing interior shell without a masthead: Back to Index, Sources and references H1, then an Entry title label and linked referring-entry title, optional explanation, and a simple external link list. Major blocks have 24px gaps; the intro and source list each use 4px internal gaps. Body and link metrics remain 14px / 20px.
+
+See `content-schema.md` for `sources`, `sourcesDescription`, and conditional `/<collection>/<slug>/sources/` routes. Each generated page receives its own title, description, canonical/OG URL through BaseLayout and the existing shared social image. Public sources pages appear in the sitemap; drafts and entries without sources do not.
+
+No production inline citation mini-type, markers, or backlinks are generated. Ordinary editorial inline links remain ordinary prose links.
 
 ---
 
 # Review-Only Components
 
 Review-only components may exist in the local editorial environment without appearing on the canonical Figma article component page.
+
+The preserved Issue #31 POC still uses experimental citation mini-type/source-kind hints, timing-model, measure-ledger, counterargument border, and Related Topic styling. These are explicitly gated to that internal draft in `DraftReviewPage.astro`; they are not canonical production components or defaults for other drafts. Retaining them preserves the recorded internal experiment, not approval for publication.
+
+Production counterarguments use ordinary sections with appropriate editorial headings. A literal Counterargument label is not required. Public citations use the Sources link/page; related topics use resolved Related Links. Decorative pull-quote rules and the unused placeholder Related Concepts/Pieces footer are retired. Draft banners, editorial flags, selection/extraction, and section-order review capabilities remain intact.
 
 ## Draft Banner
 

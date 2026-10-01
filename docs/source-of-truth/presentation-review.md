@@ -181,6 +181,7 @@ Confirm that:
 - its placement follows sufficient context
 - its removal would not alter the article's meaning
 - its frequency is proportionate to the artifact
+- it uses the canonical 24px inset, 4px padding, 16px flow gaps, and no decorative rules
 
 ## Operational Callout
 
@@ -193,6 +194,7 @@ Confirm that:
 - it is not placed inside a list
 - it is not immediately adjacent to another callout
 - ordinary paragraph content has not been converted into a callout without reason
+- any title is editorially necessary, optional, and stacked above the body with a 4px gap
 
 ## Ordered List
 
@@ -230,7 +232,7 @@ Confirm that:
 - the section does not merely repeat tags or metadata
 - the number of concepts remains selective
 
-## Related Pieces
+## Related Links
 
 Confirm that:
 
@@ -238,6 +240,16 @@ Confirm that:
 - the relationship is more useful than a generic topical similarity
 - unpublished or unavailable pieces are not exposed unintentionally
 - the section remains selective
+- relationships are explicit, ordered metadata and render actual current public links
+- empty or unresolved relationships produce no placeholder section
+
+## Sources and references
+
+Confirm that the link/page exists only for supplied entry sources; the referring title links back, source links are HTTP(S), and no inline markers or academic formatting are generated. A public source page has its own canonical URL and sitemap entry. Do not invent sources to demonstrate the component.
+
+## Page shell and experimental treatments
+
+The masthead is homepage-only. Article navigation-to-intro separation is 16px. Prose lists retain body typography and zero item gaps. Production contains no experimental counterargument, citation, timing-model, measure-ledger, or Related Topic treatments; the preserved Issue #31 review experiment is not a publication template.
 
 ## Draft Banner
 

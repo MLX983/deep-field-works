@@ -1,5 +1,6 @@
 ---
 import '../styles/tokens.css';
+import '../styles/article.css';
 
 interface Props {
   title?: string;
@@ -145,17 +146,6 @@ const withBase = (path: string) =>
 
   li {
     margin: var(--space-50) 0;
-  }
-
-  blockquote {
-    margin: var(--space-300) 0;
-    padding: 0 var(--space-300);
-    border: none;
-    font-family: var(--font-serif);
-    font-weight: var(--font-weight-light);
-    font-size: var(--font-size-subheader);
-    line-height: var(--line-height-subheader);
-    color: var(--color-text-header);
   }
 
   strong {

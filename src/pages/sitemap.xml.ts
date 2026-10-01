@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { hasSources } from '../utils/entryReferences';
 import { domains } from '../data/domains';
 import { publicEntriesOnly } from '../utils/publicEntriesOnly';
 
@@ -11,6 +12,7 @@ export const GET: APIRoute = async ({ site }) => {
   for (const collection of ['articles', 'field-notes', 'checkpoints'] as const) {
     const entries = await getCollection(collection, publicEntriesOnly);
     paths.push(...entries.map((entry) => `/${collection}/${entry.id}/`));
+    paths.push(...entries.filter(hasSources).map((entry) => `/${collection}/${entry.id}/sources/`));
   }
 
   const escapeXML = (value: string) => value.replace(/[<>&"']/g, (character) => ({

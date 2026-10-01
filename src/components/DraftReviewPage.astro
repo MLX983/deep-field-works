@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BackLink from './BackLink.astro';
+import EntryReferences from './EntryReferences.astro';
 import BackToTop from './BackToTop.astro';
 import { resolveEntryDomain } from '../data/domains';
 import { formatDomainLabel } from '../utils/formatDomainLabel';
@@ -70,7 +71,7 @@ const withBase = (path: string) =>
     ))}
   </aside>
 
-  <article class="article" data-draft-review-root>
+  <article class="article" data-draft-review-root data-review-experiments={entry.collection === 'field-notes' && entry.id === 'capacity-expansion-under-a-higher-standard-of-proof' ? 'issue-31' : undefined}>
     <header class="article__header">
       <h1 class="article__title">{pageTitle}</h1>
       <p class="article__meta">
@@ -93,30 +94,11 @@ const withBase = (path: string) =>
       {dek && <p class="article__dek">{dek}</p>}
     </header>
 
-    <div class="article__body" data-draft-body>
+    <div class="article__body prose" data-draft-body>
       <Content />
     </div>
 
-    {(plan.relatedConcepts.length > 0 || plan.relatedPieces.length > 0) && (
-      <footer class="article__related">
-        {plan.relatedConcepts.length > 0 && (
-          <section>
-            <h2 class="article__related-title">Related concepts</h2>
-            <ul>
-              {plan.relatedConcepts.map((concept) => <li>{concept}</li>)}
-            </ul>
-          </section>
-        )}
-        {plan.relatedPieces.length > 0 && (
-          <section>
-            <h2 class="article__related-title">Related pieces</h2>
-            <ul>
-              {plan.relatedPieces.map((piece) => <li>{piece}</li>)}
-            </ul>
-          </section>
-        )}
-      </footer>
-    )}
+    <EntryReferences entry={entry} relatedPieces={plan.relatedPieces.length ? plan.relatedPieces : entry.data.relatedPieces} showSources={false} />
   </article>
 
   <footer class="review-shell__footer">
@@ -252,71 +234,78 @@ const withBase = (path: string) =>
         const text = selectedText(callout.source);
         if (!text) continue;
         const aside = document.createElement('aside');
-        aside.className = `review-callout review-callout--${callout.variant}`;
+        aside.className = 'operational-callout';
         aside.dataset.reviewCallout = '';
         aside.dataset.calloutVariant = callout.variant;
         if (callout.label) {
-          const label = document.createElement('strong');
-          label.textContent = `${callout.label}: `;
+          const label = document.createElement('p');
+          label.className = 'operational-callout__title';
+          label.textContent = callout.label;
           aside.append(label);
         }
-        aside.append(text);
+        const content = document.createElement('p');
+        content.textContent = text;
+        aside.append(content);
         place(aside, callout.placement);
         if (callout.sourceBehavior === 'extract') sourceParagraph?.remove();
       }
 
-      for (const link of body.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
-        link.dataset.citation = '';
-        const label = link.textContent?.trim() ?? '';
-        const isMarketReaction = /\b(?:Reuters|AP)\b/i.test(label);
-        link.dataset.sourceKind = isMarketReaction ? 'market-reaction' : 'primary-or-institutional';
-        link.setAttribute(
-          'aria-label',
-          `${label} (${isMarketReaction ? 'market-reaction reporting' : 'primary or institutional source'})`,
-        );
-      }
-
-      const findHeading = (text: string) =>
-        [...body.querySelectorAll<HTMLHeadingElement>(':scope > h2')].find(
-          (heading) => heading.textContent?.trim() === text,
-        );
-
-      const timingHeading = findHeading('Cash leaves before returns accumulate');
-      if (timingHeading) {
-        let next = timingHeading.nextElementSibling;
-        while (next && next.tagName !== 'H2') {
-          if (next instanceof HTMLOListElement) {
-            next.classList.add('review-timing-model');
-            next.setAttribute('aria-label', 'Investment-to-return timing model');
-            break;
-          }
-          next = next.nextElementSibling;
+      // Preserved Issue #31 POC evidence treatments: internal review only.
+      // Never run these selectors for other drafts or public entries.
+      if (body.closest('[data-draft-review-root]')?.getAttribute('data-review-experiments') === 'issue-31') {
+        for (const link of body.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
+          link.dataset.citation = '';
+          const label = link.textContent?.trim() ?? '';
+          const isMarketReaction = /\b(?:Reuters|AP)\b/i.test(label);
+          link.dataset.sourceKind = isMarketReaction ? 'market-reaction' : 'primary-or-institutional';
+          link.setAttribute(
+            'aria-label',
+            `${label} (${isMarketReaction ? 'market-reaction reporting' : 'primary or institutional source'})`,
+          );
         }
-      }
 
-      const measuresParagraph = [...body.querySelectorAll<HTMLParagraphElement>(':scope > p')].find(
-        (paragraph) => paragraph.textContent?.trim().startsWith('Cloud revenue is not gross margin.'),
-      );
-      measuresParagraph?.classList.add('review-measure-ledger');
+        const findHeading = (text: string) =>
+          [...body.querySelectorAll<HTMLHeadingElement>(':scope > h2')].find(
+            (heading) => heading.textContent?.trim() === text,
+          );
 
-      const counterargumentHeading = findHeading('The strongest case against a new regime');
-      if (counterargumentHeading) {
-        const nodes = findSectionNodes('The strongest case against a new regime');
-        const section = document.createElement('section');
-        section.className = 'review-counterargument';
-        section.setAttribute('aria-labelledby', 'counterargument-heading');
-        counterargumentHeading.id = 'counterargument-heading';
-        counterargumentHeading.before(section);
-        section.append(...nodes);
-      }
+        const timingHeading = findHeading('Cash leaves before returns accumulate');
+        if (timingHeading) {
+          let next = timingHeading.nextElementSibling;
+          while (next && next.tagName !== 'H2') {
+            if (next instanceof HTMLOListElement) {
+              next.classList.add('review-timing-model');
+              next.setAttribute('aria-label', 'Investment-to-return timing model');
+              break;
+            }
+            next = next.nextElementSibling;
+          }
+        }
 
-      const relatedTopic = [...body.querySelectorAll<HTMLParagraphElement>(':scope > p')].find(
-        (paragraph) => paragraph.textContent?.trim().startsWith('Related: Issue #25'),
-      );
-      if (relatedTopic) {
-        relatedTopic.classList.add('review-related-topic');
-        if (relatedTopic.previousElementSibling instanceof HTMLHRElement) {
-          relatedTopic.previousElementSibling.classList.add('review-related-divider');
+        const measuresParagraph = [...body.querySelectorAll<HTMLParagraphElement>(':scope > p')].find(
+          (paragraph) => paragraph.textContent?.trim().startsWith('Cloud revenue is not gross margin.'),
+        );
+        measuresParagraph?.classList.add('review-measure-ledger');
+
+        const counterargumentHeading = findHeading('The strongest case against a new regime');
+        if (counterargumentHeading) {
+          const nodes = findSectionNodes('The strongest case against a new regime');
+          const section = document.createElement('section');
+          section.className = 'review-counterargument';
+          section.setAttribute('aria-labelledby', 'counterargument-heading');
+          counterargumentHeading.id = 'counterargument-heading';
+          counterargumentHeading.before(section);
+          section.append(...nodes);
+        }
+
+        const relatedTopic = [...body.querySelectorAll<HTMLParagraphElement>(':scope > p')].find(
+          (paragraph) => paragraph.textContent?.trim().startsWith('Related: Issue #25'),
+        );
+        if (relatedTopic) {
+          relatedTopic.classList.add('review-related-topic');
+          if (relatedTopic.previousElementSibling instanceof HTMLHRElement) {
+            relatedTopic.previousElementSibling.classList.add('review-related-divider');
+          }
         }
       }
     }
@@ -394,36 +383,6 @@ const withBase = (path: string) =>
 
   .article__body :global(> p:first-child) {
     margin-top: 0;
-  }
-
-  .article__body :global(.review-pull-quote) {
-    margin: var(--space-400) var(--space-300);
-    padding: var(--space-200) 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .article__body :global(.review-callout) {
-    margin: var(--space-200) 0;
-  }
-
-  .article__body :global(.review-callout--operational) {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-width: 0;
-    padding: var(--space-100);
-    gap: 0;
-    border: 0;
-    border-radius: 0;
-    background: var(--color-surface-secondary);
-    box-shadow: none;
-    color: var(--color-text-body);
-    font-family: var(--font-sans);
-    font-size: var(--font-size-body);
-    font-weight: var(--font-weight-light);
-    line-height: var(--line-height-body);
-    overflow-wrap: break-word;
   }
 
   .article__body :global(a[data-citation]) {
@@ -507,37 +466,11 @@ const withBase = (path: string) =>
     font-size: 0.92em;
   }
 
-  .article__related {
-    display: grid;
-    gap: var(--space-200);
-    margin-top: var(--space-400);
-    padding-top: var(--space-300);
-    border-top: 1px solid var(--color-border);
-  }
-
-  .article__related-title {
-    margin: 0 0 var(--space-100);
-    font-family: var(--font-sans);
-    font-size: var(--font-size-footnote);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .article__related ul {
-    margin: 0;
-  }
-
   .review-shell__footer {
     margin-top: var(--space-300);
   }
 
   @media (max-width: 36rem) {
-    .article__body :global(.review-pull-quote) {
-      margin-right: 0;
-      margin-left: 0;
-    }
-
     .article__body :global(.review-timing-model) {
       display: grid;
       gap: 0;

@@ -216,12 +216,12 @@ Text/Body — #3c3c3c
 
 # Last Verified Figma Source
 
-The component and token inventory was refreshed from the Figma MCP parity audit on 2026-09-25. The initial article examples below retain their 2026-07-18 verification record.
+The component parity scope was rechecked live on 2026-10-01; the token inventory retains its 2026-09-25 audit. The initial article examples below retain their 2026-07-18 verification record.
 
 | Item | Verified value |
 |---|---|
 | Figma file key | `9BPDDO9m33ffYpkMNWSFYW` |
-| Design Tokens page | `0:1` |
+| Current interface page | `2054:81` |
 | Interface Components section | `2054:113` |
 | Colors / Fonts / Spacing | `1:2` / `1:3` / `1:5` |
 | Index / Domain / Chronology | `8019:688` / `8076:211` / `8019:736` |
@@ -245,15 +245,18 @@ of article presentation components.
 | Subheading | `DFW / Article / Subheading` | `8046:40` |
 | Operational Callout (component set) | `DFW / Article / Operational Callout` | `8126:240` |
 | Dek | `DFW / Article / Dek` | `8126:341` |
-| Sources Link (inventory only) | `DFW / Article / Sources Link` | `8127:380` |
-| Related Links (inventory only) | `DFW / Article / Related Links` | `8126:250` |
+| Sources Link | `DFW / Article / Sources Link` | `8127:380` |
+| Related Links | `DFW / Article / Related Links` | `8126:250` |
+| Sources page | `04 References Page` | `8127:399` |
 | Footer Utility Link | `DFW / Article / Footer Utility Link` | `8085:269` |
 
-The Operational Callout set contains `Title=False` (`8046:412`) and `Title=True` (`8126:241`). The registry points to the set; this does not implement titled-callout semantics.
+The Operational Callout set contains `Title=False` (`8046:412`) and `Title=True` (`8126:241`). Both variants are supported: optional editorial title above body with a 4px gap, Inter 600/300, 8px padding, existing light/dark surfaces.
 
 The Dek maps to the existing draft-review renderer. Its presence in the registry does not add a production renderer or new published content.
 
-Sources Link and Related Links are verified visual inventory only. Sources behavior and the relationship between Related Links and repository relationship data remain deferred. Their registry semantics are not inferred from names alone. Entries without an unambiguous semantic mapping remain unmapped.
+Sources Link and Related Links now have approved behavior. `sources` and optional `sourcesDescription` generate entry-scoped `/<collection>/<slug>/sources/` pages only for public entries with data. `relatedPieces` resolves explicit ordered references to public targets. See `content-schema.md`; no source or relationship data is added automatically.
+
+Live evidence: Sources Link 11/13 Regular; Related entries heading 14/20 Semibold with 8px link gaps and 16px top padding; Sources page major gaps 24px and intro/list internal gaps 4px. Pull Quote uses 24px horizontal and 4px vertical padding with 16px flow gaps, no rules. Article navigation-to-intro gap is 16px. Prose list text indents 21px with zero item gaps; introducing paragraphs run directly into lists. Dark article `8148:388` confirms the same geometry and existing color roles.
 
 ## Canonical article composition examples
 
@@ -322,11 +325,17 @@ Typography metrics were checked again against Fonts (`1:3`), Interface Component
 - After the author's Figma correction, the Fonts example (`2:366`), its annotation, and Section Heading text (`8045:27`) all confirm `Heading text` at 24/28. Both text nodes bind to style `S:50a78a3bdb7a89c3732de73a97b0af8dff3a861b,`. The earlier 22/23 annotation and accidental Subheader assignment are superseded by this live verification.
 - Article `h2` remains visually Subheader, while `.section-head` selects Section Heading. Chronology `h3` month labels explicitly select Medium. Semantic tags are not a global visual-role mapping.
 
-Decorative rules, pull-quote spacing, prose lists, desktop rail width, masthead guidance, and review-only experiments remain outside this typography correction.
+The 2026-10-01 component pass resolves pull-quote/list spacing, optional callout titles, Sources/Related behavior, and homepage-only masthead guidance. Desktop rail width remains unchanged. Historical Issue #31 experimental treatments remain explicitly internal-only; decorative quote rules and the unused placeholder relationship footer are retired.
 
 Only verified mappings are recorded here. Unused Figma tokens do not need to
 be added to the web implementation solely because they exist in the design
 file.
+
+## Component parity validation
+
+Run `node scripts/run-component-parity-fixtures.mjs` for an isolated build covering conditional source pages, article backlinks, page-specific metadata and sitemap entries, ordered related references, draft/unavailable-target exclusion, internal links, and production exclusion of review experiments. It uses a separate Astro content cache and does not edit real entries. `KEEP_PARITY_FIXTURE=1` retains the temporary build for browser inspection.
+
+The 2026-10-01 pass also ran the normal build, all 13 existing suites, draft exclusion, whitespace checks, and the 1280px/390px light/dark browser matrix. Optional Sources/Related/callout states were verified with fixtures; no existing entry received invented data. Existing page metadata, route set, sitemap, robots, favicon, and social image were compared against the baseline.
 
 ---
 

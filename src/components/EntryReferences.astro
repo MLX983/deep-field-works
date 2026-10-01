@@ -1,0 +1,50 @@
+---
+import { entryPath, hasSources, resolveRelatedEntries, type PublicEntry } from '../utils/entryReferences';
+interface Props {
+  entry: PublicEntry;
+  relatedPieces?: string[];
+  showSources?: boolean;
+}
+const { entry, relatedPieces, showSources = true } = Astro.props;
+const related = await resolveRelatedEntries(entry, relatedPieces);
+const withBase = (path: string) => `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}`;
+---
+{showSources && hasSources(entry) && (
+  <p class="sources-link"><a href={withBase(`${entryPath(entry)}sources/`)}>Sources and references</a></p>
+)}
+{related.length > 0 && (
+  <section class="related-links" aria-labelledby="related-entries-title">
+    <h2 id="related-entries-title">Related entries</h2>
+    <ul role="list">
+      {related.map((target) => <li><a href={withBase(entryPath(target))}>{target.data.title}</a></li>)}
+    </ul>
+  </section>
+)}
+<style>
+  .sources-link {
+    margin: var(--space-200) 0;
+    font-size: var(--font-size-footnote);
+    line-height: var(--line-height-footnote);
+  }
+  .sources-link a, .related-links a { text-decoration: none; }
+  .related-links {
+    margin: var(--space-200) 0;
+    padding-top: var(--space-200);
+  }
+  .related-links h2 {
+    margin: 0 0 var(--space-100);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-body);
+  }
+  .related-links ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-100);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .related-links li { margin: 0; }
+</style>

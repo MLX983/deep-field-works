@@ -4,16 +4,18 @@ interface Props {
   label?: string;
   /** Path relative to the site base, without leading slash. Empty = home. */
   href?: string;
+  /** Canonical article navigation-to-intro gap. Other page shells retain 24px. */
+  articleIntro?: boolean;
 }
 
-const { label = 'Index', href = '' } = Astro.props;
+const { label = 'Index', href = '', articleIntro = false } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const withBase = (path: string) =>
   `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 ---
 
-<p class="back-link">
+<p class:list={['back-link', { 'back-link--article': articleIntro }]}>
   <a href={withBase(href)}>
     <span class="back-link__arrow" aria-hidden="true">←</span>
     <span class="back-link__label">{label}</span>
@@ -26,6 +28,10 @@ const withBase = (path: string) =>
     font-family: var(--font-sans);
     font-size: var(--font-size-footnote);
     line-height: var(--line-height-footnote);
+  }
+
+  .back-link--article {
+    margin-bottom: var(--space-200);
   }
 
   .back-link a {

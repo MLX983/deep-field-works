@@ -539,19 +539,30 @@ Over time, concept names should be replaced or supplemented with stable IDs.
 
 ## relatedPieces
 
-Links, slugs, or filenames for related published pieces.
-
-Use when a piece continues, responds to, supersedes, or depends on another piece.
-
-Example:
+An ordered list of explicitly reviewed related entry IDs. Prefer collection-qualified IDs; unique bare slugs and repository-relative Markdown IDs remain supported for existing pipeline output.
 
 ```yaml
 relatedPieces:
-  - "the-pyramid-was-built-to-route-information"
-  - "monitoring-preferences"
+  - "articles/the-process-is-the-proof"
+  - "field-notes/agents-increase-shop-time"
 ```
 
-Related pieces help the archive become navigable as it grows.
+Rendering resolves current titles and public URLs, preserves editorial order, and omits missing, ambiguous, self, duplicate, or unpublished targets. Targets must pass the existing `draft: false` public boundary and have no status or a public lifecycle status (`published`, `archived`, `superseded`). No runtime similarity or automatic recommendations are used. Empty results omit the Related entries component. `relatedConcepts` remains concept data, not a list of invented public links.
+
+## sources and sourcesDescription
+
+Optional entry-scoped reference data, supported in all three existing collections:
+
+```yaml
+sourcesDescription: "Optional reviewed explanation of the source material."
+sources:
+  - label: "Source title"
+    url: "https://example.org/source"
+```
+
+Each source requires a nonempty `label` and an absolute HTTP(S) `url`. Order is editorial. No numbering, inline markers, citation backlinks, or global reference database are generated. `sourcesDescription` is optional; omit it when unnecessary.
+
+For a public entry with a nonempty `sources` array, the site renders a Sources and references link and generates `/<collection>/<slug>/sources/`, including that page in the sitemap. Its title links back to the referring entry. Empty or absent sources generate neither link nor page. Drafts never generate public sources pages. Existing entries are not assigned sources automatically.
 
 ---
 

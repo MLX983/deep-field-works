@@ -33,6 +33,8 @@ export type PresentationEntryId =
   | "unordered-list"
   | "related-concepts"
   | "related-pieces"
+  | "sources-link"
+  | "sources-page"
   | "draft-banner"
   | "internal-editorial-warning";
 
@@ -164,6 +166,7 @@ const FIGMA_CAPTURED_AT = "2026-09-25";
 function figmaReference(
   componentName: string | null,
   nodeId: string | null = null,
+  capturedAt = FIGMA_CAPTURED_AT,
 ): FigmaReference {
   const mapped = componentName !== null && nodeId !== null;
 
@@ -171,7 +174,7 @@ function figmaReference(
     componentName,
     fileKey: mapped ? FIGMA_FILE_KEY : null,
     nodeId,
-    capturedAt: mapped ? FIGMA_CAPTURED_AT : null,
+    capturedAt: mapped ? capturedAt : null,
   };
 }
 
@@ -186,15 +189,15 @@ export const presentationRegistry = {
     purpose: "Identify Deep Field Works as the publishing context.",
     sourceTextBehavior: "not-applicable",
     allowedPlacements: ["page-header"],
-    optional: false,
-    minimumPerArtifact: 1,
+    optional: true,
+    minimumPerArtifact: 0,
     maximumPerArtifact: 1,
     contains: [],
-    renderer: null,
+    renderer: "src/pages/index.astro",
     figma: figmaReference("DFW / Article / Masthead", "8043:6812"),
     constraints: [
       "The masthead must appear no more than once.",
-      "It must remain visually subordinate to the artifact title.",
+      "It appears only on the homepage/index, never on interior pages.",
       "It must not contain article-specific claims.",
     ],
   },
@@ -248,6 +251,7 @@ export const presentationRegistry = {
       "It must contain exactly one page title.",
       "It must contain exactly one metadata wrapper.",
       "It must appear before the article body.",
+      "Article navigation-to-intro gap is 16px; interior pages have no masthead.",
     ],
   },
 
@@ -434,14 +438,15 @@ export const presentationRegistry = {
     minimumPerArtifact: 0,
     maximumPerArtifact: 2,
     contains: [],
-    renderer: null,
-    figma: figmaReference("DFW / Article / Pull Quote", "8043:6804"),
+    renderer: "src/styles/article.css",
+    figma: figmaReference("DFW / Article / Pull Quote", "8043:6804", "2026-10-01"),
     constraints: [
       "Its text must already exist in the canonical artifact.",
       "Extracted wording must remain unchanged.",
       "Its content must be prose rather than a heading, list, label, or summary.",
       "Removing it must not alter the artifact's meaning.",
       "Its placement should follow sufficient context.",
+      "Use 24px horizontal and 4px vertical padding, 16px flow gaps, no border/background, including mobile.",
     ],
   },
 
@@ -460,13 +465,16 @@ export const presentationRegistry = {
     minimumPerArtifact: 0,
     maximumPerArtifact: null,
     contains: [],
-    renderer: null,
+    renderer: "src/components/OperationalCallout.astro",
     figma: figmaReference(
       "DFW / Article / Operational Callout",
       "8126:240",
+      "2026-10-01",
     ),
     constraints: [
       "Its content must be concise and editorially reviewed.",
+      "An optional editorial title stacks above the body with a 4px gap; never auto-generate a title.",
+      "Inter 600 title and 300 body, 14/20; existing secondary surface, square corners, no shadow.",
       "It must not introduce an unsupported claim.",
       "It must not appear inside a list.",
       "Two operational callouts should not appear consecutively.",
@@ -573,9 +581,10 @@ export const presentationRegistry = {
     minimumPerArtifact: 0,
     maximumPerArtifact: null,
     contains: [],
-    renderer: null,
+    renderer: "src/styles/article.css",
     figma: figmaReference(null),
     constraints: [
+      "Ordinary prose: Inter 400 14/20, 21px text indent, zero item gaps, normalized ul/ol flow.",
       "Order or sequence must carry meaning.",
       "It must not be used solely to break up prose visually.",
     ],
@@ -599,9 +608,10 @@ export const presentationRegistry = {
     minimumPerArtifact: 0,
     maximumPerArtifact: null,
     contains: [],
-    renderer: null,
+    renderer: "src/styles/article.css",
     figma: figmaReference(null),
     constraints: [
+      "Ordinary prose: Inter 400 14/20, 21px text indent, zero item gaps, normalized ul/ol flow.",
       "Items must be meaningfully related.",
       "It must not imply a sequence that does not exist.",
       "It must not be used solely for emphasis.",
@@ -613,7 +623,7 @@ export const presentationRegistry = {
     name: "Related Concepts",
     kind: "data-structure",
     category: "archive-navigation",
-    htmlRole: "section",
+    htmlRole: null,
     productionAvailability: "production-and-review",
     purpose:
       "Connect the artifact to recurring concepts within the DFW archive.",
@@ -626,7 +636,7 @@ export const presentationRegistry = {
     renderer: null,
     figma: figmaReference(null),
     constraints: [
-      "Each relationship must be meaningful.",
+      "Each relationship must be meaningful; unresolved concept names are data, not public links.",
       "It must not merely repeat tags or metadata.",
       "The selection must remain limited and useful.",
     ],
@@ -634,8 +644,8 @@ export const presentationRegistry = {
 
   "related-pieces": {
     id: "related-pieces",
-    name: "Related Pieces",
-    kind: "data-structure",
+    name: "Related Links",
+    kind: "component",
     category: "archive-navigation",
     htmlRole: "section",
     productionAvailability: "production-and-review",
@@ -647,14 +657,37 @@ export const presentationRegistry = {
     minimumPerArtifact: 0,
     maximumPerArtifact: 1,
     contains: [],
-    renderer: null,
-    figma: figmaReference(null),
+    renderer: "src/components/EntryReferences.astro",
+    figma: figmaReference("DFW / Article / Related Links", "8126:250", "2026-10-01"),
     constraints: [
       "Each relationship must improve archive exploration.",
       "Generic topical similarity is insufficient.",
       "Unpublished pieces must not be exposed unintentionally.",
       "The selection must remain limited.",
+      "Resolve explicit ordered relatedPieces to public entries; omit unresolved, ambiguous, duplicate and self references.",
+      "Related entries uses Body strong; 8px link gaps, 16px top padding, no rules or uppercase.",
     ],
+  },
+
+  "sources-link": {
+    id: "sources-link", name: "Sources Link", kind: "component", category: "navigation",
+    htmlRole: "a", productionAvailability: "production", sourceTextBehavior: "reference-derived",
+    purpose: "Link to the referring entry's sources page only when sources exist.",
+    allowedPlacements: ["after-article-body"], optional: true, minimumPerArtifact: 0,
+    maximumPerArtifact: 1, contains: [], renderer: "src/components/EntryReferences.astro",
+    figma: figmaReference("DFW / Article / Sources Link", "8127:380", "2026-10-01"),
+    constraints: ["Sources and references; Inter 400 11/13; standalone link with visible focus.", "No inline citation markers."],
+  },
+
+  "sources-page": {
+    id: "sources-page", name: "Sources and References Page", kind: "composition", category: "navigation",
+    htmlRole: "main", productionAvailability: "production", sourceTextBehavior: "reference-derived",
+    purpose: "Present entry-scoped external source links with a backlink to the referring entry.",
+    allowedPlacements: ["page-header"], optional: true, minimumPerArtifact: 0,
+    maximumPerArtifact: 1, contains: ["global-navigation", "page-title", "main-link"],
+    renderer: "src/components/SourcesPage.astro",
+    figma: figmaReference("04 References Page", "8127:399", "2026-10-01"),
+    constraints: ["Generate /<collection>/<slug>/sources/ only for public entries with sources.", "No masthead; 24px major gaps and 4px intro/list gaps.", "Use entry sources and optional sourcesDescription; include own canonical and sitemap URL."],
   },
 
   "draft-banner": {

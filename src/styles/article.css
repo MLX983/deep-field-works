@@ -1,0 +1,52 @@
+/* Canonical prose and emphasis; shared by public entries and draft review. */
+.prose :is(ul, ol) {
+  padding: 0 0 0 21px;
+  margin: 0 0 var(--space-200);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  list-style-position: outside;
+}
+.prose ul { list-style-type: disc; }
+.prose ol { list-style-type: decimal; }
+.prose li { margin: 0; }
+.prose p:has(+ ul, + ol),
+.prose li > p,
+.prose li > :is(ul, ol) { margin-bottom: 0; }
+
+.prose blockquote {
+  margin: var(--space-200) 0;
+  padding: var(--space-50) var(--space-300);
+  border: 0;
+  background: none;
+  color: var(--color-text-header);
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-light);
+  font-size: var(--font-size-subheader);
+  line-height: var(--line-height-subheader);
+}
+.prose blockquote > :last-child { margin-bottom: 0; }
+.prose blockquote + :is(h2, h3) { margin-top: var(--space-200); }
+
+.operational-callout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-50);
+  width: 100%;
+  min-width: 0;
+  margin: var(--space-200) 0;
+  padding: var(--space-100);
+  border: 0;
+  border-radius: 0;
+  background: var(--color-surface-secondary);
+  box-shadow: none;
+  color: var(--color-text-body);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+  overflow-wrap: break-word;
+}
+.operational-callout > p { margin: 0; }
+.operational-callout__title { font-weight: var(--font-weight-semibold); }

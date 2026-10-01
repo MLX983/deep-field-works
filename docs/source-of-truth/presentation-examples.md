@@ -66,15 +66,14 @@ Demonstrates:
 - Footer Utility Link
 - appropriate restraint for a short field note
 
-## Page-shell discrepancy
+## Page-shell rule
 
 None of the three initial article examples contains a Masthead or Section
 Heading. Each article is a complete 390-pixel-wide page frame containing its
 own Body frame, Global Navigation, Intro, article content, and Footer Utility
 Link. No shared Masthead exists outside those frames.
 
-The current registry requires one Masthead. The examples therefore preserve an
-older accepted composition that differs from the current semantic rule. This
-document does not decide whether the Masthead requirement should change.
+The approved rule is now homepage/index-only Masthead. These interior article
+examples agree with that rule: Back to Index, title/intro, body, and footer.
 
 Future articles may become additional canonical examples after editorial approval.

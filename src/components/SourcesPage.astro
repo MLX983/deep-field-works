@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BackLink from './BackLink.astro';
+import { entryPath, type PublicEntry } from '../utils/entryReferences';
+interface Props { entry: PublicEntry; }
+const { entry } = Astro.props;
+const href = `${import.meta.env.BASE_URL.replace(/\/$/, '')}${entryPath(entry)}`;
+---
+<BaseLayout
+  title={`Sources and references: ${entry.data.title} — Deep Field Works`}
+  description={entry.data.sourcesDescription || `Sources and references for ${entry.data.title}.`}
+>
+  <BackLink />
+  <h1>Sources and references</h1>
+  <div class="sources-intro">
+    <p><strong>Entry title:</strong></p>
+    <p><a href={href}>{entry.data.title}</a></p>
+    {entry.data.sourcesDescription && <p>{entry.data.sourcesDescription}</p>}
+  </div>
+  <ul class="link-list" role="list">
+    {entry.data.sources?.map((source) => <li><a href={source.url}>{source.label}</a></li>)}
+  </ul>
+</BaseLayout>
+<style>
+  h1 { margin-bottom: var(--space-300); }
+  .sources-intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-50);
+    margin-bottom: var(--space-300);
+  }
+  .sources-intro p { margin: 0; }
+  a { text-decoration: none; overflow-wrap: anywhere; }
+  .link-list a { text-decoration: none; }
+</style>
